@@ -1,13 +1,8 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
-import { useEffect } from 'react'
-import { UnsplashClient } from '@/common/unsplashClient'
+import styles from '@/styles/Index.module.css'
+import Button from '@/components/general/Button'
 
-export default function Index() {
-
-
+export default function Register() {
   return (
     <>
       <Head>
@@ -23,12 +18,8 @@ export default function Index() {
         <div className={styles.contentContainer}>
           <img className={styles.logo} src='/assets/logo.png' alt='Logo'></img>
           <h2>Welcome to Web3 Pinterest</h2>
-          <Button width={'70%'} borderRadius={'50px'} colorScheme='primary' variant='solid'>
-            Sign up
-          </Button>
-          <Button width={'70%'} borderRadius={'50px'} colorScheme='white' variant='outline'>
-            Log in
-          </Button>
+          <Button styleType='primary' content='Sign up'></Button>
+          <Button styleType='secondary' content='Log in'></Button>
         </div>
       </main>
     </>

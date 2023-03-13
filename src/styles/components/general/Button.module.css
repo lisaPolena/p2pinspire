@@ -1,0 +1,23 @@
+
+button.btn {
+  min-height: 44px;
+  font-weight: bold;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  margin: auto;
+  border: none;
+  color: white;
+}
+
+button.primary, button.secondary{
+  width: 85%;
+  background: rgb(203, 32, 39);
+  margin-top: 2em;
+  font-weight: bold;
+  font-size: 1em;
+}
+
+
