@@ -1,12 +1,14 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import styles from '@/styles/Index.module.css'
+import { Button } from '@chakra-ui/react'
 import { useEffect } from 'react'
 import { UnsplashClient } from '@/common/unsplashClient'
 
 export default function Index() {
 
+  useEffect(() => {
+    UnsplashClient.getRandomPhotos();
+  }, [])
 
   return (
     <>
