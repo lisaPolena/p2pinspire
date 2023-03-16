@@ -3,13 +3,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  min-height: 100vh;
-}
-
-.imagesContainer {
-  height: 60vh;
-  width: 100vw;
-  background-color: red;
+  background-color: rgb(0, 0, 0);
 }
 
 .contentContainer {

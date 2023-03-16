@@ -3,6 +3,7 @@ import styles from '@/styles/Index.module.css'
 import { Button } from '@chakra-ui/react'
 import { useEffect } from 'react'
 import { UnsplashClient } from '@/common/unsplashClient'
+import ScrollGallery from '@/components/images/ScrollGallery'
 
 export default function Index() {
 
@@ -19,9 +20,7 @@ export default function Index() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.imagesContainer}> 
-          Images
-        </div>
+        <ScrollGallery />
         <div className={styles.contentContainer}>
           <img className={styles.logo} src='/assets/logo.png' alt='Logo'></img>
           <h2>Welcome to Web3 Pinterest</h2>

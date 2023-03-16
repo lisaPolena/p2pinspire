@@ -14,8 +14,7 @@ export namespace UnsplashClient {
   export async function getRandomPhotos() {
     const url = 'unsplash/randomPhotos';
     const res = await axiosClient.get(`${url}`);
-    console.log(res.data)
-    return res.data;
+    return res.data.result;
   };
 
 }
