@@ -10,7 +10,7 @@ contract Functions {
      */
     function generateId() public view returns (bytes16) {
         bytes32 uuid = keccak256(
-            abi.encodePacked(msg.sender, block.timestamp, block.prevrandao)
+            abi.encodePacked(msg.sender, block.timestamp, block.difficulty)
         );
         bytes16 id;
         assembly {
