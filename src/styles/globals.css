@@ -41,3 +41,15 @@ a {
     color-scheme: dark;
   }
 }
+
+.scroll-background {
+  background: url('../../public/assets/bg.png') repeat-y;
+  animation: scroll-anim 30s linear infinite;
+  background-size: 390px 844px;
+}
+
+@keyframes scroll-anim {
+  100% {
+    background-position: 0 -844px;
+  }
+}

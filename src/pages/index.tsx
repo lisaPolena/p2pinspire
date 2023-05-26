@@ -1,9 +1,7 @@
 import Head from 'next/head'
-import styles from '@/styles/Index.module.css'
 import { Button } from '@chakra-ui/react'
 import { useEffect } from 'react'
 import { UnsplashClient } from '@/common/unsplashClient'
-import ScrollGallery from '@/components/images/ScrollGallery'
 import { useWeb3React } from "@web3-react/core";
 import { injected } from "../wallet/connect";
 
@@ -35,10 +33,9 @@ export default function Index() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <ScrollGallery />
-        <div className={styles.contentContainer}>
-          <img className={styles.logo} src='/assets/logo.png' alt='Logo'></img>
+      <main className="fixed flex flex-col items-center justify-end h-screen scroll-background">
+        <div className="z-10 flex flex-col h-[40vh] bg-black justify-between w-screen items-center pt-12 pb-8 shadow-index">
+          <img className='w-24' src='/assets/logo.png' alt='Logo'></img>
           <h2>Welcome to Web3 Pinterest</h2>
           <Button width={'70%'} borderRadius={'50px'} colorScheme='primary' variant='solid' onClick={connect}>
             Connect MetaMask
