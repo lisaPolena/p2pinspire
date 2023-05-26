@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState } from 'react';
 
 interface AppStateContextProps {
-  disconnected: boolean;
-  setDisconnected: (value: boolean) => void;
+  createBoardModalOpen: boolean;
+  setCreateBoardModalOpen: (open: boolean) => void;
+  navbarModalOpen: boolean;
+  setNavbarModalOpen: (open: boolean) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -16,11 +18,17 @@ export const useAppState = () => {
 };
 
 export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const [disconnected, setDisconnected] = useState(false);
+  const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
+  const [navbarModalOpen, setNavbarModalOpen] = useState<boolean>(false);
 
   const contextValue: AppStateContextProps = {
-    disconnected,
-    setDisconnected,
+    createBoardModalOpen,
+    setCreateBoardModalOpen: (value: boolean) => {
+      setNavbarModalOpen(false);
+      setCreateBoardModalOpen(value);
+    },
+    navbarModalOpen,
+    setNavbarModalOpen,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;

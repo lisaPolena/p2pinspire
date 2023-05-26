@@ -3,8 +3,6 @@ import { Navbar } from '@/components/general/Navbar'
 import { useEffect } from 'react'
 import { useWeb3React } from '@web3-react/core';
 import { useRouter } from 'next/router';
-import { Button } from '@chakra-ui/react';
-import { useAppState } from '@/components/general/AppStateContext';
 
 export default function Profile() {
     // active: returns a boolean to check if user is connected
@@ -13,7 +11,6 @@ export default function Profile() {
     // deactivate: to log out the user
     const { active, account, library, deactivate } = useWeb3React()
     const router = useRouter();
-    const { setDisconnected } = useAppState();
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -26,16 +23,6 @@ export default function Profile() {
 
     }, [active])
 
-    function disconnect() {
-        try {
-            deactivate();
-            setDisconnected(true)
-            router.push('/');
-        } catch (ex) {
-            console.log(ex)
-        }
-    }
-
     return (
         <>
             <Head>
@@ -45,9 +32,7 @@ export default function Profile() {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main className='h-screen bg-black'>
-                <Button width={'70%'} borderRadius={'50px'} colorScheme='primary' variant='solid' onClick={disconnect}>
-                    Disconnect MetaMask
-                </Button>
+                <p>{account}</p>
             </main>
             <Navbar />
         </>

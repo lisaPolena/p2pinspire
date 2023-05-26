@@ -7,16 +7,17 @@ interface ModalProps {
     closeModal: () => void;
     children: React.ReactNode;
     title: string;
+    height: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, closeModal, children, title }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, closeModal, children, title, height }) => {
     // TODO: add transition to modal opening and closing
 
     return (
         <>
             {isOpen && (
                 <OutsideAlerter action={closeModal}>
-                    <div id="add-modal-container" className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 h-[22%] rounded-t-[40px] mr-3 ml-3">
+                    <div id="add-modal-container" className={"fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] mr-3 ml-3 " + height}>
                         <div className="flex items-center justify-between mb-4">
                             <button className="text-white" onClick={closeModal}>
                                 <IoClose size={30} />

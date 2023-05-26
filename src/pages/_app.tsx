@@ -19,7 +19,6 @@ export default function App({ Component, pageProps }: AppProps) {
       <Web3ReactProvider getLibrary={getLibrary}>
         <MetamaskProvider>
           <ChakraProvider theme={customTheme}>
-
             <Component {...pageProps} />
           </ChakraProvider>
         </MetamaskProvider>

@@ -1,14 +1,13 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { IoHome, IoSearch, IoAdd, IoChatbubbleEllipses, IoPersonCircle } from "react-icons/io5";
-import AddModal from '../overlays/AddModal';
+import CreateBoardModal from '../overlays/CreateBoardModal';
+import NavbarModal from '../overlays/NavbarModal';
+import { useAppState } from './AppStateContext';
 
 export const Navbar = () => {
-  const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
 
-  const closeAddModal = () => {
-    setAddModalOpen(false);
-  };
+  const { setNavbarModalOpen } = useAppState();
 
   return (
     <>
@@ -19,7 +18,7 @@ export const Navbar = () => {
         <Link href={''} className='flex justify-center w-full px-3 py-5 align-center'>
           <div className='text-2xl'><IoSearch /></div>
         </Link>
-        <Link href={''} className='flex justify-center w-full px-3 py-5 align-center' onClick={() => setAddModalOpen(true)}>
+        <Link href={''} className='flex justify-center w-full px-3 py-5 align-center' onClick={() => setNavbarModalOpen(true)}>
           <div className='text-2xl'><IoAdd /></div>
         </Link>
         <Link href={''} className='flex justify-center w-full px-3 py-5 align-center'>
@@ -29,7 +28,8 @@ export const Navbar = () => {
           <div className='text-2xl'><IoPersonCircle /></div>
         </Link>
       </div>
-      <AddModal isOpen={addModalOpen} closeModal={closeAddModal} />
+      <NavbarModal />
+      <CreateBoardModal />
     </>
   );
 };
