@@ -1,21 +1,20 @@
 import Head from 'next/head'
 import { Button } from '@chakra-ui/react'
 import { useEffect } from 'react'
-import { UnsplashClient } from '@/common/unsplashClient'
 import { useWeb3React } from "@web3-react/core";
 import { injected } from "../wallet/connect";
+import { useRouter } from 'next/router';
 
 export default function Index() {
   // active: returns a boolean to check if user is connected
-  // account: returns the users account (or .eth name)
-  // libary: provides web3React functions to interact with the blockchain / smart contracts
   // activate: to authenticate the user’s wallet
-  // deactivate: to log out the user
-  const { active, account, library, activate, deactivate } = useWeb3React()
+  const { active, activate } = useWeb3React()
+  const router = useRouter();
 
   useEffect(() => {
-    UnsplashClient.getRandomPhotos();
-  }, [])
+    if (active) router.push('/home');
+    console.log(active)
+  }, [active])
 
   async function connect() {
     try {

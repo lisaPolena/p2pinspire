@@ -1,3 +1,4 @@
+import MetamaskProvider from '@/components/general/MetaMaskProvider';
 import '@/styles/globals.css'
 import customTheme from '@/theme';
 import { ChakraProvider } from '@chakra-ui/react'
@@ -14,9 +15,11 @@ function getLibrary(provider: provider): Web3 {
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
-      <ChakraProvider theme={customTheme}>
-        <Component {...pageProps} />
-      </ChakraProvider>
+      <MetamaskProvider>
+        <ChakraProvider theme={customTheme}>
+          <Component {...pageProps} />
+        </ChakraProvider>
+      </MetamaskProvider>
     </Web3ReactProvider>
   );
 }

@@ -1,8 +1,29 @@
 import Head from 'next/head'
-import styles from '@/styles/Index.module.css'
 import { Navbar } from '@/components/general/Navbar'
+import { useEffect } from 'react'
+import { useWeb3React } from '@web3-react/core';
+import { useRouter } from 'next/router';
 
 export default function Home() {
+  // active: returns a boolean to check if user is connected
+  // account: returns the users account (or .eth name)
+  // libary: provides web3React functions to interact with the blockchain / smart contracts
+  // deactivate: to log out the user
+  const { active, account, library, deactivate } = useWeb3React()
+  const router = useRouter();
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      // Code to be executed after the specified delay
+      if (!active) router.push('/');
+    }, 2000); // Delay of 2000 milliseconds (2 seconds)
+
+    return () => {
+      // Clean up the timeout when the component unmounts or the delay changes
+      clearTimeout(timeoutId);
+    };
+
+  }, [active])
 
   return (
     <>
@@ -12,12 +33,12 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        Some Content 
+      <main className='h-screen bg-black'>
+        Some Content
         bla
         bla
-        <Navbar />
       </main>
+      <Navbar />
     </>
   )
 }
