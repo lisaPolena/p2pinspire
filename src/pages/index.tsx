@@ -13,7 +13,6 @@ export default function Index() {
 
   useEffect(() => {
     if (active) router.push('/home');
-    console.log(active)
   }, [active])
 
   async function connect() {
