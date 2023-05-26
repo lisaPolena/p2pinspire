@@ -1,3 +1,4 @@
+import { AppStateProvider } from '@/components/general/AppStateContext';
 import MetamaskProvider from '@/components/general/MetaMaskProvider';
 import '@/styles/globals.css'
 import customTheme from '@/theme';
@@ -14,12 +15,16 @@ function getLibrary(provider: provider): Web3 {
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <MetamaskProvider>
-        <ChakraProvider theme={customTheme}>
-          <Component {...pageProps} />
-        </ChakraProvider>
-      </MetamaskProvider>
-    </Web3ReactProvider>
+    <AppStateProvider>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <MetamaskProvider>
+          <ChakraProvider theme={customTheme}>
+
+            <Component {...pageProps} />
+          </ChakraProvider>
+        </MetamaskProvider>
+      </Web3ReactProvider>
+    </AppStateProvider>
+
   );
 }
