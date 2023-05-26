@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BsFillPinFill } from "react-icons/bs";
 import { MdSpaceDashboard } from "react-icons/md";
 import { HiClipboardDocumentCheck } from "react-icons/hi2";
@@ -12,6 +12,7 @@ interface AddModalProps {
 
 const AddModal: React.FC<AddModalProps> = ({ isOpen, closeModal }) => {
 
+    //TODO: add transition to modal opening and closing
 
     return (
         <>
