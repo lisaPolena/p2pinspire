@@ -61,4 +61,46 @@ contract BoardManager {
         require(boards[boardId].owner != address(0), "Board does not exist.");
         return boards[boardId];
     }
+
+    /**
+     * @dev Get all boards
+     * @return Board[] array containing all the boards
+     */
+    function getAllBoards() public returns (Board[] memory) {
+        Board[] memory allBoards = new Board[](boardCount);
+        uint index = 0;
+
+        for (uint i = 0; i < boardCount; i++) {
+            bytes16 boardId = Functions(new Functions()).uintToBytes16(i);
+            if (boards[boardId].owner != address(0)) {
+                allBoards[index] = boards[boardId];
+                index++;
+            }
+        }
+
+        // Resize the allBoards array to remove any unused elements
+        assembly {
+            mstore(allBoards, index)
+        }
+
+        return allBoards;
+    }
+
+    /**
+     * @dev Edit board information
+     * @param boardId ID of the board to edit
+     * @param newName New name for the board
+     * Requirements:
+     * - Only the board owner can edit the board
+     * - Board with the given ID must exist
+     */
+    function editBoard(bytes16 boardId, string memory newName) public {
+        require(
+            msg.sender == boards[boardId].owner,
+            "Only the board owner can edit the board."
+        );
+        require(bytes(newName).length != 0, "New board name cannot be empty.");
+
+        boards[boardId].name = newName;
+    }
 }

@@ -18,4 +18,17 @@ contract Functions {
         }
         return id;
     }
+
+    /**
+     * @dev Helper function to convert a uint256 to bytes16
+     * @param x The uint256 value to convert
+     * @return bytes16 representation of the input
+     */
+    function uintToBytes16(uint256 x) public pure returns (bytes16) {
+        bytes16 b;
+        assembly {
+            b := x
+        }
+        return b;
+    }
 }
