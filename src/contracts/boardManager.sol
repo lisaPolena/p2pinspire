@@ -4,22 +4,28 @@ pragma solidity >=0.7.0 <0.9.0;
 
 //import "hardhat/console.sol";
 import {Board, Pin} from "./common/types.sol";
-import {Functions} from "./common/functions.sol";
+import "./common/functions.sol";
 
 /**
  * @title BoardManager
  * @dev A smart contract for managing boards
  */
 contract BoardManager {
+    event BoardCreated(
+        uint256 boardId,
+        string boardName,
+        address indexed owner
+    );
+
     /**
      * @dev Mapping to store boards by their ID
      */
-    mapping(bytes16 => Board) public boards;
+    mapping(uint256 => Board) public boards;
 
     /**
      * @dev Number of boards created
      */
-    uint public boardCount;
+    uint256 public currentBoardId;
 
     /**
      * @dev Create a new board
@@ -27,13 +33,14 @@ contract BoardManager {
      * Requirements:
      * - boardName cannot be an empty string
      */
-    function createBoard(string memory boardName) public {
+    function createBoard(string memory boardName) public returns (uint256) {
         require(bytes(boardName).length != 0, "Board name cannot be empty.");
-        bytes16[] memory pins;
-        bytes16 id = Functions(new Functions()).generateId();
-        Board memory board = Board(id, boardName, msg.sender, pins);
-        boards[id] = board;
-        boardCount++;
+        currentBoardId++;
+        uint256[] memory pins;
+        Board memory board = Board(currentBoardId, boardName, msg.sender, pins);
+        boards[currentBoardId] = board;
+        emit BoardCreated(currentBoardId, boardName, msg.sender);
+        return currentBoardId;
     }
 
     /**
@@ -42,7 +49,8 @@ contract BoardManager {
      * Requirements:
      * - Only the board owner can delete the board
      */
-    function deleteBoard(bytes16 boardId) public {
+    function deleteBoard(uint256 boardId) public {
+        require(boardId <= currentBoardId, "Board does not exist.");
         require(
             msg.sender == boards[boardId].owner,
             "Only the board owner can delete the board."
@@ -57,7 +65,8 @@ contract BoardManager {
      * Requirements:
      * - Board with the given ID must exist
      */
-    function getBoardById(bytes16 boardId) public view returns (Board memory) {
+    function getBoardById(uint256 boardId) public view returns (Board memory) {
+        require(boardId <= currentBoardId, "Board does not exist.");
         require(boards[boardId].owner != address(0), "Board does not exist.");
         return boards[boardId];
     }
@@ -66,14 +75,13 @@ contract BoardManager {
      * @dev Get all boards
      * @return Board[] array containing all the boards
      */
-    function getAllBoards() public returns (Board[] memory) {
-        Board[] memory allBoards = new Board[](boardCount);
+    function getAllBoards() public view returns (Board[] memory) {
+        Board[] memory allBoards = new Board[](currentBoardId);
         uint index = 0;
 
-        for (uint i = 0; i < boardCount; i++) {
-            bytes16 boardId = Functions(new Functions()).uintToBytes16(i);
-            if (boards[boardId].owner != address(0)) {
-                allBoards[index] = boards[boardId];
+        for (uint i = 1; i <= currentBoardId; i++) {
+            if (boards[i].owner != address(0)) {
+                allBoards[index] = boards[i];
                 index++;
             }
         }
@@ -94,7 +102,8 @@ contract BoardManager {
      * - Only the board owner can edit the board
      * - Board with the given ID must exist
      */
-    function editBoard(bytes16 boardId, string memory newName) public {
+    function editBoard(uint256 boardId, string memory newName) public {
+        require(boardId <= currentBoardId, "Board does not exist.");
         require(
             msg.sender == boards[boardId].owner,
             "Only the board owner can edit the board."

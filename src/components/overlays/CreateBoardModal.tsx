@@ -5,24 +5,48 @@ import { HiClipboardDocumentCheck } from "react-icons/hi2";
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { Button, Input, Switch } from '@chakra-ui/react';
+//import { boardManagerContract } from '@/common/functions/contracts';
+import { useWeb3React } from '@web3-react/core';
+import { Contract, ethers } from 'ethers';
+import boardManager from '../../contracts/build/BoardManager.json';
+import { Web3Provider } from '@ethersproject/providers'
+import { useBoardManager } from '@/common/functions/contracts';
 
 interface CreateBoardModalProps {
 }
 
+declare var window: any;
+
 const CreateBoardModal: React.FC<CreateBoardModalProps> = () => {
 
     const { createBoardModalOpen, setCreateBoardModalOpen } = useAppState();
+    const { setLoadCreateBoardTransaction } = useAppState();
     const [boardName, setBoardName] = React.useState('');
+    const { active, account, library, deactivate } = useWeb3React<Web3Provider>();
+    const boardManagerContract = useBoardManager(library);
+
     //TODO: add transition to modal opening and closing
 
     useEffect(() => {
         setBoardName('');
     }, [createBoardModalOpen])
 
+    async function createBoard() {
+        const tx = await boardManagerContract?.createBoard(boardName);
+        setCreateBoardModalOpen(false);
+        setLoadCreateBoardTransaction(true);
+        await tx.wait()
+        setLoadCreateBoardTransaction(false);
+    }
+
     return (
         <Modal isOpen={createBoardModalOpen} closeModal={() => setCreateBoardModalOpen(false)} title="Add new Board" height='h-[95%]'>
             <div className='absolute top-3 right-3'>
-                <button className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl" disabled={boardName?.length === 0}>
+                <button
+                    className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl"
+                    disabled={boardName?.length === 0}
+                    onClick={createBoard}
+                >
                     Create
                 </button>
             </div >

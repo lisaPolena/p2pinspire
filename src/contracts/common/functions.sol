@@ -2,7 +2,7 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-contract Functions {
+library Functions {
     /**
      * @dev Generate a unique ID for a board
      * @return Unique bytes16 ID

@@ -5,6 +5,8 @@ interface AppStateContextProps {
   setCreateBoardModalOpen: (open: boolean) => void;
   navbarModalOpen: boolean;
   setNavbarModalOpen: (open: boolean) => void;
+  loadCreateBoardTransaction: boolean;
+  setLoadCreateBoardTransaction: (open: boolean) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -20,6 +22,7 @@ export const useAppState = () => {
 export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
   const [navbarModalOpen, setNavbarModalOpen] = useState<boolean>(false);
+  const [loadCreateBoardTransaction, setLoadCreateBoardTransaction] = useState<boolean>(false);
 
   const contextValue: AppStateContextProps = {
     createBoardModalOpen,
@@ -29,6 +32,8 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     },
     navbarModalOpen,
     setNavbarModalOpen,
+    loadCreateBoardTransaction,
+    setLoadCreateBoardTransaction,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
