@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react';
 import React from 'react';
 import { IoClose } from "react-icons/io5";
 import OutsideAlerter from '../general/OutsideClickAlerter';
@@ -17,13 +18,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal, children, title, heig
         <>
             {isOpen && (
                 <OutsideAlerter action={closeModal}>
-                    <div id="add-modal-container" className={"fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] mr-3 ml-3 " + height}>
-                        <div className="flex items-center justify-between mb-4">
+                    <div id="add-modal-container" className={"fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] " + height}>
+                        <div className="flex items-center gap-24 mb-4">
                             <button className="text-white" onClick={closeModal}>
                                 <IoClose size={30} />
                             </button>
                             <h2 className="text-base text-white">{title}</h2>
-                            <div></div>
                         </div>
                         <div className="mt-8">
                             {children}
