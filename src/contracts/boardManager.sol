@@ -11,11 +11,30 @@ import "./common/functions.sol";
  * @dev A smart contract for managing boards
  */
 contract BoardManager {
+    /**
+     * @dev Event emitted when a new board is created
+     * @param boardId ID of the board created
+     * @param boardName Name of the board created
+     * @param owner Owner of the board created
+     */
     event BoardCreated(
         uint256 boardId,
         string boardName,
         address indexed owner
     );
+
+    /**
+     * @dev Event emitted when a board is deleted
+     * @param boardId ID of the board deleted
+     */
+    event BoardDeleted(uint256 boardId);
+
+    /**
+     * @dev Event emitted when a board is edited
+     * @param boardId ID of the board edited
+     * @param newName New name of the board edited
+     */
+    event BoardEdited(uint256 boardId, string newName);
 
     /**
      * @dev Mapping to store boards by their ID
@@ -55,6 +74,7 @@ contract BoardManager {
             msg.sender == boards[boardId].owner,
             "Only the board owner can delete the board."
         );
+        emit BoardDeleted(boardId);
         delete boards[boardId];
     }
 
@@ -109,7 +129,7 @@ contract BoardManager {
             "Only the board owner can edit the board."
         );
         require(bytes(newName).length != 0, "New board name cannot be empty.");
-
+        emit BoardEdited(boardId, newName);
         boards[boardId].name = newName;
     }
 }

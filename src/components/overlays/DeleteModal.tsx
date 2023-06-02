@@ -14,7 +14,7 @@ interface DeleteModalProps {
 }
 
 const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, closeModal, board }) => {
-    const { setDeleteModalOpen, setEditBoardModalOpen } = useAppState();
+    const { setDeleteModalOpen, setEditBoardModalOpen, setLoadDeleteBoardTransaction } = useAppState();
     const { library } = useWeb3React<Web3Provider>()
     const boardManagerContract = useBoardManager(library);
     const router = useRouter();
@@ -24,6 +24,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, closeModal, board }) 
     const deleteBoard = () => {
         if (board) {
             boardManagerContract?.deleteBoard(board.id);
+            setLoadDeleteBoardTransaction(board.id);
             setDeleteModalOpen(false);
             setEditBoardModalOpen(false);
             router.push('/profile');

@@ -7,6 +7,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack } from '@chakr
 import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
+import { LoadingOverlay } from '@/components/overlays/LoadingOverlay';
 
 export default function Profile() {
     // active: returns a boolean to check if user is connected
@@ -16,7 +17,7 @@ export default function Profile() {
     const { active, account, library } = useWeb3React<Web3Provider>()
     const boardManagerContract = useBoardManager(library);
     const [boards, setBoards] = useState<any[]>([]);
-    const { loadCreateBoardTransaction } = useAppState();
+    const { loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
     const router = useRouter();
 
     useEffect(() => {
@@ -26,15 +27,15 @@ export default function Profile() {
 
         getAllBoards();
 
-        if (boardCreatedEvent)
-            boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
+        if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
+        boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
 
         return () => {
             clearTimeout(timeoutId);
-            if (boardCreatedEvent)
-                boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
+            if (boardCreatedEvent) boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
+            boardManagerContract?.off('BoardDeleted', handleBoardDeleted);
         }
-    }, [active, loadCreateBoardTransaction])
+    }, [active, loadCreateBoardTransaction, loadDeleteBoardTransaction])
 
     const boardCreatedEvent = boardManagerContract?.filters.BoardCreated(null, null, account);
 
@@ -44,8 +45,15 @@ export default function Profile() {
                 .sort((a, b) => a.id - b.id);
         });
 
+    const handleBoardDeleted = (boardId: number) => {
+        getAllBoards();
+        setLoadDeleteBoardTransaction(false);
+    };
+
     function getAllBoards() {
-        boardManagerContract?.getAllBoards().then((result: any) => setBoards(result));
+        boardManagerContract?.getAllBoards().then((result: any) => {
+            setBoards(result);
+        });
     }
 
     return (
@@ -91,6 +99,7 @@ export default function Profile() {
                         </TabPanels>
                     </Tabs>
                 </div>
+                {loadDeleteBoardTransaction && <LoadingOverlay />}
             </main>
             <Navbar />
         </>

@@ -11,7 +11,7 @@ export const Navbar = () => {
 
   return (
     <>
-      <div className='fixed inset-x-0 bottom-0 flex justify-between bg-black'>
+      <div className='fixed inset-x-0 bottom-0 z-20 flex justify-between bg-black'>
         <Link href={''} className='flex justify-center w-full px-3 py-5 ml-10 align-center'>
           <div className='text-2xl'><IoHome /></div>
         </Link>
