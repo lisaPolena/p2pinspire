@@ -55,10 +55,7 @@ export default function Profile() {
     return (
         <>
             <Head>
-                <title>Web3 Pinterest</title>
-                <meta name="description" content="Web3 Pinterest" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="icon" href="/favicon.ico" />
+                <title>Profile</title>
             </Head>
             <main className='min-h-screen bg-black mb-18'>
                 <div className='w-[95%] flex flex-col justify-center items-center'>
@@ -78,7 +75,7 @@ export default function Profile() {
                             <TabPanel width='100vw'>
                                 <div className='grid grid-cols-2 gap-4'>
                                     {boards?.map(({ id, name, owner, pins }) => (
-                                        <div key={id} className='text-left' onClick={() => deleteBoard(id)}>
+                                        <div key={id} className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
                                             <div className='h-[120px] bg-white rounded-3xl'>
                                             </div>
                                             <p className='pl-[0.7rem]'>{name}</p>
@@ -98,7 +95,6 @@ export default function Profile() {
                         </TabPanels>
                     </Tabs>
                 </div>
-
             </main>
             <Navbar />
         </>
