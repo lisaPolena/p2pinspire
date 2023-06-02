@@ -43,7 +43,7 @@ export default function DetailBoard() {
                 <title>Detail</title>
             </Head>
             <main className='min-h-screen bg-black mb-18'>
-                <AppBar isBoard={true} title={board ? board.name : ''} showTitle={showTitle} />
+                <AppBar isBoard={true} title={board ? board.name : ''} showTitle={showTitle} board={board} />
                 {board ? (
                     <div className='relative top-[50px]'>
                         <h1 className="mt-10 mb-10 text-white">{board ? board.name : ''}</h1>

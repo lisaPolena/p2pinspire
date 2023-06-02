@@ -48,10 +48,6 @@ export default function Profile() {
         boardManagerContract?.getAllBoards().then((result: any) => setBoards(result));
     }
 
-    function deleteBoard(boardId: number) {
-        boardManagerContract?.deleteBoard(boardId);
-    }
-
     return (
         <>
             <Head>

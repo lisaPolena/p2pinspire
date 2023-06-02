@@ -10,12 +10,13 @@ interface AppBarProps {
   isBoard: boolean;
   title?: string;
   showTitle?: boolean;
+  board?: any;
 }
 
 //TODO: add shadow if scroll position is > 0 (showtitle is true)
 
 export const AppBar = (props: AppBarProps) => {
-  const { isBoard, title, showTitle } = props;
+  const { isBoard, title, showTitle, board } = props;
   const { setEditModalOpen } = useAppState();
   const router = useRouter();
 
@@ -34,7 +35,7 @@ export const AppBar = (props: AppBarProps) => {
         </div>
       </div>
       <EditGeneralModal />
-      <EditBoardModal />
+      <EditBoardModal board={board} />
     </>
   );
 };

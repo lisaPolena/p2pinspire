@@ -3,22 +3,33 @@ import { useAppState } from '../general/AppStateContext';
 import OutsideAlerter from '../general/OutsideClickAlerter';
 import { Button } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
+import { useBoardManager } from '@/common/functions/contracts';
+import { useWeb3React } from '@web3-react/core';
+import { Web3Provider } from '@ethersproject/providers'
 
 interface DeleteModalProps {
     isOpen: boolean;
     closeModal: () => void;
+    board?: any;
 }
 
-const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, closeModal }) => {
+const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, closeModal, board }) => {
     const { setDeleteModalOpen, setEditBoardModalOpen } = useAppState();
+    const { library } = useWeb3React<Web3Provider>()
+    const boardManagerContract = useBoardManager(library);
     const router = useRouter();
 
     //TODO: add transition to modal opening and closing
 
     const deleteBoard = () => {
-        setDeleteModalOpen(false);
-        setEditBoardModalOpen(false);
-        router.push('/profile');
+        if (board) {
+            boardManagerContract?.deleteBoard(board.id);
+            setDeleteModalOpen(false);
+            setEditBoardModalOpen(false);
+            router.push('/profile');
+        } else {
+            console.log('no board to delete');
+        }
     }
 
     return (

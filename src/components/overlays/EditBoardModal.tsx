@@ -1,17 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { Input, Switch } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
 
 interface EditGeneralModalProps {
+    board: any;
 }
 
 
 const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
+    const { board } = props;
     const { editBoardModalOpen, setEditBoardModalOpen, deleteModalOpen, setDeleteModalOpen } = useAppState();
     const [boardName, setBoardName] = React.useState<string>('');
     const [boardDescription, setBoardDescripton] = React.useState<string>('');
+
+    useEffect(() => {
+        if (board) {
+            setBoardName(board.name);
+            setBoardDescripton(board.description);
+        }
+    }, [board]);
 
     return (
         <>
@@ -69,7 +78,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
 
                 </div>
             </Modal>
-            <DeleteModal isOpen={deleteModalOpen} closeModal={() => setDeleteModalOpen(false)} />
+            <DeleteModal isOpen={deleteModalOpen} closeModal={() => setDeleteModalOpen(false)} board={board} />
         </>
     );
 };
