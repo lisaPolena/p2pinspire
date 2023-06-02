@@ -3,6 +3,9 @@ import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { Input, Switch } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
+import { useBoardManager } from '@/common/functions/contracts';
+import { useWeb3React } from '@web3-react/core';
+import { Web3Provider } from '@ethersproject/providers'
 
 interface EditGeneralModalProps {
     board: any;
@@ -14,18 +17,38 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
     const { editBoardModalOpen, setEditBoardModalOpen, deleteModalOpen, setDeleteModalOpen } = useAppState();
     const [boardName, setBoardName] = React.useState<string>('');
     const [boardDescription, setBoardDescripton] = React.useState<string>('');
+    const { active, account, library, deactivate } = useWeb3React<Web3Provider>();
+    const boardManagerContract = useBoardManager(library);
+
 
     useEffect(() => {
+
         if (board) {
             setBoardName(board.name);
             setBoardDescripton(board.description);
         }
-    }, [board]);
+
+    }, []);
+
+    async function editBoard() {
+        const tx = await boardManagerContract?.editBoard(board.id as string, boardName);
+        setEditBoardModalOpen(false);
+        await tx.wait()
+    }
 
     return (
         <>
             {deleteModalOpen && <div className='absolute top-0 w-full h-full z-[12] bg-zinc-800 opacity-70'></div>}
             <Modal isOpen={editBoardModalOpen} closeModal={() => setEditBoardModalOpen(false)} title="Edit Board" height='h-[99%]'>
+                <div className='absolute top-3 right-3'>
+                    <button
+                        className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl"
+                        disabled={boardName?.length === 0}
+                        onClick={editBoard}
+                    >
+                        Done
+                    </button>
+                </div >
                 <div className='flex flex-col gap-4'>
                     <div>
                         <p>Board cover</p>
