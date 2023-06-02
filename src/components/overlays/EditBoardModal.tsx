@@ -17,9 +17,8 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
     const { editBoardModalOpen, setEditBoardModalOpen, deleteModalOpen, setDeleteModalOpen } = useAppState();
     const [boardName, setBoardName] = React.useState<string>('');
     const [boardDescription, setBoardDescripton] = React.useState<string>('');
-    const { active, account, library, deactivate } = useWeb3React<Web3Provider>();
+    const { library } = useWeb3React<Web3Provider>();
     const boardManagerContract = useBoardManager(library);
-
 
     useEffect(() => {
 

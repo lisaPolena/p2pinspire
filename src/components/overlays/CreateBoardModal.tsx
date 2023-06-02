@@ -1,31 +1,18 @@
 import React, { useEffect } from 'react';
-import { BsFillPinFill } from "react-icons/bs";
-import { MdSpaceDashboard } from "react-icons/md";
-import { HiClipboardDocumentCheck } from "react-icons/hi2";
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Button, Input, Switch } from '@chakra-ui/react';
-//import { boardManagerContract } from '@/common/functions/contracts';
+import { Input, Switch } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
-import { Contract, ethers } from 'ethers';
-import boardManager from '../../contracts/build/BoardManager.json';
 import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager } from '@/common/functions/contracts';
 
-interface CreateBoardModalProps {
-}
-
-declare var window: any;
-
-const CreateBoardModal: React.FC<CreateBoardModalProps> = () => {
-
+const CreateBoardModal: React.FC = () => {
+    // libary: provides web3React functions to interact with the blockchain / smart contracts
+    const { library } = useWeb3React<Web3Provider>();
     const { createBoardModalOpen, setCreateBoardModalOpen } = useAppState();
     const { setLoadCreateBoardTransaction } = useAppState();
     const [boardName, setBoardName] = React.useState('');
-    const { active, account, library, deactivate } = useWeb3React<Web3Provider>();
     const boardManagerContract = useBoardManager(library);
-
-    //TODO: add transition to modal opening and closing
 
     useEffect(() => {
         setBoardName('');

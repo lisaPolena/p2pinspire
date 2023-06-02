@@ -13,7 +13,6 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, isAlternative, closeModal, children, title, height }) => {
-    // TODO: add transition to modal opening and closing
 
     return (
         <>

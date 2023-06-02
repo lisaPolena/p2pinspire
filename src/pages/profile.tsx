@@ -13,7 +13,6 @@ export default function Profile() {
     // active: returns a boolean to check if user is connected
     // account: returns the users account (or .eth name)
     // libary: provides web3React functions to interact with the blockchain / smart contracts
-    // deactivate: to log out the user
     const { active, account, library } = useWeb3React<Web3Provider>()
     const boardManagerContract = useBoardManager(library);
     const [boards, setBoards] = useState<any[]>([]);

@@ -6,20 +6,15 @@ import { useRouter } from 'next/router';
 
 export default function Home() {
   // active: returns a boolean to check if user is connected
-  // account: returns the users account (or .eth name)
-  // libary: provides web3React functions to interact with the blockchain / smart contracts
-  // deactivate: to log out the user
-  const { active, account, library, deactivate } = useWeb3React()
+  const { active } = useWeb3React()
   const router = useRouter();
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      // Code to be executed after the specified delay
       if (!active) router.push('/');
-    }, 2000); // Delay of 2000 milliseconds (2 seconds)
+    }, 2000);
 
     return () => {
-      // Clean up the timeout when the component unmounts or the delay changes
       clearTimeout(timeoutId);
     };
 

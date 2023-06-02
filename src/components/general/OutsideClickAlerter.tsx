@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from "react";
-import { MdCallToAction } from "react-icons/md";
 
 /**
  * Hook that alerts clicks outside of the passed ref

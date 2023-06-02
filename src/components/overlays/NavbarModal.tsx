@@ -1,19 +1,12 @@
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import { BsFillPinFill } from "react-icons/bs";
 import { MdSpaceDashboard } from "react-icons/md";
 import { HiClipboardDocumentCheck } from "react-icons/hi2";
 import Modal from '../general/Modal';
-import AddBoard from './CreateBoardModal';
 import { useAppState } from '../general/AppStateContext';
 
-interface NavbarModalProps {
-}
-
-const NavbarModal: React.FC<NavbarModalProps> = () => {
-
+const NavbarModal: React.FC = () => {
     const { setCreateBoardModalOpen, navbarModalOpen, setNavbarModalOpen } = useAppState();
-
-    //TODO: add transition to modal opening and closing
 
     return (
         <Modal isOpen={navbarModalOpen} closeModal={() => setNavbarModalOpen(false)} title="Start creating now" height='h-[22%]'>

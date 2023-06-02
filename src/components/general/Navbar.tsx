@@ -1,12 +1,10 @@
 import Link from 'next/link';
-import { useState } from 'react';
 import { IoHome, IoSearch, IoAdd, IoChatbubbleEllipses, IoPersonCircle } from "react-icons/io5";
 import CreateBoardModal from '../overlays/CreateBoardModal';
 import NavbarModal from '../overlays/NavbarModal';
 import { useAppState } from './AppStateContext';
 
 export const Navbar = () => {
-
   const { setNavbarModalOpen } = useAppState();
 
   return (

@@ -1,6 +1,5 @@
 import { useBoardManager } from '@/common/functions/contracts';
 import { AppBar } from '@/components/general/AppBar';
-import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
@@ -10,7 +9,7 @@ import { useEffect, useState } from 'react'
 
 
 export default function DetailBoard() {
-    const { active, account, library } = useWeb3React<Web3Provider>()
+    const { library } = useWeb3React<Web3Provider>()
     const boardManagerContract = useBoardManager(library);
     const [board, setBoard] = useState<any>(null);
     const [showTitle, setShowTitle] = useState<boolean>(false);
@@ -31,7 +30,7 @@ export default function DetailBoard() {
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
-    }, [board])
+    }, [])
 
     function getBoardById(id: string) {
         boardManagerContract?.getBoardById(id).then((result: any) => setBoard(result));

@@ -1,7 +1,6 @@
 import { IoChevronBack, IoFilter } from "react-icons/io5";
 import { IoIosMore } from "react-icons/io";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import { useAppState } from "./AppStateContext";
 import EditGeneralModal from "../overlays/EditGeneralModal";
 import EditBoardModal from "../overlays/EditBoardModal";

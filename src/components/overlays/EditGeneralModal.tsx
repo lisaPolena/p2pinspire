@@ -2,15 +2,10 @@ import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { List, ListItem } from '@chakra-ui/react';
 
-interface EditGeneralModalProps {
-}
 
-const EditGeneralModal: React.FC<EditGeneralModalProps> = () => {
-
+const EditGeneralModal: React.FC = () => {
     const { editModalOpen, setEditModalOpen } = useAppState();
     const { setEditBoardModalOpen } = useAppState();
-
-    //TODO: add transition to modal opening and closing
 
     return (
         <Modal isOpen={editModalOpen} isAlternative={true} closeModal={() => setEditModalOpen(false)} title="Board Options" height='h-[38%]'>

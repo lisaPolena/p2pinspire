@@ -19,8 +19,6 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, closeModal, board }) 
     const boardManagerContract = useBoardManager(library);
     const router = useRouter();
 
-    //TODO: add transition to modal opening and closing
-
     const deleteBoard = () => {
         if (board) {
             boardManagerContract?.deleteBoard(board.id);
@@ -29,6 +27,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, closeModal, board }) 
             setEditBoardModalOpen(false);
             router.push('/profile');
         } else {
+            //TODO: handle error
             console.log('no board to delete');
         }
     }
