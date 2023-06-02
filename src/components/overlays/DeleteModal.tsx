@@ -22,7 +22,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, closeModal, board }) 
     const deleteBoard = () => {
         if (board) {
             boardManagerContract?.deleteBoard(board.id);
-            setLoadDeleteBoardTransaction(board.id);
+            setLoadDeleteBoardTransaction(board.id.toNumber());
             setDeleteModalOpen(false);
             setEditBoardModalOpen(false);
             router.push('/profile');

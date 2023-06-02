@@ -7,7 +7,6 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack } from '@chakr
 import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
-import { LoadingOverlay } from '@/components/overlays/LoadingOverlay';
 
 export default function Profile() {
     // active: returns a boolean to check if user is connected
@@ -25,6 +24,8 @@ export default function Profile() {
         }, 2000);
 
         getAllBoards();
+
+        console.log('loadDeleteBoardTransaction', loadDeleteBoardTransaction);
 
         if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
         boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
@@ -46,12 +47,12 @@ export default function Profile() {
 
     const handleBoardDeleted = (boardId: number) => {
         getAllBoards();
-        setLoadDeleteBoardTransaction(false);
+        setLoadDeleteBoardTransaction(0);
     };
 
     function getAllBoards() {
         boardManagerContract?.getAllBoards().then((result: any) => {
-            setBoards(result);
+            setBoards(result.map((board: any) => ({ id: board.id, name: board.name, owner: board.owner, pins: board.pins })));
         });
     }
 
@@ -78,12 +79,22 @@ export default function Profile() {
                             <TabPanel width='100vw'>
                                 <div className='grid grid-cols-2 gap-4'>
                                     {boards?.map(({ id, name, owner, pins }) => (
-                                        <div key={id} className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
-                                            <div className='h-[120px] bg-white rounded-3xl'>
-                                            </div>
-                                            <p className='pl-[0.7rem]'>{name}</p>
-                                            <p className='text-xs text-gray-400 pl-[0.7rem]'>{pins?.length} Pins</p>
-                                        </div>
+                                        <>
+                                            {loadDeleteBoardTransaction && loadDeleteBoardTransaction === id.toNumber() ? (
+                                                <Stack key={id}>
+                                                    <Skeleton height='120px' width='100%' fadeDuration={4} />
+                                                    <Skeleton height='10px' width='70%' fadeDuration={4} />
+                                                    <Skeleton height='5px' width='40%' fadeDuration={4} />
+                                                </Stack>
+                                            ) : (
+                                                <div key={id} className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
+                                                    <div className='h-[120px] bg-white rounded-3xl'>
+                                                    </div>
+                                                    <p className='pl-[0.7rem]'>{name}</p>
+                                                    <p className='text-xs text-gray-400 pl-[0.7rem]'>{pins?.length} Pins</p>
+                                                </div>
+                                            )}
+                                        </>
                                     ))}
                                     {loadCreateBoardTransaction &&
                                         <Stack>
@@ -98,7 +109,6 @@ export default function Profile() {
                         </TabPanels>
                     </Tabs>
                 </div>
-                {loadDeleteBoardTransaction && <LoadingOverlay />}
             </main>
             <Navbar />
         </>

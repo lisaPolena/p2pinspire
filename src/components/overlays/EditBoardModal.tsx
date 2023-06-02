@@ -27,7 +27,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
             setBoardDescripton(board.description);
         }
 
-    }, []);
+    }, [board ? board.name : '', board ? board.description : '']);
 
     async function editBoard() {
         const tx = await boardManagerContract?.editBoard(board.id as string, boardName);

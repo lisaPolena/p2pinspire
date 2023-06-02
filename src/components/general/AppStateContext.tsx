@@ -13,8 +13,8 @@ interface AppStateContextProps {
   setEditBoardModalOpen: (open: boolean) => void;
   deleteModalOpen: boolean;
   setDeleteModalOpen: (open: boolean) => void;
-  loadDeleteBoardTransaction: boolean;
-  setLoadDeleteBoardTransaction: (loading: boolean) => void;
+  loadDeleteBoardTransaction: number;
+  setLoadDeleteBoardTransaction: (id: number) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -34,7 +34,7 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
   const [editBoardModalOpen, setEditBoardModalOpen] = useState<boolean>(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
-  const [loadDeleteBoardTransaction, setLoadDeleteBoardTransaction] = useState<boolean>(false);
+  const [loadDeleteBoardTransaction, setLoadDeleteBoardTransaction] = useState<number>(0);
 
   const contextValue: AppStateContextProps = {
     createBoardModalOpen,
