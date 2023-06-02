@@ -5,11 +5,11 @@ import NavbarModal from '../overlays/NavbarModal';
 import { useAppState } from './AppStateContext';
 
 export const Navbar = () => {
-  const { setNavbarModalOpen } = useAppState();
+  const { setNavbarModalOpen, loadDeleteBoardTransaction } = useAppState();
 
   return (
     <>
-      <div className='fixed inset-x-0 bottom-0 z-20 flex justify-between bg-black'>
+      <div className={`fixed inset-x-0 bottom-0 flex justify-between bg-black ${loadDeleteBoardTransaction ? 'z-20' : ''}`}>
         <Link href={''} className='flex justify-center w-full px-3 py-5 ml-10 align-center'>
           <div className='text-2xl'><IoHome /></div>
         </Link>
