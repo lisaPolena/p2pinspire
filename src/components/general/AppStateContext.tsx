@@ -19,6 +19,10 @@ interface AppStateContextProps {
   setLoadDeleteBoardTransaction: (id: number) => void;
   editPinModalOpen: boolean;
   setEditPinModalOpen: (open: boolean) => void;
+  downloadPin: boolean;
+  setDownloadPin: (open: boolean) => void;
+  deletePinModalOpen: boolean;
+  setDeletePinModalOpen: (open: boolean) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -41,6 +45,8 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [loadDeleteBoardTransaction, setLoadDeleteBoardTransaction] = useState<number>(0);
   const [editPinModalOpen, setEditPinModalOpen] = useState<boolean>(false);
+  const [downloadPin, setDownloadPin] = useState<boolean>(false);
+  const [deletePinModalOpen, setDeletePinModalOpen] = useState<boolean>(false);
 
   const contextValue: AppStateContextProps = {
     navbarModalOpen,
@@ -76,6 +82,14 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     setEditPinModalOpen: (value: boolean) => {
       setEditModalOpen(false);
       setEditPinModalOpen(value);
+    },
+    downloadPin,
+    setDownloadPin,
+    deletePinModalOpen,
+    setDeletePinModalOpen: (value: boolean) => {
+      setEditModalOpen(false);
+      setEditPinModalOpen(true)
+      setDeletePinModalOpen(value);
     }
   };
 

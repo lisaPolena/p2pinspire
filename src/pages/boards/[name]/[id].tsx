@@ -1,5 +1,6 @@
 import { useBoardManager, useIpfs, usePinManager } from '@/common/functions/contracts';
 import { AppBar } from '@/components/general/AppBar';
+import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
@@ -46,36 +47,6 @@ export default function DetailBoard() {
         pinManagerContract?.getPinsByBoardId(id).then((result: any) => {
             setPins(result.map((pin: any) => ({ id: pin.id, title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId })));
         });
-    }
-
-    async function downloadImage(hash: string, title: string) {
-        const imageSrc = `https://web3-pinterest.infura-ipfs.io/ipfs/${hash}`;
-        // const resp = await ipfs.get(hash);
-        // let content: any[] = [];
-        // for await (const chunk of resp) {
-        //     content.push(chunk);
-        // }
-        // console.log(content.toString());
-        // Buffer.from(content).toString('base64')
-        // console.log(content);
-        // const blob = new Blob(content, { type: 'image/png' });
-        // console.log(blob);
-        // const src = URL.createObjectURL(blob);
-        // console.log(src);
-
-        const response = await fetch(imageSrc);
-        const blobImage = await response.blob();
-        const href = URL.createObjectURL(blobImage);
-
-        const anchorElement = document.createElement('a');
-        anchorElement.href = href;
-        anchorElement.download = title;
-
-        document.body.appendChild(anchorElement);
-        anchorElement.click();
-
-        document.body.removeChild(anchorElement);
-        window.URL.revokeObjectURL(href);
     }
 
     return (

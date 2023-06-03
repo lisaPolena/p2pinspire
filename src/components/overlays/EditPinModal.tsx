@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, Switch } from '@chakra-ui/react';
+import { Input, Select, Switch } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers'
+import { useBoardManager, usePinManager } from '@/common/functions/contracts';
+import DeleteModal from './DeleteModal';
 
 interface EditPinModalProps {
     pin: any;
@@ -11,39 +13,66 @@ interface EditPinModalProps {
 
 const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) => {
     const { pin } = props;
-    const { editPinModalOpen, setEditPinModalOpen, deleteModalOpen, setDeleteModalOpen } = useAppState();
+    const { editPinModalOpen, setEditPinModalOpen, deletePinModalOpen, setDeletePinModalOpen } = useAppState();
     const [pinTitle, setPinTitle] = React.useState<string>('');
     const [pinDescription, setPinDescripton] = React.useState<string>('');
-    const { library } = useWeb3React<Web3Provider>();
+    const [pinBoardId, setPinBoardId] = React.useState<string>('');
+    const { account, library } = useWeb3React<Web3Provider>();
+    const [isOwner, setIsOwner] = React.useState<boolean>(false);
+    const [boards, setBoards] = React.useState<any[]>([]);
+    const boardManagerContract = useBoardManager(library);
+    const pinManagerContract = usePinManager(library);
 
     useEffect(() => {
+
+        getAllBoards();
 
         if (pin) {
             setPinTitle(pin.title);
             setPinDescripton(pin.description);
+            setPinBoardId(pin.boardId);
+        }
+
+        if (pin && pin.owner === account) {
+            console.log('owner');
+            setIsOwner(true);
+        } else {
+            setIsOwner(false);
         }
 
     }, [pin ? pin.title : '', pin ? pin.description : '']);
 
+    function getAllBoards() {
+        boardManagerContract?.getAllBoards().then((result: any) => {
+            setBoards(result.map((board: any) => ({ id: board.id, name: board.name, owner: board.owner, pins: board.pins })));
+        });
+    }
+
+    async function editPin() {
+        const tx = await pinManagerContract?.editPin(pin.id as string, pinTitle, pinDescription, pinBoardId);
+        setEditPinModalOpen(false);
+        await tx.wait()
+    }
+
     return (
         <>
-            {deleteModalOpen && <div className='absolute top-0 w-full h-full z-[12] bg-zinc-800 opacity-70'></div>}
+            {deletePinModalOpen && <div className='absolute top-0 w-full h-full z-[12] bg-zinc-800 opacity-70'></div>}
             <Modal isOpen={editPinModalOpen} closeModal={() => setEditPinModalOpen(false)} title="Edit Pin" height='h-[99%]'>
                 <div className='absolute top-3 right-3'>
                     <button
                         className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl"
                         disabled={pinTitle?.length === 0}
-                        onClick={() => console.log('done')}
+                        onClick={editPin}
                     >
                         Done
                     </button>
                 </div >
                 <div className='flex flex-col gap-4'>
                     <div>
-                        <p>Board cover</p>
+                        <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin.title} className='object-cover w-40 h-40 rounded-2xl' />
                     </div>
                     <div>
-                        <p>Board name</p>
+                        <p>Title</p>
                         <Input variant='unstyled' placeholder='Add' defaultValue={pinTitle} onChange={(e) => setPinTitle(e.target.value)} />
                     </div>
 
@@ -53,43 +82,22 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                     </div>
 
                     <div>
-                        <p>Collaborators</p>
-                        <Input variant='unstyled' placeholder='Collaborators' />
+                        <Select placeholder='Select option' onChange={(e) => setPinBoardId(e.target.value)}>
+                            {boards.map((board) =>
+                                <option key={board.id} value={board.id.toNumber()} selected={board.id.toNumber() == pinBoardId}>{board.name}</option>
+                            )}
+                        </Select>
                     </div>
 
-                    <div>
-                        <p>Settings</p>
-                        <div className='flex flex-col justify-between item-center'>
-                            <div className='flex flex-row'>
-                                <div>
-                                    <p className='font-bold'>Make this board secret</p>
-                                    <p className='text-gray-400 text-s'>Only you and collaborators will see this board</p>
-                                </div>
-                                <div className='mt-1'><Switch size='md' /></div>
-                            </div>
-                            <div className='flex flex-row'>
-                                <div>
-                                    <p className='font-bold'>Personalisation</p>
-                                    <p className='text-gray-400 text-s'>Show Pins inspired by this board in your home feed</p>
-                                </div>
-                                <div className='mt-1'><Switch size='md' /></div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div>
-                        <p>Actions</p>
-                        <div className='flex justify-between item-center' onClick={() => setDeleteModalOpen(true)}>
-                            <div>
-                                <p className='font-bold'>Delete Board</p>
-                                <p className='text-gray-400 text-s'>Delete this board and all of its Pins forever. You can't undo this.</p>
-                            </div>
+                    <div className='flex justify-between item-center' onClick={() => setDeletePinModalOpen(true)}>
+                        <div>
+                            <p className='font-bold'>Delete this Pin</p>
                         </div>
                     </div>
 
                 </div>
             </Modal>
+            <DeleteModal isOpen={deletePinModalOpen} closeModal={() => setDeletePinModalOpen(false)} isBoard={false} pin={pin} />
         </>
     );
 };

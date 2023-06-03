@@ -75,11 +75,11 @@ const CreatePinModal: React.FC = () => {
 
                 <div>
                     <Select placeholder='Select option' onChange={(e) => setPinBoardId(e.target.value)}>
-                        {boards.map((board) => <option value={board.id.toNumber()}>{board.name}</option>)}
+                        {boards.map((board) => <option key={board.id} value={board.id.toNumber()}>{board.name}</option>)}
                     </Select>
                 </div>
             </div>
-        </Modal >
+        </Modal>
     );
 };
 

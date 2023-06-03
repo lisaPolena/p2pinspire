@@ -11,13 +11,22 @@ interface EditGeneralModalProps {
 const EditGeneralModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
     const { isBoard, isSavedPin } = props;
     const { editModalOpen, setEditModalOpen } = useAppState();
-    const { setEditBoardModalOpen, setEditPinModalOpen } = useAppState();
+    const { setEditBoardModalOpen, setEditPinModalOpen, setDownloadPin } = useAppState();
 
     function handleClickEdit() {
         if (isBoard) {
             setEditBoardModalOpen(true);
         } else if (isSavedPin) {
             setEditPinModalOpen(true);
+        }
+    }
+
+    function handleMergeDownloadClick() {
+        if (isBoard) {
+            console.log('merge');
+        } else if (isSavedPin) {
+            setDownloadPin(true);
+            setEditModalOpen(false);
         }
     }
 
@@ -29,7 +38,7 @@ const EditGeneralModal: React.FC<EditGeneralModalProps> = (props: EditGeneralMod
                         <ListItem onClick={handleClickEdit}>
                             <p className='mb-4 text-lg font-bold'>{isBoard ? 'Edit Board' : 'Edit Pin'}</p>
                         </ListItem>
-                        <ListItem>
+                        <ListItem onClick={handleMergeDownloadClick}>
                             <p className='mb-4 text-lg font-bold'>{isBoard ? 'Merge' : 'Download Image'}</p>
                         </ListItem>
                         <ListItem>

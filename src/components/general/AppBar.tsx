@@ -31,14 +31,11 @@ export const AppBar = (props: AppBarProps) => {
     }
   }, [title])
 
-  const back = () => {
-    router.back();
-  };
 
   return (
     <>
       <div className={`fixed inset-x-0 top-0 grid grid-cols-3 ${isBoard ? 'bg-black' : 'bg-transparent'} h-[50px] pt-3 px-2 z-10`}>
-        <div className={`text-2xl ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'}`} onClick={back}><IoChevronBack /></div>
+        <div className={`text-2xl ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'}`} onClick={() => router.back()}><IoChevronBack /></div>
         <div className={`text-center ${longTitle ? 'mt-[-0.5rem]' : ''}`}>{showTitle && title ? title : ''}</div>
         <div className={`flex justify-end gap-6 ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'} `}>
           {isBoard && <div className='text-2xl'><IoFilter /></div>}

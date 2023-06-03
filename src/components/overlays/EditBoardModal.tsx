@@ -100,7 +100,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
 
                 </div>
             </Modal>
-            <DeleteModal isOpen={deleteModalOpen} closeModal={() => setDeleteModalOpen(false)} board={board} />
+            <DeleteModal isOpen={deleteModalOpen} closeModal={() => setDeleteModalOpen(false)} isBoard={true} board={board} />
         </>
     );
 };

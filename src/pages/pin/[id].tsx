@@ -1,5 +1,6 @@
 import { usePinManager } from '@/common/functions/contracts';
 import { AppBar } from '@/components/general/AppBar';
+import { useAppState } from '@/components/general/AppStateContext';
 import { Button } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
@@ -13,13 +14,16 @@ export default function DetailPin() {
     const pinManagerContract = usePinManager(library);
     const router = useRouter()
     const [pin, setPin] = useState<any>(null);
+    const { downloadPin, setDownloadPin } = useAppState();
     //const ipfs = useIpfs();
 
     useEffect(() => {
         const { id } = router.query
         getPinById(id as string);
 
-    }, [])
+        if (downloadPin) downloadImage(pin.imageHash, pin.title);
+
+    }, [downloadPin])
 
     function getPinById(id: string) {
         pinManagerContract?.getPinById(id).then((result: any) => {
@@ -33,6 +37,25 @@ export default function DetailPin() {
                 boardId: result.boardId.toNumber()
             });
         });
+    }
+
+    async function downloadImage(hash: string, title: string) {
+        const imageSrc = `https://web3-pinterest.infura-ipfs.io/ipfs/${hash}`;
+
+        const response = await fetch(imageSrc);
+        const blobImage = await response.blob();
+        const href = URL.createObjectURL(blobImage);
+
+        const anchorElement = document.createElement('a');
+        anchorElement.href = href;
+        anchorElement.download = title;
+
+        document.body.appendChild(anchorElement);
+        anchorElement.click();
+
+        document.body.removeChild(anchorElement);
+        window.URL.revokeObjectURL(href);
+        setDownloadPin(false);
     }
 
     return (
