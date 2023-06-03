@@ -149,20 +149,18 @@ contract PinManager {
     }
 
     /**
-     * @dev Get all pins from a specific board owned by a specific address
+     * @dev Get all pins from a specific board
      * @param boardId ID of the board
-     * @param owner Address of the pin owner
-     * @return Pin[] array containing all the pins from the board and owner
+     * @return Pin[] array containing all the pins from the board
      */
     function getPinsByBoardId(
-        uint256 boardId,
-        address owner
+        uint256 boardId
     ) public view returns (Pin[] memory) {
         uint256 count = 0;
 
-        // Count the number of pins in the board and owned by the specific address
+        // Count the number of pins in the board
         for (uint256 i = 1; i <= currentPinId; i++) {
-            if (pins[i].boardId == boardId && pins[i].owner == owner) {
+            if (pins[i].boardId == boardId) {
                 count++;
             }
         }
@@ -171,9 +169,9 @@ contract PinManager {
         Pin[] memory boardPins = new Pin[](count);
         uint256 index = 0;
 
-        // Retrieve the pins from the board and owned by the specific address
+        // Retrieve the pins from the board
         for (uint256 i = 1; i <= currentPinId; i++) {
-            if (pins[i].boardId == boardId && pins[i].owner == owner) {
+            if (pins[i].boardId == boardId) {
                 boardPins[index] = pins[i];
                 index++;
             }
