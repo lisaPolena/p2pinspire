@@ -6,7 +6,7 @@ import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 
 const NavbarModal: React.FC = () => {
-    const { setCreateBoardModalOpen, navbarModalOpen, setNavbarModalOpen } = useAppState();
+    const { setCreateBoardModalOpen, navbarModalOpen, setNavbarModalOpen, setCreatePinModalOpen } = useAppState();
 
     return (
         <Modal isOpen={navbarModalOpen} closeModal={() => setNavbarModalOpen(false)} title="Start creating now" height='h-[22%]'>
@@ -19,13 +19,12 @@ const NavbarModal: React.FC = () => {
                     <div className="mt-2 text-sm text-white">Idea Pin</div>
                 </div>
 
-                <div className='flex flex-col items-center justify-center'>
+                <div className='flex flex-col items-center justify-center' onClick={() => setCreatePinModalOpen(true)}>
                     <div className="flex items-center justify-center w-16 h-16 m-auto bg-[#7f7d82] rounded-xl">
                         <BsFillPinFill size={30} />
                     </div>
                     <div className="mt-2 text-sm text-white ">Pin</div>
                 </div>
-
 
                 <div className='flex flex-col items-center justify-center' onClick={() => setCreateBoardModalOpen(true)}>
                     <div className="flex items-center justify-center w-16 h-16 bg-[#7f7d82] fflex rounded-xl">

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { IoHome, IoSearch, IoAdd, IoChatbubbleEllipses, IoPersonCircle } from "react-icons/io5";
 import CreateBoardModal from '../overlays/CreateBoardModal';
+import CreatePinModal from '../overlays/CreatePinModal';
 import NavbarModal from '../overlays/NavbarModal';
 import { useAppState } from './AppStateContext';
 
@@ -28,6 +29,7 @@ export const Navbar = () => {
       </div>
       <NavbarModal />
       <CreateBoardModal />
+      <CreatePinModal />
     </>
   );
 };

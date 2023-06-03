@@ -11,6 +11,8 @@ interface AppStateContextProps {
   setEditModalOpen: (open: boolean) => void;
   editBoardModalOpen: boolean;
   setEditBoardModalOpen: (open: boolean) => void;
+  createPinModalOpen: boolean;
+  setCreatePinModalOpen: (open: boolean) => void;
   deleteModalOpen: boolean;
   setDeleteModalOpen: (open: boolean) => void;
   loadDeleteBoardTransaction: number;
@@ -28,8 +30,9 @@ export const useAppState = () => {
 };
 
 export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
   const [navbarModalOpen, setNavbarModalOpen] = useState<boolean>(false);
+  const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
+  const [createPinModalOpen, setCreatePinModalOpen] = useState<boolean>(false);
   const [loadCreateBoardTransaction, setLoadCreateBoardTransaction] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
   const [editBoardModalOpen, setEditBoardModalOpen] = useState<boolean>(false);
@@ -37,13 +40,18 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [loadDeleteBoardTransaction, setLoadDeleteBoardTransaction] = useState<number>(0);
 
   const contextValue: AppStateContextProps = {
+    navbarModalOpen,
+    setNavbarModalOpen,
     createBoardModalOpen,
     setCreateBoardModalOpen: (value: boolean) => {
       setNavbarModalOpen(false);
       setCreateBoardModalOpen(value);
     },
-    navbarModalOpen,
-    setNavbarModalOpen,
+    createPinModalOpen,
+    setCreatePinModalOpen: (value: boolean) => {
+      setNavbarModalOpen(false);
+      setCreatePinModalOpen(value);
+    },
     loadCreateBoardTransaction,
     setLoadCreateBoardTransaction,
     editModalOpen,

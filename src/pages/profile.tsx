@@ -25,8 +25,6 @@ export default function Profile() {
 
         getAllBoards();
 
-        console.log('loadDeleteBoardTransaction', loadDeleteBoardTransaction);
-
         if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
         boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
 
