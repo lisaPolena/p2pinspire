@@ -4,7 +4,6 @@ pragma solidity >=0.7.0 <0.9.0;
 
 //import "hardhat/console.sol";
 import {Board, Pin} from "./common/types.sol";
-import "./common/functions.sol";
 
 /**
  * @title BoardManager

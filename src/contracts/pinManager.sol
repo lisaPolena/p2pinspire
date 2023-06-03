@@ -1,137 +1,207 @@
-// // SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: GPL-3.0
 
-// pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.7.0 <0.9.0;
 
-// import {Board, Pin} from "./common/types.sol";
-// import {Functions} from "./common/functions.sol";
+import {Pin} from "./common/types.sol";
 
-// /**
-//  * @title PinManager
-//  * @dev A smart contract for managing pins
-//  */
-// contract PinManager {
-//     /**
-//      * @dev Mapping to store pins by their ID
-//      */
-//     mapping(bytes16 => Pin) public pins;
-//     mapping(bytes16 => Board) public boards;
+/**
+ * @title PinManager
+ * @dev A smart contract for managing pins
+ */
+contract PinManager {
+    /**
+     * @dev Event emitted when a new pin is created
+     * @param pinId ID of the pin created
+     * @param title Title of the pin created
+     * @param description Description of the pin created
+     * @param imageHash IPFS hash of the pin's image
+     * @param boardId of the board the pin belongs to
+     * @param owner Owner of the pin created
+     */
+    event PinCreated(
+        uint256 pinId,
+        string title,
+        string description,
+        string imageHash,
+        uint256 indexed boardId,
+        address indexed owner
+    );
 
-//     /**
-//      * @dev Number of pins created
-//      */
-//     uint public pinCount;
+    /**
+     * @dev Event emitted when a pin is deleted
+     * @param pinId ID of the pin deleted
+     */
+    event PinDeleted(uint256 pinId);
 
-//     /**
-//      * @dev Create a new pin
-//      * @param imageHash Hash for the image of the pin
-//      * @param title Title of the pin
-//      * @param description Description of the pin
-//      * @param boardId ID of the board where the pin will be saved
-//      * Requirements:
-//      * - imageHash, title, and description cannot be empty strings
-//      * - Board with the given ID must exist
-//      */
-//     function createPin(
-//         string memory imageHash,
-//         string memory title,
-//         string memory description,
-//         bytes16 boardId
-//     ) public {
-//         require(bytes(imageHash).length != 0, "Image hash cannot be empty.");
-//         require(bytes(title).length != 0, "Title cannot be empty.");
-//         require(bytes(description).length != 0, "Description cannot be empty.");
-//         require(boards[boardId].owner != address(0), "Board does not exist.");
-//         bytes16 id = Functions(new Functions()).generateId();
-//         Pin memory pin = Pin(
-//             id,
-//             imageHash,
-//             title,
-//             description,
-//             msg.sender,
-//             boardId
-//         );
-//         pins[id] = pin;
-//         pinCount++;
-//     }
+    /**
+     * @dev Event emitted when a pin is edited
+     * @param pinId ID of the pin edited
+     * @param newTitle New title of the pin edited
+     * @param newDescription New description of the pin edited
+     * @param boardId ID of the new board
+     */
+    event PinEdited(
+        uint256 pinId,
+        string newTitle,
+        string newDescription,
+        uint256 boardId
+    );
 
-//     /**
-//      * @dev Delete an existing pin
-//      * @param pinId ID of the pin to delete
-//      * Requirements:
-//      * - Only the pin owner can delete the pin
-//      */
-//     function deletePin(bytes16 pinId) public {
-//         require(
-//             msg.sender == pins[pinId].owner,
-//             "Only the pin owner can delete the pin."
-//         );
-//         delete pins[pinId];
-//     }
+    /**
+     * @dev Mapping to store pins by their ID
+     */
+    mapping(uint256 => Pin) public pins;
 
-//     /**
-//      * @dev Get pin information by its ID
-//      * @param pinId ID of the pin to get
-//      * @return Pin struct containing pin information
-//      * Requirements:
-//      * - Pin with the given ID must exist
-//      */
-//     function getPin(bytes16 pinId) public view returns (Pin memory) {
-//         require(pins[pinId].owner != address(0), "Pin does not exist.");
-//         return pins[pinId];
-//     }
+    /**
+     * @dev Number of pins created
+     */
+    uint256 public currentPinId;
 
-//     /**
-//      * @dev Save a pin to a board
-//      * @param pinId ID of the pin to save
-//      * @param boardId ID of the board to save the pin to
-//      * Requirements:
-//      * - Pin with the given ID must exist
-//      * - Board with the given ID must exist
-//      * - Only the pin owner can save the pin to the board
-//      */
-//     function savePinToBoard(bytes16 pinId, bytes16 boardId) public {
-//         require(
-//             pins[pinId].owner == msg.sender,
-//             "Only the pin owner can save the pin to a board."
-//         );
-//         require(boards[boardId].owner != address(0), "Board does not exist.");
-//         pins[pinId].boardId = boardId;
-//         boards[boardId].pins.push(pinId);
-//     }
+    /**
+     * @dev Create a new pin
+     * @param title Title of the pin
+     * @param description Description of the pin
+     * @param imageHash IPFS hash of the pin's image
+     * @param boardId ID of the board the pin belongs to
+     * @return uint256 ID of the created pin
+     */
+    function createPin(
+        string memory title,
+        string memory description,
+        string memory imageHash,
+        uint256 boardId
+    ) public returns (uint256) {
+        currentPinId++;
+        Pin memory pin = Pin(
+            currentPinId,
+            title,
+            description,
+            imageHash,
+            msg.sender,
+            boardId
+        );
+        pins[currentPinId] = pin;
+        emit PinCreated(
+            currentPinId,
+            title,
+            description,
+            imageHash,
+            boardId,
+            msg.sender
+        );
+        return currentPinId;
+    }
 
-//     /**
-//      * @dev Remove a pin from a board
-//      * @param boardId ID of the board from which to remove the pin
-//      * @param pinId ID of the pin to remove
-//      * Requirements:
-//      * - Only the board owner can remove pins from the board
-//      * - Board and pin with the given IDs must exist
-//      */
-//     function removePinFromBoard(bytes16 boardId, bytes16 pinId) public {
-//         Board storage board = boards[boardId];
-//         require(
-//             board.owner == msg.sender,
-//             "Only the board owner can remove pins from the board."
-//         );
-//         require(
-//             pins[pinId].owner != address(0),
-//             "Pin with the given ID does not exist."
-//         );
-//         require(
-//             pins[pinId].boardId == boardId,
-//             "Pin with the given ID is not on the specified board."
-//         );
-//         uint indexToDelete;
-//         for (uint i = 0; i < board.pins.length; i++) {
-//             if (board.pins[i] == pinId) {
-//                 indexToDelete = i;
-//                 break;
-//             }
-//         }
-//         for (uint i = indexToDelete; i < board.pins.length - 1; i++) {
-//             board.pins[i] = board.pins[i + 1];
-//         }
-//         board.pins.pop();
-//         pins[pinId].boardId = 0;
-//     }
-// }
+    /**
+     * @dev Delete an existing pin
+     * @param pinId ID of the pin to delete
+     * Requirements:
+     * - Only the pin owner can delete the pin
+     */
+    function deletePin(uint256 pinId) public {
+        require(pinId <= currentPinId, "Pin does not exist.");
+        require(
+            msg.sender == pins[pinId].owner,
+            "Only the pin owner can delete the pin."
+        );
+        emit PinDeleted(pinId);
+        delete pins[pinId];
+    }
+
+    /**
+     * @dev Get pin information by its ID
+     * @param pinId ID of the pin to get
+     * @return Pin struct containing pin information
+     * Requirements:
+     * - Pin with the given ID must exist
+     */
+    function getPinById(uint256 pinId) public view returns (Pin memory) {
+        require(pinId <= currentPinId, "Pin does not exist.");
+        require(pins[pinId].owner != address(0), "Pin does not exist.");
+        return pins[pinId];
+    }
+
+    /**
+     * @dev Edit pin information
+     * @param pinId ID of the pin to edit
+     * @param newTitle New title for the pin
+     * @param newDescription New description for the pin
+     * @param newBoardId New Id if the board
+     * Requirements:
+     * - Only the pin owner can edit the pin
+     * - Pin with the given ID must exist
+     */
+    function editPin(
+        uint256 pinId,
+        string memory newTitle,
+        string memory newDescription,
+        uint256 newBoardId
+    ) public {
+        require(pinId <= currentPinId, "Pin does not exist.");
+        require(
+            msg.sender == pins[pinId].owner,
+            "Only the pin owner can edit the pin."
+        );
+        pins[pinId].title = newTitle;
+        pins[pinId].description = newDescription;
+        pins[pinId].boardId = newBoardId;
+        emit PinEdited(pinId, newTitle, newDescription, newBoardId);
+    }
+
+    /**
+     * @dev Get all pins from a specific board owned by a specific address
+     * @param boardId ID of the board
+     * @param owner Address of the pin owner
+     * @return Pin[] array containing all the pins from the board and owner
+     */
+    function getPinsByBoardId(
+        uint256 boardId,
+        address owner
+    ) public view returns (Pin[] memory) {
+        uint256 count = 0;
+
+        // Count the number of pins in the board and owned by the specific address
+        for (uint256 i = 1; i <= currentPinId; i++) {
+            if (pins[i].boardId == boardId && pins[i].owner == owner) {
+                count++;
+            }
+        }
+
+        // Create an array with the count of pins
+        Pin[] memory boardPins = new Pin[](count);
+        uint256 index = 0;
+
+        // Retrieve the pins from the board and owned by the specific address
+        for (uint256 i = 1; i <= currentPinId; i++) {
+            if (pins[i].boardId == boardId && pins[i].owner == owner) {
+                boardPins[index] = pins[i];
+                index++;
+            }
+        }
+
+        return boardPins;
+    }
+
+    /**
+     * @dev Get all pins
+     * @return Pin[] array containing all the pins
+     */
+    function getAllPins() public view returns (Pin[] memory) {
+        Pin[] memory allPins = new Pin[](currentPinId);
+        uint256 index = 0;
+
+        for (uint256 i = 1; i <= currentPinId; i++) {
+            if (pins[i].owner != address(0)) {
+                allPins[index] = pins[i];
+                index++;
+            }
+        }
+
+        // Resize the allPins array to remove any unused elements
+        assembly {
+            mstore(allPins, index)
+        }
+
+        return allPins;
+    }
+}
