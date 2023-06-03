@@ -17,9 +17,9 @@ struct Board {
  */
 struct Pin {
     uint256 id; // Unique identifier for pin
-    string imageHash; //hash for the image
     string title; //title of the pin
     string description; //description of the pin
+    string imageHash; //hash for the image
     address owner; //owner of the pin
     uint256 boardId; //id of the board where the pin is saved
 }
