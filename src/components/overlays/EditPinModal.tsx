@@ -6,6 +6,7 @@ import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import DeleteModal from './DeleteModal';
+import { useRouter } from 'next/router';
 
 interface EditPinModalProps {
     pin: any;
@@ -22,6 +23,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
     const [boards, setBoards] = React.useState<any[]>([]);
     const boardManagerContract = useBoardManager(library);
     const pinManagerContract = usePinManager(library);
+    const router = useRouter();
 
     useEffect(() => {
 
@@ -52,6 +54,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
         const tx = await pinManagerContract?.editPin(pin.id as string, pinTitle, pinDescription, pinBoardId);
         setEditPinModalOpen(false);
         await tx.wait()
+        router.push('/profile');
     }
 
     return (
