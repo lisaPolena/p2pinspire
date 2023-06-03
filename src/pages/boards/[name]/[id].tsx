@@ -84,7 +84,7 @@ export default function DetailBoard() {
                 <title>Detail</title>
             </Head>
             <main className='min-h-screen overflow-auto bg-black mb-18'>
-                <AppBar isBoard={true} title={board ? board.name : ''} showTitle={showTitle} board={board} />
+                <AppBar isBoard={true} isSavedPin={false} title={board ? board.name : ''} showTitle={showTitle} board={board} />
                 {board ? (
                     <div className='relative top-[50px]'>
                         <div className='mt-10 mb-10 text-center'>
@@ -97,7 +97,7 @@ export default function DetailBoard() {
                         </div>
                         <div className="grid grid-cols-2 gap-3 px-4">
                             {pins.map((pin: any) => (
-                                <div key={pin.id} className="h-auto" onClick={() => console.log(pin.id.toNumber())}>
+                                <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}`)}>
                                     <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
                                         alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
                                     <div className='mb-4'>

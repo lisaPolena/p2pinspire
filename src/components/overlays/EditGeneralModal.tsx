@@ -2,26 +2,50 @@ import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { List, ListItem } from '@chakra-ui/react';
 
+interface EditGeneralModalProps {
+    isBoard: boolean;
+    isSavedPin: boolean;
+}
 
-const EditGeneralModal: React.FC = () => {
+
+const EditGeneralModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
+    const { isBoard, isSavedPin } = props;
     const { editModalOpen, setEditModalOpen } = useAppState();
-    const { setEditBoardModalOpen } = useAppState();
+    const { setEditBoardModalOpen, setEditPinModalOpen } = useAppState();
+
+    function handleClickEdit() {
+        if (isBoard) {
+            setEditBoardModalOpen(true);
+        } else if (isSavedPin) {
+            setEditPinModalOpen(true);
+        }
+    }
 
     return (
-        <Modal isOpen={editModalOpen} isAlternative={true} closeModal={() => setEditModalOpen(false)} title="Board Options" height='h-[38%]'>
+        <Modal isOpen={editModalOpen} isAlternative={true} closeModal={() => setEditModalOpen(false)} title={isBoard ? "Board Options" : 'More Options'} height='h-[38%]'>
             <List>
-                <ListItem onClick={() => setEditBoardModalOpen(true)}>
-                    <p className='mb-4 text-lg font-bold'>Edit Board</p>
-                </ListItem>
-                <ListItem>
-                    <p className='mb-4 text-lg font-bold'>Merge</p>
-                </ListItem>
-                <ListItem>
-                    <p className='mb-4 text-lg font-bold'>Share</p>
-                </ListItem>
-                <ListItem>
-                    <p className='mb-4 text-lg font-bold'>Archive</p>
-                </ListItem>
+                {isBoard || isSavedPin ? (
+                    <>
+                        <ListItem onClick={handleClickEdit}>
+                            <p className='mb-4 text-lg font-bold'>{isBoard ? 'Edit Board' : 'Edit Pin'}</p>
+                        </ListItem>
+                        <ListItem>
+                            <p className='mb-4 text-lg font-bold'>{isBoard ? 'Merge' : 'Download Image'}</p>
+                        </ListItem>
+                        <ListItem>
+                            <p className='mb-4 text-lg font-bold'>{isBoard ? 'Share' : 'Copy Link'}</p>
+                        </ListItem>
+                        {isBoard &&
+                            <ListItem>
+                                <p className='mb-4 text-lg font-bold'>Archive</p>
+                            </ListItem>
+                        }
+                    </>
+
+                ) : (
+                    <>
+                    </>
+                )}
             </List>
         </Modal>
     );

@@ -17,6 +17,8 @@ interface AppStateContextProps {
   setDeleteModalOpen: (open: boolean) => void;
   loadDeleteBoardTransaction: number;
   setLoadDeleteBoardTransaction: (id: number) => void;
+  editPinModalOpen: boolean;
+  setEditPinModalOpen: (open: boolean) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -38,6 +40,7 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [editBoardModalOpen, setEditBoardModalOpen] = useState<boolean>(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [loadDeleteBoardTransaction, setLoadDeleteBoardTransaction] = useState<number>(0);
+  const [editPinModalOpen, setEditPinModalOpen] = useState<boolean>(false);
 
   const contextValue: AppStateContextProps = {
     navbarModalOpen,
@@ -69,6 +72,11 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     },
     loadDeleteBoardTransaction,
     setLoadDeleteBoardTransaction,
+    editPinModalOpen,
+    setEditPinModalOpen: (value: boolean) => {
+      setEditModalOpen(false);
+      setEditPinModalOpen(value);
+    }
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
