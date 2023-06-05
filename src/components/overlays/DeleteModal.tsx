@@ -13,9 +13,11 @@ interface DeleteModalProps {
     closeModal: () => void;
     board?: any;
     pin?: any;
+    isOwner?: boolean;
+    savedPinBoardId?: string;
 }
 
-const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, board, pin }) => {
+const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, board, pin, isOwner, savedPinBoardId }) => {
     const { setDeleteModalOpen, setEditBoardModalOpen, setLoadDeleteBoardTransaction, setDeletePinModalOpen, setEditPinModalOpen } = useAppState();
     const { library } = useWeb3React<Web3Provider>()
     const boardManagerContract = useBoardManager(library);
@@ -36,8 +38,13 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
     }
 
     const deletePin = () => {
-        if (pin) {
+        if (pin && isOwner) {
             pinManagerContract?.deletePin(pin.id);
+            setDeletePinModalOpen(false);
+            setEditPinModalOpen(false);
+            router.back();
+        } else if (pin && !isOwner) {
+            boardManagerContract?.deleteSavedPin(pin.id as string, savedPinBoardId);
             setDeletePinModalOpen(false);
             setEditPinModalOpen(false);
             router.back();

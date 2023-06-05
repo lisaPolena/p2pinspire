@@ -50,6 +50,13 @@ contract BoardManager {
     event SavedPinEdited(uint256 pinId, uint256 boardId);
 
     /**
+     * @dev Event emitted when a saved pin is deleted
+     * @param pinId ID of the pin edited
+     * @param boardId ID of the board
+     */
+    event SavedPinDeleted(uint256 pinId, uint256 boardId);
+
+    /**
      * @dev Mapping to store boards by their ID
      */
     mapping(uint256 => Board) public boards;
@@ -213,5 +220,32 @@ contract BoardManager {
         newBoard.pins.push(pinId);
 
         emit SavedPinEdited(pinId, newBoardId);
+    }
+
+    /**
+     * @dev Delete a saved pin
+     * @param pinId ID of the pin to delete
+     * @param boardId ID of the board the pin is saved to
+     * Requirements:
+     * - Board with the given ID must exist
+     * - Pin with the given ID must exist in the board's pins array
+     */
+    function deleteSavedPin(uint256 pinId, uint256 boardId) public {
+        require(boardId <= currentBoardId, "Board does not exist.");
+
+        Board storage board = boards[boardId];
+        uint256[] storage pins = board.pins;
+
+        for (uint256 i = 0; i < pins.length; i++) {
+            if (pins[i] == pinId) {
+                // Move the last element to the deleted position
+                pins[i] = pins[pins.length - 1];
+                // Decrease the length of the array by 1
+                pins.pop();
+                break;
+            }
+        }
+
+        emit SavedPinDeleted(pinId, boardId);
     }
 }

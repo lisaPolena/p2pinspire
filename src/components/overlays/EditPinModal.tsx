@@ -115,7 +115,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
 
                 </div>
             </Modal>
-            <DeleteModal isOpen={deletePinModalOpen} closeModal={() => setDeletePinModalOpen(false)} isBoard={false} pin={pin} />
+            <DeleteModal isOpen={deletePinModalOpen} closeModal={() => setDeletePinModalOpen(false)} isBoard={false} pin={pin} isOwner={isOwner} savedPinBoardId={pinBoardId} />
         </>
     );
 };
