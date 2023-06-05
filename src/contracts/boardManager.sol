@@ -43,6 +43,13 @@ contract BoardManager {
     event PinSaved(uint256 pinId, uint256 boardId);
 
     /**
+     * @dev Event emitted when a saved pin is edited
+     * @param pinId ID of the pin edited
+     * @param boardId ID of the new board
+     */
+    event SavedPinEdited(uint256 pinId, uint256 boardId);
+
+    /**
      * @dev Mapping to store boards by their ID
      */
     mapping(uint256 => Board) public boards;
@@ -152,8 +159,7 @@ contract BoardManager {
         return ownerBoards;
     }
 
-    /**
-     * @dev Save a new pin to a board
+    /* @dev Save a new pin to a board
      * @param boardId ID of the board to save the pin to
      * @param pinId ID of the pin to save
      * Requirements:
@@ -162,12 +168,50 @@ contract BoardManager {
      */
     function savePinToBoard(uint256 boardId, uint256 pinId) public {
         require(boardId <= currentBoardId, "Board does not exist.");
-
-        Board storage board = boards[boardId];
         require(pinId > 0, "Pin ID must be greater than zero.");
 
+        Board storage board = boards[boardId];
         board.pins.push(pinId);
 
         emit PinSaved(pinId, boardId);
+    }
+
+    /**
+     * @dev Edit a saved pin
+     * @param pinId ID of the pin to edit
+     * @param boardId ID of the board the pin is saved to
+     * @param newBoardId ID of the new board to save the pin to
+     * Requirements:
+     * - Board with the given ID must exist
+     * - Pin ID must be unique within the board
+     */
+    function editSavedPin(
+        uint256 pinId,
+        uint256 boardId,
+        uint256 newBoardId
+    ) public {
+        require(newBoardId <= currentBoardId, "New Board does not exist.");
+        require(boardId <= currentBoardId, "Old Board does not exist.");
+
+        Board storage oldBoard = boards[boardId];
+        Board storage newBoard = boards[newBoardId];
+        require(pinId > 0, "Pin ID must be greater than zero.");
+
+        // Delete pin from the old board
+        uint256[] storage oldBoardPins = oldBoard.pins;
+        for (uint256 i = 0; i < oldBoardPins.length; i++) {
+            if (oldBoardPins[i] == pinId) {
+                // Move the last element to the deleted position
+                oldBoardPins[i] = oldBoardPins[oldBoardPins.length - 1];
+                // Decrease the length of the array by 1
+                oldBoardPins.pop();
+                break;
+            }
+        }
+
+        // Save pin to the new board
+        newBoard.pins.push(pinId);
+
+        emit SavedPinEdited(pinId, newBoardId);
     }
 }

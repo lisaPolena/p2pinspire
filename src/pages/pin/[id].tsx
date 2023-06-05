@@ -75,7 +75,7 @@ export default function DetailPin() {
                 <title>Detail</title>
             </Head>
             <main className='flex flex-col min-h-screen overflow-auto bg-black mb-18'>
-                <AppBar isBoard={false} isSavedPin={true} pin={pin} />
+                <AppBar isBoard={false} isSavedPin={isSavedPin} pin={pin} />
                 <div className=''>
                     <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin?.title}
                         className="object-cover w-full rounded-tl-3xl rounded-tr-3xl " />

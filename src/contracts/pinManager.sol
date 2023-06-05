@@ -34,13 +34,13 @@ contract PinManager {
     event PinDeleted(uint256 pinId);
 
     /**
-     * @dev Event emitted when a pin is edited
+     * @dev Event emitted when a created pin is edited
      * @param pinId ID of the pin edited
      * @param newTitle New title of the pin edited
      * @param newDescription New description of the pin edited
      * @param boardId ID of the new board
      */
-    event PinEdited(
+    event CreatedPinEdited(
         uint256 pinId,
         string newTitle,
         string newDescription,
@@ -122,16 +122,16 @@ contract PinManager {
     }
 
     /**
-     * @dev Edit pin information
+     * @dev Edit created pin information
      * @param pinId ID of the pin to edit
      * @param newTitle New title for the pin
      * @param newDescription New description for the pin
-     * @param newBoardId New Id if the board
+     * @param newBoardId New Id of the board
      * Requirements:
      * - Only the pin owner can edit the pin
      * - Pin with the given ID must exist
      */
-    function editPin(
+    function editCreatedPin(
         uint256 pinId,
         string memory newTitle,
         string memory newDescription,
@@ -145,7 +145,7 @@ contract PinManager {
         pins[pinId].title = newTitle;
         pins[pinId].description = newDescription;
         pins[pinId].boardId = newBoardId;
-        emit PinEdited(pinId, newTitle, newDescription, newBoardId);
+        emit CreatedPinEdited(pinId, newTitle, newDescription, newBoardId);
     }
 
     /**

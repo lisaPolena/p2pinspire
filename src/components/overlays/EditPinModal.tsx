@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, Select, Switch } from '@chakra-ui/react';
+import { Input, Select } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager, usePinManager } from '@/common/functions/contracts';
@@ -18,6 +18,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
     const [pinTitle, setPinTitle] = React.useState<string>('');
     const [pinDescription, setPinDescripton] = React.useState<string>('');
     const [pinBoardId, setPinBoardId] = React.useState<string>('');
+    const [newPinBoardId, setNewPinBoardId] = React.useState<string>('');
     const { account, library } = useWeb3React<Web3Provider>();
     const [isOwner, setIsOwner] = React.useState<boolean>(false);
     const [boards, setBoards] = React.useState<any[]>([]);
@@ -26,21 +27,22 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
     const router = useRouter();
 
     useEffect(() => {
+        const { boardId } = router.query;
 
         getAllBoards();
 
-        if (pin) {
+        if (pin && pin.owner === account) {
+            setIsOwner(true);
             setPinTitle(pin.title);
             setPinDescripton(pin.description);
             setPinBoardId(pin.boardId);
-        }
-
-        if (pin && pin.owner === account) {
-            console.log('owner');
-            setIsOwner(true);
         } else {
             setIsOwner(false);
+            setPinBoardId(boardId as string);
         }
+
+        setNewPinBoardId('');
+
 
     }, [pin ? pin.title : '', pin ? pin.description : '', account]);
 
@@ -50,11 +52,20 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
         });
     }
 
-    async function editPin() {
-        const tx = await pinManagerContract?.editPin(pin.id as string, pinTitle, pinDescription, pinBoardId);
+    //TODO created edit pin event 
+    async function editCreatedPin() {
+        const tx = await pinManagerContract?.editCreatedPin(pin.id as string, pinTitle, pinDescription, newPinBoardId);
         setEditPinModalOpen(false);
-        await tx.wait()
         router.push('/profile');
+        await tx.wait()
+    }
+
+    //TODO saved edit pin event 
+    async function editSavedPin() {
+        const tx = await boardManagerContract?.editSavedPin(pin.id as string, pinBoardId, newPinBoardId);
+        setEditPinModalOpen(false);
+        router.push('/profile');
+        await tx.wait()
     }
 
     return (
@@ -64,8 +75,8 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                 <div className='absolute top-3 right-3'>
                     <button
                         className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl"
-                        disabled={pinTitle?.length === 0}
-                        onClick={editPin}
+                        disabled={(isOwner && pinTitle?.length === 0) || (!isOwner && (newPinBoardId !== '' ? pinBoardId === newPinBoardId : newPinBoardId === ''))}
+                        onClick={isOwner ? editCreatedPin : editSavedPin}
                     >
                         Done
                     </button>
@@ -74,18 +85,22 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                     <div>
                         <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin?.title} className='object-cover w-40 h-40 rounded-2xl' />
                     </div>
-                    <div>
-                        <p>Title</p>
-                        <Input variant='unstyled' placeholder='Add' defaultValue={pinTitle} onChange={(e) => setPinTitle(e.target.value)} />
-                    </div>
+                    {isOwner &&
+                        <>
+                            <div>
+                                <p>Title</p>
+                                <Input variant='unstyled' placeholder='Add' defaultValue={pinTitle} onChange={(e) => setPinTitle(e.target.value)} />
+                            </div>
+
+                            <div>
+                                <p>Description</p>
+                                <Input variant='unstyled' placeholder='Add what your board is about' defaultValue={pinDescription} onChange={(e) => setPinDescripton(e.target.value)} />
+                            </div>
+                        </>
+                    }
 
                     <div>
-                        <p>Description</p>
-                        <Input variant='unstyled' placeholder='Add what your board is about' defaultValue={pinDescription} onChange={(e) => setPinDescripton(e.target.value)} />
-                    </div>
-
-                    <div>
-                        <Select placeholder='Select option' onChange={(e) => setPinBoardId(e.target.value)}>
+                        <Select placeholder='Select option' onChange={(e) => setNewPinBoardId(e.target.value)}>
                             {boards.map((board) =>
                                 <option key={board.id} value={board.id.toNumber()} selected={board.id.toNumber() == pinBoardId}>{board.name}</option>
                             )}
