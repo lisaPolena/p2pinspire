@@ -70,10 +70,10 @@ export default function Profile() {
 
         boards.forEach((board: any) => {
             pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
-                let pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() }));
+                let pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() })).sort((a: any, b: any) => a.id - b.id);
                 board.pins.forEach((pinId: any) => {
                     pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
-                        pins = [...pins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }]
+                        pins = [...pins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }].sort((a: any, b: any) => a.id - b.id);
                         setBoards((prevBoards) => {
                             return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === account), { id: board.id, name: board.name, owner: board.owner, pins: pins }]
                                 .sort((a, b) => a.id - b.id);
@@ -110,7 +110,7 @@ export default function Profile() {
                             </TabPanel>
                             <TabPanel key={'TabPanel-2'} width='100vw'>
                                 <div className='grid grid-cols-2 gap-4'>
-                                    {boards?.map(({ id, name, owner, pins }) => (
+                                    {boards?.map(({ id, name, pins }) => (
                                         <React.Fragment key={id}>
                                             {loadDeleteBoardTransaction && loadDeleteBoardTransaction === id.toNumber() ? (
                                                 <Stack>

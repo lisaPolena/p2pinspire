@@ -53,7 +53,7 @@ export default function DetailBoard() {
             pins.forEach((pinId) => {
                 pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
                     boardPins = [...boardPins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }]
-                    setPins(boardPins);
+                    setPins(boardPins.sort((a: { id: number; }, b: { id: number; }) => a.id - b.id));
                     setIsLoading(false);
                 });
             });
