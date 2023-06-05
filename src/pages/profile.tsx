@@ -56,18 +56,27 @@ export default function Profile() {
         });
     }
 
+    //TODO: ugly af, fix this
     function getAllPinsByBoard(boards: any) {
         boards.forEach((board: any) => {
             pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
+                let pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() }));
+                board.pins.forEach((pinId: any) => {
+                    pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
+                        pins = [...pins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }]
+                        setBoards((prevBoards) => {
+                            return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === board.owner), { id: board.id, name: board.name, owner: board.owner, pins: pins }]
+                                .sort((a, b) => a.id - b.id);
+                        });
+                    });
+                });
                 setBoards((prevBoards) => {
-                    return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === board.owner), { id: board.id, name: board.name, owner: board.owner, pins: result }]
+                    return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === board.owner), { id: board.id, name: board.name, owner: board.owner, pins: pins }]
                         .sort((a, b) => a.id - b.id);
                 });
             });
         });
     }
-
-    console.log(boards);
 
     return (
         <>

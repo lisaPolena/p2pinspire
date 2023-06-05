@@ -1,6 +1,7 @@
 import { usePinManager } from '@/common/functions/contracts';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
+import SavePinModal from '@/components/overlays/SavePinModal';
 import { Button } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
@@ -14,7 +15,8 @@ export default function DetailPin() {
     const pinManagerContract = usePinManager(library);
     const router = useRouter()
     const [pin, setPin] = useState<any>(null);
-    const { downloadPin, setDownloadPin } = useAppState();
+    const { downloadPin, setDownloadPin, setSavePinModalOpen } = useAppState();
+    const [savePinId, setSavePinId] = useState<number | null>(null);
     //const ipfs = useIpfs();
 
     useEffect(() => {
@@ -57,6 +59,13 @@ export default function DetailPin() {
         setDownloadPin(false);
     }
 
+    function handleSavePinToBoard(pinId: number, isOwner: boolean) {
+        if (!isOwner) {
+            setSavePinId(pinId);
+            setSavePinModalOpen(true);
+        }
+    }
+
     return (
         <>
             <Head>
@@ -71,18 +80,17 @@ export default function DetailPin() {
                         <h1 className='text-2xl font-semibold'>{pin?.title}</h1>
                         <p>{pin?.description}</p>
                         <div className='flex flex-row justify-center gap-4 mt-6'>
-                            <Button width={'30%'} borderRadius={'50px'} colorScheme='secondary' variant='solid' onClick={() => console.log('view')}>
+                            <Button width={'30%'} borderRadius={'50px'} colorScheme='tertiary' variant='solid' onClick={() => console.log('view')}>
                                 View
                             </Button>
-                            <Button width={'30%'} borderRadius={'50px'} colorScheme='primary' variant='solid' onClick={() => console.log('save')}>
+                            <Button width={'30%'} borderRadius={'50px'} colorScheme={pin?.owner === account ? 'secondary' : 'primary'} variant='solid' onClick={() => handleSavePinToBoard(pin.id, pin?.owner === account)}>
                                 {pin?.owner === account ? 'Saved' : 'Save'}
                             </Button>
                         </div>
                     </div>
                 </div>
             </main>
-
-
+            <SavePinModal pinId={savePinId} />
         </>
     )
 }

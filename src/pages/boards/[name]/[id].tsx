@@ -37,15 +37,23 @@ export default function DetailBoard() {
     }, [])
 
     function getBoardById(id: string) {
-        boardManagerContract?.getBoardById(id).then((result: any) => {
+        boardManagerContract?.getBoardById(id).then(async (result: any) => {
             setBoard(result);
-            getPinsByBoardId(id);
+            getPinsByBoardId(id, result.pins);
         });
     }
 
-    function getPinsByBoardId(id: string) {
+    function getPinsByBoardId(id: string, pins: any[]) {
         pinManagerContract?.getPinsByBoardId(id).then((result: any) => {
-            setPins(result.map((pin: any) => ({ id: pin.id, title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId })));
+            let boardPins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() }));
+
+            pins.forEach((pinId) => {
+                pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
+                    boardPins = [...boardPins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }]
+                    setPins(boardPins);
+                });
+            });
+            setPins(boardPins);
         });
     }
 

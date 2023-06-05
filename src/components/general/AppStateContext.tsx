@@ -23,6 +23,8 @@ interface AppStateContextProps {
   setDownloadPin: (open: boolean) => void;
   deletePinModalOpen: boolean;
   setDeletePinModalOpen: (open: boolean) => void;
+  savePinModalOpen: boolean;
+  setSavePinModalOpen: (open: boolean) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -47,6 +49,7 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [editPinModalOpen, setEditPinModalOpen] = useState<boolean>(false);
   const [downloadPin, setDownloadPin] = useState<boolean>(false);
   const [deletePinModalOpen, setDeletePinModalOpen] = useState<boolean>(false);
+  const [savePinModalOpen, setSavePinModalOpen] = useState<boolean>(false);
 
   const contextValue: AppStateContextProps = {
     navbarModalOpen,
@@ -90,7 +93,9 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
       setEditModalOpen(false);
       setEditPinModalOpen(true)
       setDeletePinModalOpen(value);
-    }
+    },
+    savePinModalOpen,
+    setSavePinModalOpen
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;

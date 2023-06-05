@@ -69,6 +69,24 @@ contract BoardManager {
     }
 
     /**
+     * @dev Edit board information
+     * @param boardId ID of the board to edit
+     * @param newName New name for the board
+     * Requirements:
+     * - Only the board owner can edit the board
+     * - Board with the given ID must exist
+     */
+    function editBoard(uint256 boardId, string memory newName) public {
+        require(
+            msg.sender == boards[boardId].owner,
+            "Only the board owner can edit the board."
+        );
+        require(bytes(newName).length != 0, "New board name cannot be empty.");
+
+        boards[boardId].name = newName;
+    }
+
+    /**
      * @dev Delete an existing board
      * @param boardId ID of the board to delete
      * Requirements:
@@ -138,15 +156,11 @@ contract BoardManager {
      * @dev Save a new pin to a board
      * @param boardId ID of the board to save the pin to
      * @param pinId ID of the pin to save
-     * @return uint256 ID of the saved pin
      * Requirements:
      * - Board with the given ID must exist
      * - Pin ID must be unique within the board
      */
-    function savePinToBoard(
-        uint256 boardId,
-        uint256 pinId
-    ) public returns (uint256) {
+    function savePinToBoard(uint256 boardId, uint256 pinId) public {
         require(boardId <= currentBoardId, "Board does not exist.");
 
         Board storage board = boards[boardId];
@@ -155,7 +169,5 @@ contract BoardManager {
         board.pins.push(pinId);
 
         emit PinSaved(pinId, boardId);
-
-        return pinId;
     }
 }
