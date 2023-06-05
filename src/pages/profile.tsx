@@ -80,12 +80,12 @@ export default function Profile() {
                                         <>
                                             {loadDeleteBoardTransaction && loadDeleteBoardTransaction === id.toNumber() ? (
                                                 <Stack key={id}>
-                                                    <Skeleton height='120px' width='100%' fadeDuration={4} />
-                                                    <Skeleton height='10px' width='70%' fadeDuration={4} />
-                                                    <Skeleton height='5px' width='40%' fadeDuration={4} />
+                                                    <Skeleton key={'1-' + id} height='120px' width='100%' fadeDuration={4} />
+                                                    <Skeleton key={'2-' + id} height='10px' width='70%' fadeDuration={4} />
+                                                    <Skeleton key={'3-' + id} height='5px' width='40%' fadeDuration={4} />
                                                 </Stack>
                                             ) : (
-                                                <div key={id} className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
+                                                <div key={'0-' + id} className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
                                                     <div className='h-[120px] bg-white rounded-3xl'>
                                                     </div>
                                                     <p className='pl-[0.7rem]'>{name}</p>

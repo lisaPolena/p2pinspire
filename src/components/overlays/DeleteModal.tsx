@@ -3,7 +3,7 @@ import { useAppState } from '../general/AppStateContext';
 import OutsideAlerter from '../general/OutsideClickAlerter';
 import { Button } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { useBoardManager } from '@/common/functions/contracts';
+import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers'
 
@@ -19,6 +19,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
     const { setDeleteModalOpen, setEditBoardModalOpen, setLoadDeleteBoardTransaction, setDeletePinModalOpen, setEditPinModalOpen } = useAppState();
     const { library } = useWeb3React<Web3Provider>()
     const boardManagerContract = useBoardManager(library);
+    const pinManagerContract = usePinManager(library);
     const router = useRouter();
 
     const deleteBoard = () => {
@@ -36,6 +37,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
 
     const deletePin = () => {
         if (pin) {
+            pinManagerContract?.deletePin(pin.id);
             setDeletePinModalOpen(false);
             setEditPinModalOpen(false);
             router.back();

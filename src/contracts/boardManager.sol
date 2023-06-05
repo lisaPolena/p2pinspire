@@ -36,6 +36,13 @@ contract BoardManager {
     event BoardEdited(uint256 boardId, string newName);
 
     /**
+     * @dev Event emitted when a pin is saved to a board
+     * @param pinId ID of the saved pin
+     * @param boardId ID of the board the pin is saved to
+     */
+    event PinSaved(uint256 pinId, uint256 boardId);
+
+    /**
      * @dev Mapping to store boards by their ID
      */
     mapping(uint256 => Board) public boards;
@@ -114,21 +121,27 @@ contract BoardManager {
     }
 
     /**
-     * @dev Edit board information
-     * @param boardId ID of the board to edit
-     * @param newName New name for the board
+     * @dev Save a new pin to a board
+     * @param boardId ID of the board to save the pin to
+     * @param pinId ID of the pin to save
+     * @return uint256 ID of the saved pin
      * Requirements:
-     * - Only the board owner can edit the board
      * - Board with the given ID must exist
+     * - Pin ID must be unique within the board
      */
-    function editBoard(uint256 boardId, string memory newName) public {
+    function savePinToBoard(
+        uint256 boardId,
+        uint256 pinId
+    ) public returns (uint256) {
         require(boardId <= currentBoardId, "Board does not exist.");
-        require(
-            msg.sender == boards[boardId].owner,
-            "Only the board owner can edit the board."
-        );
-        require(bytes(newName).length != 0, "New board name cannot be empty.");
-        emit BoardEdited(boardId, newName);
-        boards[boardId].name = newName;
+
+        Board storage board = boards[boardId];
+        require(pinId > 0, "Pin ID must be greater than zero.");
+
+        board.pins.push(pinId);
+
+        emit PinSaved(pinId, boardId);
+
+        return pinId;
     }
 }

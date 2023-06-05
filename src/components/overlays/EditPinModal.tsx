@@ -72,7 +72,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                 </div >
                 <div className='flex flex-col gap-4'>
                     <div>
-                        <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin.title} className='object-cover w-40 h-40 rounded-2xl' />
+                        <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin?.title} className='object-cover w-40 h-40 rounded-2xl' />
                     </div>
                     <div>
                         <p>Title</p>
