@@ -1,6 +1,5 @@
 import { useBoardManager, useIpfs, usePinManager } from '@/common/functions/contracts';
 import { AppBar } from '@/components/general/AppBar';
-import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
@@ -17,6 +16,7 @@ export default function DetailBoard() {
     const [showTitle, setShowTitle] = useState<boolean>(false);
     const router = useRouter()
     const [pins, setPins] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     //const ipfs = useIpfs();
 
     useEffect(() => {
@@ -44,13 +44,16 @@ export default function DetailBoard() {
     }
 
     function getPinsByBoardId(id: string, pins: any[]) {
+        console.log(isLoading);
         pinManagerContract?.getPinsByBoardId(id).then((result: any) => {
             let boardPins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() }));
+            if (pins.length === 0) setIsLoading(false);
 
             pins.forEach((pinId) => {
                 pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
                     boardPins = [...boardPins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }]
                     setPins(boardPins);
+                    setIsLoading(false);
                 });
             });
             setPins(boardPins);
@@ -71,20 +74,35 @@ export default function DetailBoard() {
                                 {board ? board.name : ''}
                             </h1>
                         </div>
-                        <div>
-                            <p className='text-[1.2rem] ml-[1.3rem] mb-[0.4rem] font-semibold'>{pins && pins.length ? pins.length + ' Pins' : '0 Pins'}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 px-4">
-                            {pins.map((pin: any) => (
-                                <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${board.id}`)}>
-                                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
-                                        alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
-                                    <div className='mb-4'>
-                                        <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
-                                    </div>
+                        {!isLoading ? (
+                            <>
+                                <div>
+                                    <p className='text-[1.2rem] ml-[1.3rem] mb-[0.4rem] font-semibold'>{pins && pins.length ? pins.length + ' Pins' : '0 Pins'}</p>
                                 </div>
-                            ))}
-                        </div>
+                                <div className="grid grid-cols-2 gap-3 px-4">
+                                    {pins.map((pin: any) => (
+                                        <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${board.id}`)}>
+                                            <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
+                                                alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
+                                            <div className='mb-4'>
+                                                <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+
+                        ) : (
+                            <div className='flex items-center justify-center h-[60vh]'>
+                                <Spinner
+                                    thickness='4px'
+                                    speed='0.65s'
+                                    emptyColor='gray.200'
+                                    color='blue.500'
+                                    size='xl'
+                                />
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <Spinner
