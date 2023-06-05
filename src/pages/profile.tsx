@@ -67,6 +67,8 @@ export default function Profile() {
         });
     }
 
+    console.log(boards);
+
     return (
         <>
             <Head>
@@ -99,7 +101,36 @@ export default function Profile() {
                                                 </Stack>
                                             ) : (
                                                 <div key={'0-' + id} className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
-                                                    <div className='h-[120px] bg-white rounded-3xl'>
+                                                    <div className={`h-[120px] rounded-3xl grid ${(pins?.length > 1 && pins[1].imageHash) || pins?.length === 0 ? 'grid-cols-2' : 'grid-cols-1'} gap-x-0.5`}>
+
+                                                        <div className='col-span-1'>
+                                                            {pins?.length > 0 && pins[0].imageHash ? (
+                                                                <img className={`object-cover w-full h-[120px] ${pins.length > 1 && pins[0].imageHash ? 'rounded-tl-3xl rounded-bl-3xl' : 'rounded-3xl'}`} src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pins[0].imageHash}`} />
+                                                            ) : (
+                                                                <div className='h-full bg-white rounded-tl-3xl rounded-bl-3xl'>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className={`grid col-span-1 ${(pins?.length > 2 && pins[2].imageHash) || pins?.length === 0 ? 'grid-rows-2 gap-y-0.5' : 'grid-rows-1'} `}>
+                                                            {/* Second column content */}
+
+                                                            {pins?.length > 1 && pins[1].imageHash ? (
+                                                                <img className={`object-cover w-full ${pins.length > 2 && pins[2].imageHash ? 'h-[60px]' : 'h-[120px] rounded-br-3xl'} rounded-tr-3xl`} src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pins[1].imageHash}`} />
+                                                            ) : (
+                                                                <div className='h-full row-span-1 bg-white rounded-tr-3xl'></div>
+                                                            )}
+
+                                                            {pins?.length > 2 && pins[2].imageHash && (
+                                                                <img className={`object-cover w-full h-[60px] rounded-br-3xl`} src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pins[2].imageHash}`} />
+                                                            )}
+
+                                                            {pins.length === 0 && (
+                                                                <div className='h-full row-span-1 bg-white rounded-br-3xl'></div>
+                                                            )}
+
+                                                        </div>
+
                                                     </div>
                                                     <p className='pl-[0.7rem]'>{name}</p>
                                                     <p className='text-xs text-gray-400 pl-[0.7rem]'>{pins?.length} Pins</p>
