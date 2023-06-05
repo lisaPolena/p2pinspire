@@ -7,7 +7,7 @@ import { usePinManager } from '@/common/functions/contracts';
 
 export default function Home() {
   // active: returns a boolean to check if user is connected
-  const { active, library } = useWeb3React()
+  const { active, library, account } = useWeb3React()
   const router = useRouter();
   const pinManagerContract = usePinManager(library);
   const [pins, setPins] = useState<any[]>([]);
@@ -23,12 +23,12 @@ export default function Home() {
       clearTimeout(timeoutId);
     };
 
-  }, [active, library])
+  }, [active, library, account])
 
   function getAllPins() {
     pinManagerContract?.getAllPins().then((result: any) => {
       const pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, imageHash: pin.imageHash, boardId: pin.boardId.toNumber(), owner: pin.owner }));
-      setPins(pins);
+      setPins(pins.filter((pin: { owner: any; }) => pin.owner !== account));
     });
   }
 

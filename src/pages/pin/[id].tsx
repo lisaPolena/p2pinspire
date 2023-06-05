@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 
 
 export default function DetailPin() {
-    const { library } = useWeb3React<Web3Provider>()
+    const { library, account } = useWeb3React<Web3Provider>()
     const pinManagerContract = usePinManager(library);
     const router = useRouter()
     const [pin, setPin] = useState<any>(null);
@@ -27,7 +27,6 @@ export default function DetailPin() {
 
     function getPinById(id: string) {
         pinManagerContract?.getPinById(id).then((result: any) => {
-            console.log(result);
             setPin({
                 id: result.id.toNumber(),
                 title: result.title,
@@ -76,7 +75,7 @@ export default function DetailPin() {
                                 View
                             </Button>
                             <Button width={'30%'} borderRadius={'50px'} colorScheme='primary' variant='solid' onClick={() => console.log('save')}>
-                                Save
+                                {pin?.owner === account ? 'Saved' : 'Save'}
                             </Button>
                         </div>
                     </div>

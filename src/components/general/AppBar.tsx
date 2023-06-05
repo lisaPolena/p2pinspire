@@ -25,7 +25,6 @@ export const AppBar = (props: AppBarProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log(title?.length);
     if (title && title.length > 17) {
       setLongTitle(true);
     }
