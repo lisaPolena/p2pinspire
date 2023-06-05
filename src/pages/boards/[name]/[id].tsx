@@ -76,7 +76,7 @@ export default function DetailBoard() {
                         </div>
                         <div className="grid grid-cols-2 gap-3 px-4">
                             {pins.map((pin: any) => (
-                                <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}`)}>
+                                <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${board.id}`)}>
                                     <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
                                         alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
                                     <div className='mb-4'>

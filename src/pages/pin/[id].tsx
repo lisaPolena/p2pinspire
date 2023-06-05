@@ -1,4 +1,4 @@
-import { usePinManager } from '@/common/functions/contracts';
+import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
 import SavePinModal from '@/components/overlays/SavePinModal';
@@ -17,11 +17,14 @@ export default function DetailPin() {
     const [pin, setPin] = useState<any>(null);
     const { downloadPin, setDownloadPin, setSavePinModalOpen } = useAppState();
     const [savePinId, setSavePinId] = useState<number | null>(null);
+    const [isSavedPin, setIsSavedPin] = useState<boolean>(false);
     //const ipfs = useIpfs();
 
     useEffect(() => {
-        const { id } = router.query
+        const { id, boardId } = router.query
         getPinById(id as string);
+        if (boardId || pin?.owner === account) setIsSavedPin(true)
+        else setIsSavedPin(false);
 
         if (downloadPin) downloadImage(pin.imageHash, pin.title);
 
@@ -83,8 +86,8 @@ export default function DetailPin() {
                             <Button width={'30%'} borderRadius={'50px'} colorScheme='tertiary' variant='solid' onClick={() => console.log('view')}>
                                 View
                             </Button>
-                            <Button width={'30%'} borderRadius={'50px'} colorScheme={pin?.owner === account ? 'secondary' : 'primary'} variant='solid' onClick={() => handleSavePinToBoard(pin.id, pin?.owner === account)}>
-                                {pin?.owner === account ? 'Saved' : 'Save'}
+                            <Button width={'30%'} borderRadius={'50px'} colorScheme={isSavedPin ? 'secondary' : 'primary'} variant='solid' onClick={() => handleSavePinToBoard(pin.id, isSavedPin)}>
+                                {isSavedPin ? 'Saved' : 'Save'}
                             </Button>
                         </div>
                     </div>

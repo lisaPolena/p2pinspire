@@ -16,7 +16,7 @@ export default function Profile() {
     const boardManagerContract = useBoardManager(library);
     const pinManagerContract = usePinManager(library);
     const [boards, setBoards] = useState<any[]>([]);
-    const { loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
+    const { allBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
     const router = useRouter();
 
     useEffect(() => {

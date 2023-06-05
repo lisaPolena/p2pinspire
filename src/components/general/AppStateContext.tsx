@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
 
 interface AppStateContextProps {
+  allBoards: any[];
+  setAllBoards: (boards: any[]) => void;
   createBoardModalOpen: boolean;
   setCreateBoardModalOpen: (open: boolean) => void;
   navbarModalOpen: boolean;
@@ -38,6 +40,7 @@ export const useAppState = () => {
 };
 
 export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  const [allBoards, setAllBoards] = useState<any[]>([]);
   const [navbarModalOpen, setNavbarModalOpen] = useState<boolean>(false);
   const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
   const [createPinModalOpen, setCreatePinModalOpen] = useState<boolean>(false);
@@ -52,6 +55,8 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [savePinModalOpen, setSavePinModalOpen] = useState<boolean>(false);
 
   const contextValue: AppStateContextProps = {
+    allBoards,
+    setAllBoards,
     navbarModalOpen,
     setNavbarModalOpen,
     createBoardModalOpen,
