@@ -98,26 +98,40 @@ contract BoardManager {
     }
 
     /**
-     * @dev Get all boards
-     * @return Board[] array containing all the boards
+     * @dev Get boards owned by a specific address
+     * @param owner Address of the board owner
+     * @return Board[] array containing the boards owned by the specified address
      */
-    function getAllBoards() public view returns (Board[] memory) {
-        Board[] memory allBoards = new Board[](currentBoardId);
-        uint index = 0;
+    function getBoardsByOwner(
+        address owner
+    ) public view returns (Board[] memory) {
+        uint256 count = 0;
 
-        for (uint i = 1; i <= currentBoardId; i++) {
-            if (boards[i].owner != address(0)) {
-                allBoards[index] = boards[i];
+        // Count the number of boards owned by the specified address
+        for (uint256 i = 1; i <= currentBoardId; i++) {
+            if (boards[i].owner == owner) {
+                count++;
+            }
+        }
+
+        // Create an array with the count of boards
+        Board[] memory ownerBoards = new Board[](count);
+        uint256 index = 0;
+
+        // Retrieve the boards owned by the specified address
+        for (uint256 i = 1; i <= currentBoardId; i++) {
+            if (boards[i].owner == owner) {
+                ownerBoards[index] = boards[i];
                 index++;
             }
         }
 
-        // Resize the allBoards array to remove any unused elements
+        // Resize the ownerBoards array to remove any unused elements
         assembly {
-            mstore(allBoards, index)
+            mstore(ownerBoards, index)
         }
 
-        return allBoards;
+        return ownerBoards;
     }
 
     /**

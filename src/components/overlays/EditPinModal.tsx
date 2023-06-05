@@ -42,10 +42,10 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
             setIsOwner(false);
         }
 
-    }, [pin ? pin.title : '', pin ? pin.description : '']);
+    }, [pin ? pin.title : '', pin ? pin.description : '', account]);
 
     function getAllBoards() {
-        boardManagerContract?.getAllBoards().then((result: any) => {
+        boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
             setBoards(result.map((board: any) => ({ id: board.id, name: board.name, owner: board.owner, pins: board.pins })));
         });
     }

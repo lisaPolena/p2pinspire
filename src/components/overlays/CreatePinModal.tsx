@@ -30,10 +30,10 @@ const CreatePinModal: React.FC = () => {
         return () => {
             if (pinCreatedEvent) pinManagerContract?.off(pinCreatedEvent, handlePinCreated);
         }
-    }, [library])
+    }, [library, account])
 
     function getAllBoards() {
-        boardManagerContract?.getAllBoards().then((result: any) => {
+        boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
             setBoards(result.map((board: any) => ({ id: board.id, name: board.name, owner: board.owner, pins: board.pins })));
         });
     }

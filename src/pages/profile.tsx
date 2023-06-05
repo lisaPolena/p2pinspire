@@ -34,7 +34,7 @@ export default function Profile() {
             if (boardCreatedEvent) boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
             boardManagerContract?.off('BoardDeleted', handleBoardDeleted);
         }
-    }, [active, loadCreateBoardTransaction, loadDeleteBoardTransaction])
+    }, [active, account, loadCreateBoardTransaction, loadDeleteBoardTransaction])
 
     const boardCreatedEvent = boardManagerContract?.filters.BoardCreated(null, null, account);
 
@@ -50,7 +50,7 @@ export default function Profile() {
     };
 
     function getAllBoards() {
-        boardManagerContract?.getAllBoards().then((result: any) => {
+        boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
             const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins }));
             getAllPinsByBoard(boards);
         });
@@ -60,7 +60,7 @@ export default function Profile() {
         boards.forEach((board: any) => {
             pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
                 setBoards((prevBoards) => {
-                    return [...prevBoards.filter(({ id }) => id !== board.id), { id: board.id, name: board.name, owner: board.owner, pins: result }]
+                    return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === board.owner), { id: board.id, name: board.name, owner: board.owner, pins: result }]
                         .sort((a, b) => a.id - b.id);
                 });
             });
