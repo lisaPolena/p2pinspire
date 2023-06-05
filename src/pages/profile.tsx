@@ -7,6 +7,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack } from '@chakr
 import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
+import React from 'react';
 
 export default function Profile() {
     // active: returns a boolean to check if user is connected
@@ -106,15 +107,15 @@ export default function Profile() {
                             <TabPanel key={'TabPanel-2'} width='100vw'>
                                 <div className='grid grid-cols-2 gap-4'>
                                     {boards?.map(({ id, name, owner, pins }) => (
-                                        <>
+                                        <React.Fragment key={id}>
                                             {loadDeleteBoardTransaction && loadDeleteBoardTransaction === id.toNumber() ? (
-                                                <Stack key={id}>
-                                                    <Skeleton key={'1-' + id} height='120px' width='100%' fadeDuration={4} />
-                                                    <Skeleton key={'2-' + id} height='10px' width='70%' fadeDuration={4} />
-                                                    <Skeleton key={'3-' + id} height='5px' width='40%' fadeDuration={4} />
+                                                <Stack>
+                                                    <Skeleton height='120px' width='100%' fadeDuration={4} />
+                                                    <Skeleton height='10px' width='70%' fadeDuration={4} />
+                                                    <Skeleton height='5px' width='40%' fadeDuration={4} />
                                                 </Stack>
                                             ) : (
-                                                <div key={'0-' + id} className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
+                                                <div className='text-left' onClick={() => router.push(`/boards/${name}/${id}`)}>
                                                     <div className={`h-[120px] rounded-3xl grid ${(pins?.length > 1 && pins[1].imageHash) || pins?.length === 0 ? 'grid-cols-2' : 'grid-cols-1'} gap-x-0.5`}>
 
                                                         <div className='col-span-1'>
@@ -150,13 +151,13 @@ export default function Profile() {
                                                     <p className='text-xs text-gray-400 pl-[0.7rem]'>{pins?.length} Pins</p>
                                                 </div>
                                             )}
-                                        </>
+                                        </React.Fragment>
                                     ))}
                                     {loadCreateBoardTransaction &&
                                         <Stack>
-                                            <Skeleton key={'100'} height='120px' width='100%' fadeDuration={4} />
-                                            <Skeleton key={'101'} height='10px' width='70%' fadeDuration={4} />
-                                            <Skeleton key={'102'} height='5px' width='40%' fadeDuration={4} />
+                                            <Skeleton height='120px' width='100%' fadeDuration={4} />
+                                            <Skeleton height='10px' width='70%' fadeDuration={4} />
+                                            <Skeleton height='5px' width='40%' fadeDuration={4} />
                                         </Stack>
                                     }
                                 </div>

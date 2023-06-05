@@ -100,9 +100,9 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                     }
 
                     <div>
-                        <Select placeholder='Select option' onChange={(e) => setNewPinBoardId(e.target.value)}>
+                        <Select placeholder='Select option' value={newPinBoardId !== '' ? newPinBoardId : pinBoardId} onChange={(e) => setNewPinBoardId(e.target.value)}>
                             {boards.map((board) =>
-                                <option key={board.id} value={board.id.toNumber()} selected={board.id.toNumber() == pinBoardId}>{board.name}</option>
+                                <option key={board.id} value={board.id.toNumber()}>{board.name}</option>
                             )}
                         </Select>
                     </div>
