@@ -19,6 +19,7 @@ export default function Profile() {
     const [boards, setBoards] = useState<any[]>([]);
     const { allBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
     const router = useRouter();
+    const [ownPins, setOwnPins] = useState<any[]>([]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -71,6 +72,14 @@ export default function Profile() {
         boards.forEach((board: any) => {
             pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
                 let pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() })).sort((a: any, b: any) => a.id - b.id);
+                pins.map((pin: any) => {
+                    if (pin.owner === account) {
+                        setOwnPins((prevPins) => {
+                            return [...prevPins.filter(({ id }) => id !== pin.id), { id: pin.id, title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId }]
+                                .sort((a, b) => b.id - a.id);
+                        });
+                    }
+                });
                 board.pins.forEach((pinId: any) => {
                     pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
                         pins = [...pins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }].sort((a: any, b: any) => a.id - b.id);
@@ -106,7 +115,21 @@ export default function Profile() {
                         </TabList>
                         <TabPanels>
                             <TabPanel key={'TabPanel-1'}>
-                                <p>one!</p>
+                                {ownPins?.length !== 0 ? (
+                                    <div className={`grid grid-cols-3 gap-3 px-3 mt-4`}>
+                                        {ownPins.map((pin: any) => (
+                                            <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${pin.boardId}`)}>
+                                                <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
+                                                    alt={pin.title} className={`object-cover w-full rounded-2xl h-36`} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className='flex flex-col items-center justify-center'>
+                                        <p className='text-lg font-bold'>You haven't created any pins yet.</p>
+                                        <p className='text-lg font-bold'>Create your first pin.</p>
+                                    </div>
+                                )}
                             </TabPanel>
                             <TabPanel key={'TabPanel-2'} width='100vw'>
                                 <div className='grid grid-cols-2 gap-4'>
