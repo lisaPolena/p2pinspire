@@ -6,6 +6,7 @@ import EditGeneralModal from "../overlays/EditGeneralModal";
 import EditBoardModal from "../overlays/EditBoardModal";
 import { useEffect, useState } from "react";
 import EditPinModal from "../overlays/EditPinModal";
+import FilterBoardModal from "../overlays/FilterBoardModal";
 
 interface AppBarProps {
   isBoard: boolean;
@@ -20,7 +21,7 @@ interface AppBarProps {
 
 export const AppBar = (props: AppBarProps) => {
   const { isBoard, isSavedPin, title, showTitle, board, pin } = props;
-  const { setEditModalOpen } = useAppState();
+  const { setEditModalOpen, setFilterBoardModalOpen } = useAppState();
   const [longTitle, setLongTitle] = useState<boolean>(false);
   const router = useRouter();
 
@@ -37,13 +38,14 @@ export const AppBar = (props: AppBarProps) => {
         <div className={`text-2xl ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'}`} onClick={() => router.back()}><IoChevronBack /></div>
         <div className={`text-center ${longTitle ? 'mt-[-0.5rem]' : ''}`}>{showTitle && title ? title : ''}</div>
         <div className={`flex justify-end gap-6 ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'} `}>
-          {isBoard && <div className='text-2xl'><IoFilter /></div>}
+          {isBoard && <div className='text-2xl' onClick={() => setFilterBoardModalOpen(true)}><IoFilter /></div>}
           <div className='text-2xl' onClick={() => setEditModalOpen(true)}><IoIosMore /></div>
         </div>
       </div>
       <EditGeneralModal isBoard={isBoard} isSavedPin={isSavedPin} />
       <EditBoardModal board={board} />
       <EditPinModal pin={pin} />
+      <FilterBoardModal />
     </>
   );
 };

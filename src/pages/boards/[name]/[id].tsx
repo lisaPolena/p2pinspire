@@ -1,5 +1,6 @@
 import { useBoardManager, useIpfs, usePinManager } from '@/common/functions/contracts';
 import { AppBar } from '@/components/general/AppBar';
+import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
@@ -17,6 +18,7 @@ export default function DetailBoard() {
     const router = useRouter()
     const [pins, setPins] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const { boardView } = useAppState();
     //const ipfs = useIpfs();
 
     useEffect(() => {
@@ -79,12 +81,12 @@ export default function DetailBoard() {
                                 <div>
                                     <p className='text-[1.2rem] ml-[1.3rem] mb-[0.4rem] font-semibold'>{pins && pins.length ? pins.length + ' Pins' : '0 Pins'}</p>
                                 </div>
-                                <div className="grid grid-cols-2 gap-3 px-4">
+                                <div className={`grid ${boardView === 'wide' ? 'grid-cols-1' : (boardView === 'compact' ? 'grid-cols-3' : 'grid-cols-2')} gap-3 px-4`}>
                                     {pins.map((pin: any) => (
                                         <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${board.id}`)}>
                                             <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
-                                                alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
-                                            <div className='mb-4'>
+                                                alt={pin.title} className={`object-cover w-full rounded-2xl ${boardView === 'wide' ? 'max-h-96' : (boardView === 'compact' ? 'max-h-40' : 'max-h-72')}`} />
+                                            <div className='mb-2'>
                                                 <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
                                             </div>
                                         </div>

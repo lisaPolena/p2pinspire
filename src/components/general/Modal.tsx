@@ -10,9 +10,10 @@ interface ModalProps {
     children: React.ReactNode;
     title: string;
     height: string;
+    modalId?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, isAlternative, closeModal, children, title, height }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, isAlternative, closeModal, children, title, height, modalId }) => {
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -28,7 +29,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, isAlternative, closeModal, childr
         <>
             {isOpen && (
                 <OutsideAlerter action={closeModal}>
-                    <div ref={modalRef} id="add-modal-container" className={"absolute bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] z-10 " + height}>
+                    <div ref={modalRef} id={modalId} className={"fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] z-10 " + height}>
                         <div className={`flex items-center gap-24 ${!isAlternative ? 'mb-4' : ''}`}>
                             {!isAlternative &&
                                 <button className="text-white" onClick={closeModal}>

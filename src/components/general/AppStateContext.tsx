@@ -27,6 +27,10 @@ interface AppStateContextProps {
   setDeletePinModalOpen: (open: boolean) => void;
   savePinModalOpen: boolean;
   setSavePinModalOpen: (open: boolean) => void;
+  filterBoardModalOpen: boolean;
+  setFilterBoardModalOpen: (open: boolean) => void;
+  boardView: string;
+  setBoardView: (view: string) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -53,6 +57,8 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [downloadPin, setDownloadPin] = useState<boolean>(false);
   const [deletePinModalOpen, setDeletePinModalOpen] = useState<boolean>(false);
   const [savePinModalOpen, setSavePinModalOpen] = useState<boolean>(false);
+  const [filterBoardModalOpen, setFilterBoardModalOpen] = useState<boolean>(false);
+  const [boardView, setBoardView] = useState<string>('default');
 
   const contextValue: AppStateContextProps = {
     allBoards,
@@ -100,7 +106,11 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
       setDeletePinModalOpen(value);
     },
     savePinModalOpen,
-    setSavePinModalOpen
+    setSavePinModalOpen,
+    filterBoardModalOpen,
+    setFilterBoardModalOpen,
+    boardView,
+    setBoardView,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
