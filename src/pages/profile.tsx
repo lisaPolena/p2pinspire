@@ -5,7 +5,7 @@ import { useWeb3React } from '@web3-react/core';
 import { useRouter } from 'next/router';
 import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers'
-import { useBoardManager } from '@/common/functions/contracts';
+import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
 
 export default function Profile() {
@@ -14,6 +14,7 @@ export default function Profile() {
     // libary: provides web3React functions to interact with the blockchain / smart contracts
     const { active, account, library } = useWeb3React<Web3Provider>()
     const boardManagerContract = useBoardManager(library);
+    const pinManagerContract = usePinManager(library);
     const [boards, setBoards] = useState<any[]>([]);
     const { loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
     const router = useRouter();
@@ -43,14 +44,26 @@ export default function Profile() {
                 .sort((a, b) => a.id - b.id);
         });
 
-    const handleBoardDeleted = (boardId: number) => {
+    const handleBoardDeleted = () => {
         getAllBoards();
         setLoadDeleteBoardTransaction(0);
     };
 
     function getAllBoards() {
         boardManagerContract?.getAllBoards().then((result: any) => {
-            setBoards(result.map((board: any) => ({ id: board.id, name: board.name, owner: board.owner, pins: board.pins })));
+            const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins }));
+            getAllPinsByBoard(boards);
+        });
+    }
+
+    function getAllPinsByBoard(boards: any) {
+        boards.forEach((board: any) => {
+            pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
+                setBoards((prevBoards) => {
+                    return [...prevBoards.filter(({ id }) => id !== board.id), { id: board.id, name: board.name, owner: board.owner, pins: result }]
+                        .sort((a, b) => a.id - b.id);
+                });
+            });
         });
     }
 
@@ -67,14 +80,14 @@ export default function Profile() {
                 <div className='flex flex-col items-center'>
                     <Tabs variant='soft-rounded' colorScheme='primary' defaultIndex={1} size='md' align='center'>
                         <TabList>
-                            <Tab>Created</Tab>
-                            <Tab>Saved</Tab>
+                            <Tab key={'Tab-1'}>Created</Tab>
+                            <Tab key={'Tab-2'}>Saved</Tab>
                         </TabList>
                         <TabPanels>
-                            <TabPanel>
+                            <TabPanel key={'TabPanel-1'}>
                                 <p>one!</p>
                             </TabPanel>
-                            <TabPanel width='100vw'>
+                            <TabPanel key={'TabPanel-2'} width='100vw'>
                                 <div className='grid grid-cols-2 gap-4'>
                                     {boards?.map(({ id, name, owner, pins }) => (
                                         <>
@@ -96,9 +109,9 @@ export default function Profile() {
                                     ))}
                                     {loadCreateBoardTransaction &&
                                         <Stack>
-                                            <Skeleton height='120px' width='100%' fadeDuration={4} />
-                                            <Skeleton height='10px' width='70%' fadeDuration={4} />
-                                            <Skeleton height='5px' width='40%' fadeDuration={4} />
+                                            <Skeleton key={'100'} height='120px' width='100%' fadeDuration={4} />
+                                            <Skeleton key={'101'} height='10px' width='70%' fadeDuration={4} />
+                                            <Skeleton key={'102'} height='5px' width='40%' fadeDuration={4} />
                                         </Stack>
                                     }
                                 </div>

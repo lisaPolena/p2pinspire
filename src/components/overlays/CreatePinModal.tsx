@@ -30,7 +30,7 @@ const CreatePinModal: React.FC = () => {
         return () => {
             if (pinCreatedEvent) pinManagerContract?.off(pinCreatedEvent, handlePinCreated);
         }
-    }, [])
+    }, [library])
 
     function getAllBoards() {
         boardManagerContract?.getAllBoards().then((result: any) => {
@@ -75,7 +75,7 @@ const CreatePinModal: React.FC = () => {
 
                 <div>
                     <Select placeholder='Select option' onChange={(e) => setPinBoardId(e.target.value)}>
-                        {boards.map((board) => <option key={board.id} value={board.id.toNumber()}>{board.name}</option>)}
+                        {boards.map((board) => <option key={board.id} value={board.id}>{board.name}</option>)}
                     </Select>
                 </div>
             </div>
