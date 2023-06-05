@@ -22,8 +22,11 @@ export default function Home() {
 
     getAllBoards();
 
+    boardManagerContract?.on('PinSaved', () => getAllBoards());
+
     return () => {
       clearTimeout(timeoutId);
+      boardManagerContract?.off('PinSaved', () => getAllBoards());
     };
 
   }, [active, library, account])

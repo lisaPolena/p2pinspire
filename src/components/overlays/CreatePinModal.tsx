@@ -1,10 +1,11 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, Select } from '@chakra-ui/react';
+import { Input, Select, useToast } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager, useIpfs, usePinManager } from '@/common/functions/contracts';
+import { Progress } from '@chakra-ui/react'
 
 const CreatePinModal: React.FC = () => {
     // account: returns the users account (or .eth name)
@@ -19,6 +20,7 @@ const CreatePinModal: React.FC = () => {
     const boardManagerContract = useBoardManager(library);
     const pinManagerContract = usePinManager(library);
     const ipfs = useIpfs();
+    const toast = useToast()
 
     useEffect(() => {
         setPinTitle('');
@@ -42,14 +44,38 @@ const CreatePinModal: React.FC = () => {
         const result = await ipfs.add(pinImage);
         const tx = await pinManagerContract?.createPin(pinTitle, pinDescription, result.path, pinBoardId);
         setCreatePinModalOpen(false);
-        await tx.wait()
+        handleLoadingCreatingPinToast();
+        await tx?.wait();
     }
 
     const pinCreatedEvent = pinManagerContract?.filters.PinCreated(null, null, null, null, null, account);
 
     const handlePinCreated = () => {
-        console.log('Pin saved to ' + pinBoardId + ' board');
+        handleSavedPinToast();
     };
+
+    function handleSavedPinToast() {
+        toast({
+            position: 'top',
+            render: () => (
+                <div className='text-white bg-zinc-800 rounded-xl h-[70px] flex items-center justify-center' >
+                    Saved Pin to
+                </ div >
+            ),
+        })
+    }
+
+    function handleLoadingCreatingPinToast() {
+        toast({
+            position: 'top',
+            render: () => (
+                <div className='text-white bg-zinc-800 rounded-xl h-[70px] flex flex-col items-center justify-center' >
+                    <p>Pin creating...</p>
+                    <Progress size='xs' isIndeterminate />
+                </div>
+            ),
+        })
+    }
 
     return (
         <Modal isOpen={createPinModalOpen} closeModal={() => setCreatePinModalOpen(false)} title="Add new Pin" height='h-[95%]'>

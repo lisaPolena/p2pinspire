@@ -29,11 +29,15 @@ export default function Profile() {
 
         if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
         boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
+        pinManagerContract?.on(pinManagerContract?.filters.PinCreated(null, null, null, null, null, account), () => getAllBoards());
+        boardManagerContract?.on('PinSaved', () => getAllBoards());
 
         return () => {
             clearTimeout(timeoutId);
             if (boardCreatedEvent) boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
             boardManagerContract?.off('BoardDeleted', handleBoardDeleted);
+            pinManagerContract?.off(pinManagerContract?.filters.PinCreated(null, null, null, null, null, account), () => getAllBoards());
+            boardManagerContract?.off('PinSaved', () => getAllBoards());
         }
     }, [active, account, loadCreateBoardTransaction, loadDeleteBoardTransaction])
 
