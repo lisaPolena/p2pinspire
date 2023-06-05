@@ -22,13 +22,17 @@ export default function DetailPin() {
 
     useEffect(() => {
         const { id, boardId } = router.query
-        getPinById(id as string);
+        console.log(library);
+        if (!library) {
+            setTimeout(() => location.reload(), 2000);
+        }
+        if (library && id) getPinById(id as string);
         if (boardId || pin?.owner === account) setIsSavedPin(true)
         else setIsSavedPin(false);
 
         if (downloadPin) downloadImage(pin.imageHash, pin.title);
 
-    }, [downloadPin])
+    }, [library, router.query, downloadPin, account])
 
     function getPinById(id: string) {
         pinManagerContract?.getPinById(id).then((result: any) => {
@@ -76,7 +80,7 @@ export default function DetailPin() {
             </Head>
             <main className='flex flex-col min-h-screen overflow-auto bg-black mb-18'>
                 <AppBar isBoard={false} isSavedPin={isSavedPin} pin={pin} />
-                {pin &&
+                {pin ? (
                     <div className=''>
                         <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin?.title}
                             className="object-cover w-full rounded-tl-3xl rounded-tr-3xl " />
@@ -93,7 +97,11 @@ export default function DetailPin() {
                             </div>
                         </div>
                     </div>
-                }
+                ) : (
+                    <div className='flex flex-col items-center justify-center h-full'>
+                        <p className='text-2xl font-semibold'>Loading...</p>
+                    </div>
+                )}
             </main>
             <SavePinModal pinId={savePinId} />
         </>

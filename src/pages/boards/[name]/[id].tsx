@@ -24,9 +24,7 @@ export default function DetailBoard() {
     useEffect(() => {
         const { id } = router.query
 
-        if (library && id) {
-            getBoardById(id as string);
-        }
+        if (library && id) getBoardById(id as string);
 
         const handleScroll = () => {
             const scrollPosition = window.scrollY;
