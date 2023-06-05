@@ -24,7 +24,9 @@ export default function DetailBoard() {
     useEffect(() => {
         const { id } = router.query
 
-        getBoardById(id as string);
+        if (library && id) {
+            getBoardById(id as string);
+        }
 
         const handleScroll = () => {
             const scrollPosition = window.scrollY;
@@ -36,7 +38,7 @@ export default function DetailBoard() {
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
-    }, [])
+    }, [library, router.query])
 
     function getBoardById(id: string) {
         boardManagerContract?.getBoardById(id).then(async (result: any) => {
@@ -46,7 +48,6 @@ export default function DetailBoard() {
     }
 
     function getPinsByBoardId(id: string, pins: any[]) {
-        console.log(isLoading);
         pinManagerContract?.getPinsByBoardId(id).then((result: any) => {
             let boardPins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() }));
             if (pins.length === 0) setIsLoading(false);
