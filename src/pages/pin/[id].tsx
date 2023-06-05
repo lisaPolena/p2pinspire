@@ -22,10 +22,6 @@ export default function DetailPin() {
 
     useEffect(() => {
         const { id, boardId } = router.query
-        console.log(library);
-        if (!library) {
-            setTimeout(() => location.reload(), 2000);
-        }
         if (library && id) getPinById(id as string);
         if (boardId || pin?.owner === account) setIsSavedPin(true)
         else setIsSavedPin(false);
