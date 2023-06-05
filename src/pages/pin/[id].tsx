@@ -76,22 +76,24 @@ export default function DetailPin() {
             </Head>
             <main className='flex flex-col min-h-screen overflow-auto bg-black mb-18'>
                 <AppBar isBoard={false} isSavedPin={isSavedPin} pin={pin} />
-                <div className=''>
-                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin?.title}
-                        className="object-cover w-full rounded-tl-3xl rounded-tr-3xl " />
-                    <div className='p-4 bg-zinc-800 rounded-bl-3xl rounded-br-3xl'>
-                        <h1 className='text-2xl font-semibold'>{pin?.title}</h1>
-                        <p>{pin?.description}</p>
-                        <div className='flex flex-row justify-center gap-4 mt-6'>
-                            <Button width={'30%'} borderRadius={'50px'} colorScheme='tertiary' variant='solid' onClick={() => console.log('view')}>
-                                View
-                            </Button>
-                            <Button width={'30%'} borderRadius={'50px'} colorScheme={isSavedPin ? 'secondary' : 'primary'} variant='solid' onClick={() => handleSavePinToBoard(pin.id, isSavedPin)}>
-                                {isSavedPin ? 'Saved' : 'Save'}
-                            </Button>
+                {pin &&
+                    <div className=''>
+                        <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin?.title}
+                            className="object-cover w-full rounded-tl-3xl rounded-tr-3xl " />
+                        <div className='p-4 bg-zinc-800 rounded-bl-3xl rounded-br-3xl'>
+                            <h1 className='text-2xl font-semibold'>{pin?.title}</h1>
+                            <p>{pin?.description}</p>
+                            <div className='flex flex-row justify-center gap-4 mt-6'>
+                                <Button width={'30%'} borderRadius={'50px'} colorScheme='tertiary' variant='solid' onClick={() => console.log('view')}>
+                                    View
+                                </Button>
+                                <Button width={'30%'} borderRadius={'50px'} colorScheme={isSavedPin ? 'secondary' : 'primary'} variant='solid' onClick={() => handleSavePinToBoard(pin.id, isSavedPin)}>
+                                    {isSavedPin ? 'Saved' : 'Save'}
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </main>
             <SavePinModal pinId={savePinId} />
         </>
