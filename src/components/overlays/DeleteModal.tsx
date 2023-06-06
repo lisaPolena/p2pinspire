@@ -3,9 +3,9 @@ import { useAppState } from '../general/AppStateContext';
 import OutsideAlerter from '../general/OutsideClickAlerter';
 import { Button } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { useBoardManager, usePinManager } from '@/common/functions/contracts';
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers'
+import boardManager from '../../contracts/build/BoardManager.json';
+import pinManager from '../../contracts/build/PinManager.json';
+import { useContractWrite } from 'wagmi';
 
 interface DeleteModalProps {
     isOpen: boolean;
@@ -19,17 +19,53 @@ interface DeleteModalProps {
 
 const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, board, pin, isOwner, savedPinBoardId }) => {
     const { setDeleteModalOpen, setEditBoardModalOpen, setLoadDeleteBoardTransaction, setDeletePinModalOpen, setEditPinModalOpen } = useAppState();
-    const { library } = useWeb3React<Web3Provider>()
-    const boardManagerContract = useBoardManager(library);
-    const pinManagerContract = usePinManager(library);
     const router = useRouter();
 
-    const deleteBoard = () => {
+    const {
+        data: deleteCreatedPinData,
+        status: deleteCreatedPinStatus,
+        writeAsync: deleteCreatedPin,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        functionName: 'deletePin',
+        onError(err) {
+            console.log('error ', err);
+        }
+    })
+
+    const {
+        data: deleteSavedPinData,
+        status: deleteSavedPinStatus,
+        writeAsync: deleteSavedPin,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'deleteSavedPin',
+        onError(err) {
+            console.log('error ', err);
+        }
+    })
+
+    const {
+        data: deleteBoardData,
+        status: deleteBoardStatus,
+        writeAsync: deleteBoard,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'deleteBoard',
+        onError(err) {
+            console.log('error ', err);
+        }
+    })
+
+    const handleDeleteBoard = async () => {
         if (board) {
-            boardManagerContract?.deleteBoard(board.id);
-            setLoadDeleteBoardTransaction(board.id.toNumber());
             setDeleteModalOpen(false);
             setEditBoardModalOpen(false);
+            await deleteBoard({ args: [board.id] })
+            setLoadDeleteBoardTransaction(board.id);
             router.push('/profile');
         } else {
             //TODO: handle error
@@ -37,16 +73,16 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
         }
     }
 
-    const deletePin = () => {
+    const deletePin = async () => {
         if (pin && isOwner) {
-            pinManagerContract?.deletePin(pin.id);
             setDeletePinModalOpen(false);
             setEditPinModalOpen(false);
+            await deleteCreatedPin({ args: [pin.id] })
             router.back();
         } else if (pin && !isOwner) {
-            boardManagerContract?.deleteSavedPin(pin.id as string, savedPinBoardId);
             setDeletePinModalOpen(false);
             setEditPinModalOpen(false);
+            await deleteSavedPin({ args: [pin.id as string, savedPinBoardId] })
             router.back();
         } else {
             //TODO: handle error
@@ -64,7 +100,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
                         </div>
                         <div className='flex justify-evenly'>
                             <Button colorScheme="secondary" borderRadius={'50px'} variant='solid' onClick={closeModal}>Cancel</Button>
-                            <Button colorScheme="primary" borderRadius={'50px'} variant='solid' onClick={isBoard ? deleteBoard : deletePin}>{isBoard ? 'Delete forever' : 'Delete'}</Button>
+                            <Button colorScheme="primary" borderRadius={'50px'} variant='solid' onClick={isBoard ? () => handleDeleteBoard() : () => deletePin()}>{isBoard ? 'Delete forever' : 'Delete'}</Button>
                         </div>
                     </div>
                 </OutsideAlerter>
