@@ -2,57 +2,78 @@ import React, { ChangeEvent, useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { Input, Select, useToast } from '@chakra-ui/react';
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers'
-import { useBoardManager, useIpfs, usePinManager } from '@/common/functions/contracts';
 import { Progress } from '@chakra-ui/react'
+import boardManager from '../../contracts/build/BoardManager.json';
+import pinManager from '../../contracts/build/PinManager.json';
+import { useAccount, useContractEvent, useContractRead, useContractWrite } from 'wagmi';
+import { Board } from '@/common/types/structs';
+import { useIpfs } from '@/common/functions/contracts';
 
 const CreatePinModal: React.FC = () => {
-    // account: returns the users account (or .eth name)
-    // libary: provides web3React functions to interact with the blockchain / smart contracts
-    const { account, library } = useWeb3React<Web3Provider>();
-    const [pinTitle, setPinTitle] = React.useState('');
-    const [pinDescription, setPinDescription] = React.useState('');
-    const [pinBoardId, setPinBoardId] = React.useState('');
-    const [pinImage, setPinImage] = React.useState<any>(null);
+    const { address, isConnected } = useAccount()
+    const [pinTitle, setPinTitle] = useState<string>('');
+    const [pinDescription, setPinDescription] = useState<string>('');
+    const [pinBoardId, setPinBoardId] = useState<string>('');
+    const [pinImage, setPinImage] = useState<any>(null);
     const { createPinModalOpen, setCreatePinModalOpen } = useAppState();
     const [boards, setBoards] = useState<any[]>([]);
-    const boardManagerContract = useBoardManager(library);
-    const pinManagerContract = usePinManager(library);
     const ipfs = useIpfs();
     const toast = useToast()
 
+    const { data: allBoardsByAddress } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'getBoardsByOwner',
+        args: [address],
+        onSuccess(data) {
+            setBoards(data as Board[]);
+        },
+    });
+
+    const {
+        data: createPinData,
+        status: createPinStatus,
+        writeAsync: createPin,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        functionName: 'createPin',
+        onError(err) {
+            console.log('error ', err);
+        }
+    })
+
+    const unwatchPinCreated = useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'PinCreated',
+        listener(log) {
+            handleSavedPinToast();
+        },
+    });
+
     useEffect(() => {
+
+    }, [isConnected, address, allBoardsByAddress, createPinStatus])
+
+    const handleCreatePin = async () => {
+        if (!pinTitle || !pinBoardId || (pinDescription && pinDescription.length > 50) || !pinImage) {
+            console.log('error');
+            return;
+        }
+        const result = await ipfs.add(pinImage);
+        await createPin({ args: [pinTitle, pinDescription, result.path, pinBoardId] })
+        setCreatePinModalOpen(false);
+        clearForm();
+        handleLoadingCreatingPinToast();
+    }
+
+    function clearForm() {
         setPinTitle('');
         setPinDescription('');
-        getAllBoards();
-
-        if (pinCreatedEvent) pinManagerContract?.on(pinCreatedEvent, handlePinCreated);
-
-        return () => {
-            if (pinCreatedEvent) pinManagerContract?.off(pinCreatedEvent, handlePinCreated);
-        }
-    }, [library, account])
-
-    function getAllBoards() {
-        boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
-            setBoards(result.map((board: any) => ({ id: board.id, name: board.name, owner: board.owner, pins: board.pins })));
-        });
+        setPinBoardId('');
+        setPinImage(null);
     }
-
-    async function createPin() {
-        const result = await ipfs.add(pinImage);
-        const tx = await pinManagerContract?.createPin(pinTitle, pinDescription, result.path, pinBoardId);
-        setCreatePinModalOpen(false);
-        handleLoadingCreatingPinToast();
-        await tx?.wait();
-    }
-
-    const pinCreatedEvent = pinManagerContract?.filters.PinCreated(null, null, null, null, null, account);
-
-    const handlePinCreated = () => {
-        handleSavedPinToast();
-    };
 
     function handleSavedPinToast() {
         toast({
@@ -82,7 +103,7 @@ const CreatePinModal: React.FC = () => {
             <div className='absolute top-3 right-3'>
                 <button
                     className="px-4 py-2 text-white transition-colors bg-red-600 rounded-3xl"
-                    onClick={() => createPin()}
+                    onClick={() => handleCreatePin()}
                 >
                     Create
                 </button>
@@ -101,7 +122,7 @@ const CreatePinModal: React.FC = () => {
 
                 <div>
                     <Select placeholder='Select option' onChange={(e) => setPinBoardId(e.target.value)}>
-                        {boards.map((board) => <option key={board.id} value={board.id}>{board.name}</option>)}
+                        {boards.map((board) => <option key={Number(board.id)} value={Number(board.id)}>{board.name}</option>)}
                     </Select>
                 </div>
             </div>

@@ -1,31 +1,22 @@
 import Head from 'next/head'
 import { Navbar } from '@/components/general/Navbar'
 import { useEffect, useState } from 'react'
-import { useWeb3React } from '@web3-react/core';
 import { useRouter } from 'next/router';
 import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack } from '@chakra-ui/react';
-import { Web3Provider } from '@ethersproject/providers'
-import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
 import React from 'react';
-import { useAccount, useContractRead } from 'wagmi';
+import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 
 export default function Profile() {
-    // active: returns a boolean to check if user is connected
-    // account: returns the users account (or .eth name)
-    // libary: provides web3React functions to interact with the blockchain / smart contracts
-    const { active, account, library } = useWeb3React<Web3Provider>()
     const { address, isConnected } = useAccount()
-    const boardManagerContract = useBoardManager(library);
-    const pinManagerContract = usePinManager(library);
     const [boards, setBoards] = useState<any[]>([]);
     const [allBoards, setAllBoards] = useState<Board[]>([]);
     const [allPins, setAllPins] = useState<Pin[]>([]);
-    const { loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
+    const { loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
     const router = useRouter();
     const [ownPins, setOwnPins] = useState<any[]>([]);
 
@@ -50,40 +41,82 @@ export default function Profile() {
         },
     });
 
+    //TODO: does not work 
+    const unwatchBoardCreated = useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'BoardCreated',
+        listener(log) {
+            console.log(log)
+            onBoardCreated;
+        },
+    });
+
+    const unwatchBoardDeleted = useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'BoardDeleted',
+        listener(log) {
+            //TODO: es hört auf zu laden aber das gelöschte board ist noch da
+            if (log) {
+                getAllBoards();
+                setLoadDeleteBoardTransaction(0);
+            }
+        },
+    });
+
+    const unwatchPinSaved = useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'PinSaved',
+        listener(log) {
+            console.log(log)
+            getAllBoards();
+        },
+    });
+
+    const unwatchPinCreated = useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'PinCreated',
+        listener(log) {
+            console.log(log)
+            getAllBoards();
+        },
+    });
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (!isConnected) router.push('/');
         }, 2000);
 
+        const timeoutIdCreateBoard = setTimeout(() => {
+            setLoadCreateBoardTransaction(false);
+        }, 1000);
+
         getAllBoards();
 
         //TODO: Events umschreiben wegen wigma 
-        if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
-        boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
-        pinManagerContract?.on(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
-        boardManagerContract?.on('PinSaved', () => getAllBoards());
+        //if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
+        //boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
+        //pinManagerContract?.on(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
+        //boardManagerContract?.on('PinSaved', () => getAllBoards());
 
         return () => {
             clearTimeout(timeoutId);
-            if (boardCreatedEvent) boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
-            boardManagerContract?.off('BoardDeleted', handleBoardDeleted);
-            pinManagerContract?.off(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
-            boardManagerContract?.off('PinSaved', () => getAllBoards());
+            clearTimeout(timeoutIdCreateBoard);
+            //if (boardCreatedEvent) boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
+            //boardManagerContract?.off('BoardDeleted', handleBoardDeleted);
+            //pinManagerContract?.off(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
+            //boardManagerContract?.off('PinSaved', () => getAllBoards());
         }
     }, [isConnected, address, loadCreateBoardTransaction, loadDeleteBoardTransaction, allBoardsByAddress, allPinsByAddress, allBoards])
-
-    const boardCreatedEvent = boardManagerContract?.filters.BoardCreated(null, null, address);
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {
             return [...prevBoards.filter(({ id }) => id !== boardId), { id: boardId, name: boardName, owner: owner, pins: [] }]
                 .sort((a, b) => a.id - b.id);
-        });
-
-    const handleBoardDeleted = () => {
-        getAllBoards();
-        setLoadDeleteBoardTransaction(0);
-    };
+        });;
 
     function getAllBoards() {
         if (allBoards.length === 0) {

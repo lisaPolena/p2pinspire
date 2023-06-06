@@ -2,28 +2,36 @@ import React, { useEffect } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { Input, Switch } from '@chakra-ui/react';
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers'
-import { useBoardManager } from '@/common/functions/contracts';
+import boardManager from '../../contracts/build/BoardManager.json';
+import { useContractWrite } from 'wagmi';
 
 const CreateBoardModal: React.FC = () => {
-    // libary: provides web3React functions to interact with the blockchain / smart contracts
-    const { library } = useWeb3React<Web3Provider>();
     const { createBoardModalOpen, setCreateBoardModalOpen } = useAppState();
     const { setLoadCreateBoardTransaction } = useAppState();
     const [boardName, setBoardName] = React.useState('');
-    const boardManagerContract = useBoardManager(library);
+
+    const {
+        data: createBoardData,
+        status: createBoardStatus,
+        writeAsync: createBoard,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'createBoard',
+        onError(err) {
+            console.log('error ', err);
+        },
+    })
 
     useEffect(() => {
         setBoardName('');
+
     }, [createBoardModalOpen])
 
-    async function createBoard() {
-        const tx = await boardManagerContract?.createBoard(boardName);
+    const handleCreateBoard = async () => {
+        await createBoard({ args: [boardName] });
         setCreateBoardModalOpen(false);
         setLoadCreateBoardTransaction(true);
-        await tx.wait()
-        setLoadCreateBoardTransaction(false);
     }
 
     return (
@@ -32,7 +40,7 @@ const CreateBoardModal: React.FC = () => {
                 <button
                     className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl"
                     disabled={boardName?.length === 0}
-                    onClick={createBoard}
+                    onClick={() => handleCreateBoard()}
                 >
                     Create
                 </button>

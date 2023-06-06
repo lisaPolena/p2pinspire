@@ -3,22 +3,31 @@ import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { Input, Switch } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
-import { useBoardManager } from '@/common/functions/contracts';
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers'
+import boardManager from '../../contracts/build/BoardManager.json';
+import { useContractWrite } from 'wagmi';
 
 interface EditGeneralModalProps {
     board: any;
 }
-
 
 const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
     const { board } = props;
     const { editBoardModalOpen, setEditBoardModalOpen, deleteModalOpen, setDeleteModalOpen } = useAppState();
     const [boardName, setBoardName] = React.useState<string>('');
     const [boardDescription, setBoardDescripton] = React.useState<string>('');
-    const { library } = useWeb3React<Web3Provider>();
-    const boardManagerContract = useBoardManager(library);
+
+    const {
+        data: editBoardData,
+        status: editBoardStatus,
+        writeAsync: editBoard,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'editBoard',
+        onError(err) {
+            console.log('error ', err);
+        }
+    })
 
     useEffect(() => {
 
@@ -27,12 +36,11 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
             setBoardDescripton(board.description);
         }
 
-    }, [board ? board.name : '', board ? board.description : '']);
+    }, [board ? board.name : '', board ? board.description : '', editBoardStatus]);
 
-    async function editBoard() {
-        const tx = await boardManagerContract?.editBoard(board.id as string, boardName);
+    const handleEditBoard = async () => {
+        await editBoard({ args: [board.id as string, boardName] })
         setEditBoardModalOpen(false);
-        await tx.wait()
     }
 
     return (
@@ -43,7 +51,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
                     <button
                         className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl"
                         disabled={boardName?.length === 0}
-                        onClick={editBoard}
+                        onClick={() => handleEditBoard()}
                     >
                         Done
                     </button>

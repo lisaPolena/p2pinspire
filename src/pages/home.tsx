@@ -1,76 +1,60 @@
 import Head from 'next/head'
 import { Navbar } from '@/components/general/Navbar'
 import { useEffect, useState } from 'react'
-import { useWeb3React } from '@web3-react/core';
 import { useRouter } from 'next/router';
-import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
-import { useAccount } from 'wagmi';
+import { useAccount, useContractRead } from 'wagmi';
+import boardManager from '../contracts/build/BoardManager.json';
+import pinManager from '../contracts/build/PinManager.json';
+import { Board, Pin } from '@/common/types/structs';
 
 export default function Home() {
-  // active: returns a boolean to check if user is connected
-  const { active, library, account } = useWeb3React()
   const { address, isConnected } = useAccount()
   const router = useRouter();
-  const pinManagerContract = usePinManager(library);
-  const boardManagerContract = useBoardManager(library);
-  const [pins, setPins] = useState<any[]>([]);
+  const [pins, setPins] = useState<Pin[]>([]);
+  const [notOwnPins, setNotOwnPins] = useState<Pin[]>([]);
   const { allBoards, setAllBoards } = useAppState();
+  const [boards, setBoards] = useState<Board[]>([]);
+
+  const { data: allBoardsByAddress } = useContractRead({
+    address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+    abi: boardManager.abi,
+    functionName: 'getBoardsByOwner',
+    args: [address],
+    onSuccess(data) {
+      setBoards(data as Board[]);
+    },
+  });
+
+  const { data: allPins } = useContractRead({
+    address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+    abi: pinManager.abi,
+    functionName: 'getAllPins',
+    onSuccess(data) {
+      const res = data as Pin[];
+      setNotOwnPins(res.filter((pin: Pin) => pin.owner !== address));
+    },
+  });
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (!isConnected) router.push('/');
     }, 2000);
 
-    getAllBoards();
-
-    boardManagerContract?.on('PinSaved', () => getAllBoards());
+    getAllPins();
 
     return () => {
       clearTimeout(timeoutId);
-      boardManagerContract?.off('PinSaved', () => getAllBoards());
     };
 
-  }, [address, isConnected])
+  }, [address, isConnected, boards])
 
-  function getAllPins(boards: any[]) {
-    const boardPins = boards.map((board: any) => board.pins.map((pin: any) => pin)).flat();
-    pinManagerContract?.getAllPins().then((result: any) => {
-      const pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, imageHash: pin.imageHash, boardId: pin.boardId.toNumber(), owner: pin.owner }));
-      setPins(pins.filter((pin: { owner: any; id: number; }) => pin.owner !== address && !boardPins.includes(pin.id)));
-    });
+  function getAllPins() {
+    if (allBoardsByAddress && allPins) {
+      const boardPins = boards.map((board: any) => board.pins.map((pin: any) => pin)).flat();
+      setPins(notOwnPins.filter((pin: { owner: any; id: number; }) => pin.owner !== address && !boardPins.includes(pin.id)));
+    }
   }
-
-  function getAllBoards() {
-    boardManagerContract?.getBoardsByOwner(address).then((result: any) => {
-      const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins.map((pin: any) => pin.toNumber()) }));
-      getAllPins(boards);
-    });
-  }
-
-  // function getAllBoards() {
-  //   boardManagerContract?.getBoardsByOwner(address).then((result: any) => {
-  //     const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins }));
-  //     setAllBoards(boards);
-  //     getAllPinsByBoard(boards);
-  //   });
-  // }
-
-  // function getAllPinsByBoard(boards: any) {
-  //   boards.forEach((board: any) => {
-  //     pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
-  //       let pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() }));
-  //       board.pins.forEach((pinId: any) => {
-  //         pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
-  //           pins = [...pins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }]
-  //           let index = allBoards.findIndex(({ id }) => id === board.id);
-  //           if (index != -1) allBoards[index].pins = pins;
-  //           setAllBoards(allBoards);
-  //         });
-  //       });
-  //     });
-  //   });
-  // }
 
   return (
     <>

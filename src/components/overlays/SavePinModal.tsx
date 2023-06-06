@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers'
-import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useRouter } from 'next/router';
 import { List, ListItem, useToast } from '@chakra-ui/react';
+import boardManager from '../../contracts/build/BoardManager.json';
+import pinManager from '../../contracts/build/PinManager.json';
+import { useAccount, useContractRead, useContractWrite } from 'wagmi';
+import { Board, Pin } from '@/common/types/structs';
 
 interface SavePinModalProps {
     pinId: number | null;
@@ -13,45 +14,76 @@ interface SavePinModalProps {
 
 const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => {
     const { pinId } = props;
+    const { address, isConnected } = useAccount()
     const { savePinModalOpen, setSavePinModalOpen } = useAppState();
-    const { account, library } = useWeb3React<Web3Provider>();
-    const boardManagerContract = useBoardManager(library);
-    const pinManagerContract = usePinManager(library);
     const router = useRouter();
     const [boardId, setBoardId] = useState<number | null>(null);
     const [boards, setBoards] = useState<any[]>([]);
+    const [pins, setPins] = useState<Pin[]>([]);
     const toast = useToast();
+
+    const {
+        data: savePinToBoardData,
+        status: savePinToBoardStatus,
+        writeAsync: savePinToBoard,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'savePinToBoard',
+        onError(err) {
+            console.log('error ', err);
+        }
+    })
+
+    const { data: allBoardsByAddress } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'getBoardsByOwner',
+        args: [address],
+        onSuccess(data) {
+            setBoards(data as Board[]);
+        },
+    });
+
+    const { data: allPinsByAddress } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        functionName: 'getAllPins',
+        onSuccess(data) {
+            const res = data as Pin[];
+            setPins(res);
+        },
+    });
 
     useEffect(() => {
         getAllBoards();
 
-    }, [account, library]);
+    }, [address, allBoardsByAddress, allPinsByAddress]);
 
     function getAllBoards() {
-        boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
-            const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins }));
-            getAllPinsByBoard(boards);
-        });
-    }
+        if (boards.length === 0) {
+            setBoards([]);
+            return;
+        }
 
-    function getAllPinsByBoard(boards: any) {
-        boards.forEach((board: any) => {
-            pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
+        if (allBoardsByAddress && allPinsByAddress) {
+            boards.map((board: Board) => {
+                const boardPins = pins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
+                const moreBoardPins = pins.filter((pin: Pin) => pin.boardId === board.id);
+                const mergedPins = [...boardPins, ...moreBoardPins];
                 setBoards((prevBoards) => {
-                    return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === board.owner), { id: board.id, name: board.name, owner: board.owner, pins: result }]
-                        .sort((a, b) => a.id - b.id);
+                    return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, owner: board.owner, pins: mergedPins }]
+                        .sort((a, b) => Number(a.id) - Number(b.id));
                 });
             });
-        });
+        }
     }
 
-    async function savePinToBoard(boardId: number) {
+    const handleSavePinToBoard = async (boardId: number) => {
         setSavePinModalOpen(false);
         router.push('/home');
-        const tx = await boardManagerContract?.savePinToBoard(boardId, pinId);
-        handleSavedPinToast(false, boardId);
-        await tx?.wait();
-        handleSavedPinToast(true, boardId);
+        await savePinToBoard({ args: [boardId, pinId] });
+        //handleSavedPinToast(false, boardId);
     }
 
     function handleSavedPinToast(finished: boolean, boardId: number) {
@@ -84,7 +116,7 @@ const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => 
         <Modal isOpen={savePinModalOpen} closeModal={() => setSavePinModalOpen(false)} title='Save to board' height='h-full' >
             <List>
                 {boards.map((board: any) => (
-                    <ListItem key={board.id} onClick={() => savePinToBoard(board.id)}>
+                    <ListItem key={Number(board.id)} onClick={() => handleSavePinToBoard(Number(board.id))}>
                         <div className='flex items-center h-16'>
 
                             {board.pins?.length > 0 && board.pins[0].imageHash ? (
