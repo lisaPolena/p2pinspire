@@ -97,7 +97,7 @@ export default function Profile() {
         return () => {
             clearTimeout(timeoutId);
         }
-    }, [isConnected, address, loadCreateBoardTransaction, loadDeleteBoardTransaction, allBoardsByAddress, allPinsByAddress])
+    }, [isConnected, address, loadCreateBoardTransaction, loadDeleteBoardTransaction, allBoardsByAddress, allPinsByAddress, allBoards])
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {
@@ -106,7 +106,6 @@ export default function Profile() {
         });;
 
     function getAllBoards() {
-        console.log('getAllBoards');
         if (allBoards.length === 0) {
             setBoards([]);
             return;

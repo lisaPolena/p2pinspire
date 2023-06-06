@@ -81,8 +81,8 @@ const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => 
 
     const handleSavePinToBoard = async (boardId: number) => {
         setSavePinModalOpen(false);
-        router.push('/home');
         await savePinToBoard({ args: [boardId, pinId] });
+        router.push('/home');
         //handleSavedPinToast(false, boardId);
     }
 

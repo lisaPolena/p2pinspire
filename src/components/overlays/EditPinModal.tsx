@@ -74,14 +74,11 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
             setPinBoardId(Number(boardId));
         }
 
-        console.log('editSavedPinStatus: ', editSavedPinStatus);
-        console.log('editCreatedPinStatus: ', editCreatedPinStatus);
-
     }, [pin, address, allBoardsByAddress, editSavedPinStatus, editCreatedPinStatus]);
 
     //TODO created edit pin event 
     async function editCreatedPin() {
-        await writeEditCreatedPin({ args: [pin.id as string, pinTitle, pinDescription, newPinBoardId] })
+        await writeEditCreatedPin({ args: [pin.id as string, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
         setEditPinModalOpen(false);
         setNewPinBoardId('');
         router.push('/profile');
@@ -89,7 +86,9 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
 
     //TODO saved edit pin event 
     const editSavedPin = async () => {
-        await writeEditSavedPin({ args: [pin.id as string, pinBoardId, newPinBoardId] })
+        if (newPinBoardId !== '') {
+            await writeEditSavedPin({ args: [pin.id as string, pinBoardId, newPinBoardId] })
+        }
         setEditPinModalOpen(false);
         setNewPinBoardId('');
         router.push('/profile');

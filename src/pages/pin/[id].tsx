@@ -23,6 +23,7 @@ export default function DetailPin() {
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
         abi: pinManager.abi,
         functionName: 'getPinById',
+        enabled: !!router.query.id,
         args: [router.query.id ?? ''],
         onSuccess(data) {
             const res = data as Pin;
@@ -34,6 +35,7 @@ export default function DetailPin() {
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
         functionName: 'getBoardById',
+        enabled: !!router.query.boardId,
         args: [router.query.boardId ?? ''],
         onSuccess(data) {
             const res = data as Board;
@@ -58,7 +60,7 @@ export default function DetailPin() {
             clearTimeout(timeoutId);
         };
 
-    }, [router.query, downloadPin, address, isConnected, board, pin])
+    }, [router.query, downloadPin, address, isConnected, board, pin]);
 
     async function downloadImage(hash: string, title: string) {
         const imageSrc = `https://web3-pinterest.infura-ipfs.io/ipfs/${hash}`;
