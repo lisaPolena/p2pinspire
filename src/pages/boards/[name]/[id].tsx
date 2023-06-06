@@ -1,4 +1,5 @@
 import { useBoardManager, useIpfs, usePinManager } from '@/common/functions/contracts';
+import { Board, Pin } from '@/common/types/structs';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner } from '@chakra-ui/react';
@@ -7,24 +8,53 @@ import { useWeb3React } from '@web3-react/core';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-
+import { useAccount, useContractRead } from 'wagmi';
+import pinManager from '../../../contracts/build/PinManager.json';
+import boardManager from '../../../contracts/build/BoardManager.json';
+import { readContract } from '@wagmi/core'
 
 export default function DetailBoard() {
     const { library } = useWeb3React<Web3Provider>()
-    const boardManagerContract = useBoardManager(library);
-    const pinManagerContract = usePinManager(library);
+    const { address, isConnected } = useAccount()
     const [board, setBoard] = useState<any>(null);
     const [showTitle, setShowTitle] = useState<boolean>(false);
     const router = useRouter()
-    const [pins, setPins] = useState<any[]>([]);
+    const [pins, setPins] = useState<Pin[]>([]);
+    const [tmpPins, setTmpPins] = useState<Pin[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const { boardView } = useAppState();
     //const ipfs = useIpfs();
 
-    useEffect(() => {
-        const { id } = router.query
+    const { data: boardById } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'getBoardById',
+        args: [router.query.id],
+        onSuccess(data) {
+            const res = data as Board;
+            setBoard(res);
+        },
+    });
 
-        if (library && id) getBoardById(id as string);
+    const { data: allPins } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        functionName: 'getAllPins',
+        onSuccess(data) {
+            const res = data as Pin[];
+            setTmpPins(res);
+        },
+    });
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (!isConnected) router.push('/');
+        }, 2000);
+
+        getPinsByBoardId();
+
+        if (board && board.owner !== address)
+            router.push('/profile');
 
         const handleScroll = () => {
             const scrollPosition = window.scrollY;
@@ -34,31 +64,20 @@ export default function DetailBoard() {
         window.addEventListener('scroll', handleScroll);
 
         return () => {
+            clearTimeout(timeoutId);
             window.removeEventListener('scroll', handleScroll);
         };
-    }, [library, router.query])
 
-    function getBoardById(id: string) {
-        boardManagerContract?.getBoardById(id).then(async (result: any) => {
-            setBoard(result);
-            getPinsByBoardId(id, result.pins);
-        });
-    }
+    }, [router.query, board, allPins, boardById, isConnected, address])
 
-    function getPinsByBoardId(id: string, pins: any[]) {
-        pinManagerContract?.getPinsByBoardId(id).then((result: any) => {
-            let boardPins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() }));
-            if (pins.length === 0) setIsLoading(false);
-
-            pins.forEach((pinId) => {
-                pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
-                    boardPins = [...boardPins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }]
-                    setPins(boardPins.sort((a: { id: number; }, b: { id: number; }) => a.id - b.id));
-                    setIsLoading(false);
-                });
-            });
-            setPins(boardPins);
-        });
+    function getPinsByBoardId() {
+        if (boardById && board && allPins) {
+            const boardPins = tmpPins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
+            const pins = tmpPins.filter((pin: Pin) => pin.boardId === board.id);
+            const mergedPins = [...boardPins, ...pins];
+            setPins(mergedPins);
+            setIsLoading(false);
+        }
     }
 
     return (
