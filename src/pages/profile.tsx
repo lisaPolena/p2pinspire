@@ -119,7 +119,7 @@ export default function Profile() {
             </Head>
             <main className='min-h-screen bg-black mb-18'>
                 <div className='w-[95%] flex flex-col justify-center items-center'>
-                    <ConnectButton />
+                    <ConnectButton accountStatus={'avatar'} />
                 </div>
 
                 <div className='flex flex-col items-center'>

@@ -22,14 +22,14 @@ import { useEffect } from 'react';
 export default function App({ Component, pageProps }: AppProps) {
 
   const { chains, publicClient } = configureChains(
-    [polygon, polygonMumbai],
+    [polygonMumbai],
     [
       alchemyProvider({ apiKey: '2qNZE4vHDxHv7f_2vcF1WrGtOa-ALKJW' }),
       publicProvider()
     ]
   );
   const { connectors } = getDefaultWallets({
-    appName: 'My RainbowKit App',
+    appName: 'Web3Pinterest',
     projectId: '875210f269badbd4a01da1fab3ee5fde',
     chains
   });
@@ -41,7 +41,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <AppStateProvider>
-      {/* <Web3ReactProvider getLibrary={(provider) => new Web3Provider(provider)}> */}
       <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider chains={chains}>
           <ChakraProvider theme={customTheme}>
@@ -49,7 +48,6 @@ export default function App({ Component, pageProps }: AppProps) {
           </ChakraProvider>
         </RainbowKitProvider>
       </WagmiConfig>
-      {/* </Web3ReactProvider> */}
     </AppStateProvider>
 
   );

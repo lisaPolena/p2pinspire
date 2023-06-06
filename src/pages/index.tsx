@@ -38,7 +38,7 @@ export default function Index() {
           {/* <Button width={'70%'} borderRadius={'50px'} colorScheme='primary' variant='solid' onClick={connect}>
             Connect MetaMask
           </Button> */}
-          <ConnectButton />
+          <ConnectButton accountStatus={'full'} />
         </div>
       </main>
     </>

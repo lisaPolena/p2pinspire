@@ -44,8 +44,7 @@
     "unsplash-js": "^7.0.15",
     "viem": "^0.3.50",
     "wagmi": "^1.0.9",
-    "web3": "^1.10.0",
-    "web3modal": "^1.9.12"
+    "web3": "^1.10.0"
   },
   "devDependencies": {
     "@web3-react/types": "^8.2.0",
