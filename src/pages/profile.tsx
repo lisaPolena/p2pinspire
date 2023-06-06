@@ -143,7 +143,7 @@ export default function Profile() {
                                 <div className='grid grid-cols-2 gap-4'>
                                     {boards?.map(({ id, name, pins }) => (
                                         <React.Fragment key={id}>
-                                            {loadDeleteBoardTransaction && loadDeleteBoardTransaction === id ? (
+                                            {loadDeleteBoardTransaction && loadDeleteBoardTransaction === Number(id) ? (
                                                 <Stack>
                                                     <Skeleton height='120px' width='100%' fadeDuration={4} />
                                                     <Skeleton height='10px' width='70%' fadeDuration={4} />

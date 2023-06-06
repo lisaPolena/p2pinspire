@@ -65,7 +65,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
             setDeleteModalOpen(false);
             setEditBoardModalOpen(false);
             await deleteBoard({ args: [board.id] })
-            setLoadDeleteBoardTransaction(board.id);
+            setLoadDeleteBoardTransaction(Number(board.id));
             router.push('/profile');
         } else {
             //TODO: handle error
