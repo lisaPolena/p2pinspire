@@ -8,41 +8,79 @@ import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
 import React from 'react';
+import { useAccount, useContractEvent, useContractRead, useWalletClient } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import boardManager from '../contracts/build/BoardManager.json';
+import pinManager from '../contracts/build/PinManager.json';
+import { Board, Pin } from '@/common/types/structs';
 
 export default function Profile() {
     // active: returns a boolean to check if user is connected
     // account: returns the users account (or .eth name)
     // libary: provides web3React functions to interact with the blockchain / smart contracts
     const { active, account, library } = useWeb3React<Web3Provider>()
+    const { address, isConnected } = useAccount()
     const boardManagerContract = useBoardManager(library);
     const pinManagerContract = usePinManager(library);
     const [boards, setBoards] = useState<any[]>([]);
-    const { allBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
+    const [allBoards, setAllBoards] = useState<Board[]>([]);
+    const [allPins, setAllPins] = useState<Pin[]>([]);
+    const { loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction } = useAppState();
     const router = useRouter();
     const [ownPins, setOwnPins] = useState<any[]>([]);
 
+    const { data: allBoardsByAddress } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'getBoardsByOwner',
+        args: [address],
+        onSuccess(data) {
+            setAllBoards(data as Board[]);
+        },
+    });
+
+    const { data: allPinsByAddress } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        functionName: 'getAllPins',
+        onSuccess(data) {
+            const res = data as Pin[];
+            setAllPins(res);
+            setOwnPins(res.filter((pin: Pin) => pin.owner === address));
+        },
+    });
+
+    // useContractEvent({
+    //     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+    //     abi: pinManager.abi,
+    //     eventName: 'BoardCreated',
+    //     listener(log) {
+    //         console.log(log)
+    //     },
+    // })
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            if (!active) router.push('/');
+            if (!isConnected) router.push('/');
         }, 2000);
 
         getAllBoards();
 
         if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
         boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
-        pinManagerContract?.on(pinManagerContract?.filters.PinCreated(null, null, null, null, null, account), () => getAllBoards());
+        pinManagerContract?.on(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
         boardManagerContract?.on('PinSaved', () => getAllBoards());
 
         return () => {
             clearTimeout(timeoutId);
             if (boardCreatedEvent) boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
             boardManagerContract?.off('BoardDeleted', handleBoardDeleted);
-            pinManagerContract?.off(pinManagerContract?.filters.PinCreated(null, null, null, null, null, account), () => getAllBoards());
+            pinManagerContract?.off(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
             boardManagerContract?.off('PinSaved', () => getAllBoards());
         }
-    }, [active, account, loadCreateBoardTransaction, loadDeleteBoardTransaction])
+    }, [isConnected, address, loadCreateBoardTransaction, loadDeleteBoardTransaction, allBoardsByAddress, allPinsByAddress, allBoards])
 
-    const boardCreatedEvent = boardManagerContract?.filters.BoardCreated(null, null, account);
+    const boardCreatedEvent = boardManagerContract?.filters.BoardCreated(null, null, address);
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {
@@ -56,45 +94,22 @@ export default function Profile() {
     };
 
     function getAllBoards() {
-        boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
-            const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins }));
-            getAllPinsByBoard(boards);
-        });
-    }
-
-    //TODO: ugly af, fix this
-    function getAllPinsByBoard(boards: any) {
-        if (boards.length === 0) {
+        if (allBoards.length === 0) {
             setBoards([]);
             return;
         }
 
-        boards.forEach((board: any) => {
-            pinManagerContract?.getPinsByBoardId(board.id).then((result: any) => {
-                let pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId.toNumber() })).sort((a: any, b: any) => a.id - b.id);
-                pins.map((pin: any) => {
-                    if (pin.owner === account) {
-                        setOwnPins((prevPins) => {
-                            return [...prevPins.filter(({ id }) => id !== pin.id), { id: pin.id, title: pin.title, description: pin.description, owner: pin.owner, imageHash: pin.imageHash, boardId: pin.boardId }]
-                                .sort((a, b) => b.id - a.id);
-                        });
-                    }
-                });
-                board.pins.forEach((pinId: any) => {
-                    pinManagerContract.getPinById(pinId.toNumber()).then((result: any) => {
-                        pins = [...pins, { id: result.id.toNumber(), title: result.title, description: result.description, owner: result.owner, imageHash: result.imageHash, boardId: result.boardId.toNumber() }].sort((a: any, b: any) => a.id - b.id);
-                        setBoards((prevBoards) => {
-                            return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === account), { id: board.id, name: board.name, owner: board.owner, pins: pins }]
-                                .sort((a, b) => a.id - b.id);
-                        });
-                    });
-                });
+        if (allBoardsByAddress && allPinsByAddress) {
+            allBoards.map((board: Board) => {
+                const boardPins = allPins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
+                const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
+                const mergedPins = [...boardPins, ...pins];
                 setBoards((prevBoards) => {
-                    return [...prevBoards.filter(({ id, owner }) => id !== board.id && owner === account), { id: board.id, name: board.name, owner: board.owner, pins: pins }]
-                        .sort((a, b) => a.id - b.id);
+                    return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, owner: board.owner, pins: mergedPins }]
+                        .sort((a, b) => Number(a.id) - Number(b.id));
                 });
             });
-        });
+        }
     }
 
     return (
@@ -104,7 +119,7 @@ export default function Profile() {
             </Head>
             <main className='min-h-screen bg-black mb-18'>
                 <div className='w-[95%] flex flex-col justify-center items-center'>
-                    {account && <p className='text-lg font-bold'>{account.slice(0, 5)}...${account.slice(-4)}</p>}
+                    <ConnectButton />
                 </div>
 
                 <div className='flex flex-col items-center'>

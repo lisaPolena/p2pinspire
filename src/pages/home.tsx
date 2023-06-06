@@ -5,10 +5,12 @@ import { useWeb3React } from '@web3-react/core';
 import { useRouter } from 'next/router';
 import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
+import { useAccount } from 'wagmi';
 
 export default function Home() {
   // active: returns a boolean to check if user is connected
   const { active, library, account } = useWeb3React()
+  const { address, isConnected } = useAccount()
   const router = useRouter();
   const pinManagerContract = usePinManager(library);
   const boardManagerContract = useBoardManager(library);
@@ -17,7 +19,7 @@ export default function Home() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (!active) router.push('/');
+      if (!isConnected) router.push('/');
     }, 2000);
 
     getAllBoards();
@@ -29,25 +31,25 @@ export default function Home() {
       boardManagerContract?.off('PinSaved', () => getAllBoards());
     };
 
-  }, [active, library, account])
+  }, [address, isConnected])
 
   function getAllPins(boards: any[]) {
     const boardPins = boards.map((board: any) => board.pins.map((pin: any) => pin)).flat();
     pinManagerContract?.getAllPins().then((result: any) => {
       const pins = result.map((pin: any) => ({ id: pin.id.toNumber(), title: pin.title, description: pin.description, imageHash: pin.imageHash, boardId: pin.boardId.toNumber(), owner: pin.owner }));
-      setPins(pins.filter((pin: { owner: any; id: number; }) => pin.owner !== account && !boardPins.includes(pin.id)));
+      setPins(pins.filter((pin: { owner: any; id: number; }) => pin.owner !== address && !boardPins.includes(pin.id)));
     });
   }
 
   function getAllBoards() {
-    boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
+    boardManagerContract?.getBoardsByOwner(address).then((result: any) => {
       const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins.map((pin: any) => pin.toNumber()) }));
       getAllPins(boards);
     });
   }
 
   // function getAllBoards() {
-  //   boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
+  //   boardManagerContract?.getBoardsByOwner(address).then((result: any) => {
   //     const boards = result.map((board: any) => ({ id: board.id.toNumber(), name: board.name, owner: board.owner, pins: board.pins }));
   //     setAllBoards(boards);
   //     getAllPinsByBoard(boards);
