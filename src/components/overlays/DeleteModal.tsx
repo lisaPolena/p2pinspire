@@ -14,7 +14,7 @@ interface DeleteModalProps {
     board?: any;
     pin?: any;
     isOwner?: boolean;
-    savedPinBoardId?: string;
+    savedPinBoardId?: string | number;
 }
 
 const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, board, pin, isOwner, savedPinBoardId }) => {

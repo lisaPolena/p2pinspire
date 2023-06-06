@@ -1,20 +1,15 @@
-import { useBoardManager, useIpfs, usePinManager } from '@/common/functions/contracts';
 import { Board, Pin } from '@/common/types/structs';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner } from '@chakra-ui/react';
-import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useAccount, useContractRead } from 'wagmi';
 import pinManager from '../../../contracts/build/PinManager.json';
 import boardManager from '../../../contracts/build/BoardManager.json';
-import { readContract } from '@wagmi/core'
 
 export default function DetailBoard() {
-    const { library } = useWeb3React<Web3Provider>()
     const { address, isConnected } = useAccount()
     const [board, setBoard] = useState<any>(null);
     const [showTitle, setShowTitle] = useState<boolean>(false);
@@ -23,7 +18,6 @@ export default function DetailBoard() {
     const [tmpPins, setTmpPins] = useState<Pin[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const { boardView } = useAppState();
-    //const ipfs = useIpfs();
 
     const { data: boardById } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,

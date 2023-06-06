@@ -1,47 +1,64 @@
-import { useBoardManager, usePinManager } from '@/common/functions/contracts';
+import { Board, Pin } from '@/common/types/structs';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
 import SavePinModal from '@/components/overlays/SavePinModal';
 import { Button } from '@chakra-ui/react';
-import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-
+import { useAccount, useContractRead } from 'wagmi';
+import pinManager from '../../contracts/build/PinManager.json';
+import boardManager from '../../contracts/build/BoardManager.json';
 
 export default function DetailPin() {
-    const { library, account } = useWeb3React<Web3Provider>()
-    const pinManagerContract = usePinManager(library);
+    const { address, isConnected } = useAccount()
     const router = useRouter()
-    const [pin, setPin] = useState<any>(null);
+    const [pin, setPin] = useState<Pin>();
+    const [board, setBoard] = useState<Board>();
     const { downloadPin, setDownloadPin, setSavePinModalOpen } = useAppState();
     const [savePinId, setSavePinId] = useState<number | null>(null);
     const [isSavedPin, setIsSavedPin] = useState<boolean>(false);
-    //const ipfs = useIpfs();
+
+    const { data: pinbyId } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        functionName: 'getPinById',
+        args: [router.query.id],
+        onSuccess(data) {
+            const res = data as Pin;
+            setPin(res);
+        },
+    });
+
+    const { data: boardById } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'getBoardById',
+        args: [router.query.boardId],
+        onSuccess(data) {
+            const res = data as Board;
+            setBoard(res);
+        },
+    });
 
     useEffect(() => {
-        const { id, boardId } = router.query
-        if (library && id) getPinById(id as string);
-        if (boardId || pin?.owner === account) setIsSavedPin(true)
+        const timeoutId = setTimeout(() => {
+            if (!isConnected) router.push('/');
+        }, 2000);
+
+        if (board && board.owner !== address)
+            router.push('/profile');
+
+        if (router.query.boardId || pin?.owner === address) setIsSavedPin(true)
         else setIsSavedPin(false);
 
-        if (downloadPin) downloadImage(pin.imageHash, pin.title);
+        if (pin && downloadPin) downloadImage(pin.imageHash, pin.title);
 
-    }, [library, router.query, downloadPin, account])
+        return () => {
+            clearTimeout(timeoutId);
+        };
 
-    function getPinById(id: string) {
-        pinManagerContract?.getPinById(id).then((result: any) => {
-            setPin({
-                id: result.id.toNumber(),
-                title: result.title,
-                description: result.description,
-                owner: result.owner,
-                imageHash: result.imageHash,
-                boardId: result.boardId.toNumber()
-            });
-        });
-    }
+    }, [router.query, downloadPin, address, isConnected])
 
     async function downloadImage(hash: string, title: string) {
         const imageSrc = `https://web3-pinterest.infura-ipfs.io/ipfs/${hash}`;
@@ -87,7 +104,7 @@ export default function DetailPin() {
                                 <Button width={'30%'} borderRadius={'50px'} colorScheme='tertiary' variant='solid' onClick={() => console.log('view')}>
                                     View
                                 </Button>
-                                <Button width={'30%'} borderRadius={'50px'} colorScheme={isSavedPin ? 'secondary' : 'primary'} variant='solid' onClick={() => handleSavePinToBoard(pin.id, isSavedPin)}>
+                                <Button width={'30%'} borderRadius={'50px'} colorScheme={isSavedPin ? 'secondary' : 'primary'} variant='solid' onClick={() => handleSavePinToBoard(Number(pin.id), isSavedPin)}>
                                     {isSavedPin ? 'Saved' : 'Save'}
                                 </Button>
                             </div>

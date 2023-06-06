@@ -8,7 +8,7 @@ import { Web3Provider } from '@ethersproject/providers'
 import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import { useAppState } from '@/components/general/AppStateContext';
 import React from 'react';
-import { useAccount, useContractEvent, useContractRead, useWalletClient } from 'wagmi';
+import { useAccount, useContractRead } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
@@ -50,15 +50,6 @@ export default function Profile() {
         },
     });
 
-    // useContractEvent({
-    //     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
-    //     abi: pinManager.abi,
-    //     eventName: 'BoardCreated',
-    //     listener(log) {
-    //         console.log(log)
-    //     },
-    // })
-
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (!isConnected) router.push('/');
@@ -66,6 +57,7 @@ export default function Profile() {
 
         getAllBoards();
 
+        //TODO: Events umschreiben wegen wigma 
         if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
         boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
         pinManagerContract?.on(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());

@@ -2,11 +2,12 @@ import React, { useEffect } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
 import { Input, Select } from '@chakra-ui/react';
-import { useWeb3React } from '@web3-react/core';
-import { Web3Provider } from '@ethersproject/providers'
-import { useBoardManager, usePinManager } from '@/common/functions/contracts';
 import DeleteModal from './DeleteModal';
 import { useRouter } from 'next/router';
+import boardManager from '../../contracts/build/BoardManager.json';
+import pinManager from '../../contracts/build/PinManager.json';
+import { useAccount, useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi';
+import { Board } from '@/common/types/structs';
 
 interface EditPinModalProps {
     pin: any;
@@ -14,58 +15,84 @@ interface EditPinModalProps {
 
 const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) => {
     const { pin } = props;
+    const { address, isConnected } = useAccount()
     const { editPinModalOpen, setEditPinModalOpen, deletePinModalOpen, setDeletePinModalOpen } = useAppState();
     const [pinTitle, setPinTitle] = React.useState<string>('');
     const [pinDescription, setPinDescripton] = React.useState<string>('');
-    const [pinBoardId, setPinBoardId] = React.useState<string>('');
+    const [pinBoardId, setPinBoardId] = React.useState<string | number>('');
     const [newPinBoardId, setNewPinBoardId] = React.useState<string>('');
-    const { account, library } = useWeb3React<Web3Provider>();
     const [isOwner, setIsOwner] = React.useState<boolean>(false);
-    const [boards, setBoards] = React.useState<any[]>([]);
-    const boardManagerContract = useBoardManager(library);
-    const pinManagerContract = usePinManager(library);
+    const [boards, setBoards] = React.useState<Board[]>([]);
     const router = useRouter();
+
+    const { data: allBoardsByAddress } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'getBoardsByOwner',
+        args: [address],
+        onSuccess(data) {
+            setBoards(data as Board[]);
+        },
+    });
+
+    const {
+        data: savedPinData,
+        status: editSavedPinStatus,
+        writeAsync: writeEditSavedPin,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        functionName: 'editSavedPin',
+        onError(err) {
+            console.log('err.prepare: ', err);
+        }
+    })
+
+    const {
+        data: createdPinData,
+        status: editCreatedPinStatus,
+        writeAsync: writeEditCreatedPin,
+    } = useContractWrite({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        functionName: 'editCreatedPin',
+        onError(err) {
+            console.log('error ', err);
+        }
+    })
 
     useEffect(() => {
         const { boardId } = router.query;
 
-        getAllBoards();
-
-        if (pin && pin.owner === account) {
+        if (pin && pin.owner === address) {
             setIsOwner(true);
             setPinTitle(pin.title);
             setPinDescripton(pin.description);
-            setPinBoardId(pin.boardId);
+            setPinBoardId(Number(pin.boardId));
         } else {
             setIsOwner(false);
-            setPinBoardId(boardId as string);
+            setPinBoardId(Number(boardId));
         }
 
-        setNewPinBoardId('');
+        console.log('editSavedPinStatus: ', editSavedPinStatus);
+        console.log('editCreatedPinStatus: ', editCreatedPinStatus);
 
-
-    }, [pin ? pin.title : '', pin ? pin.description : '', account]);
-
-    function getAllBoards() {
-        boardManagerContract?.getBoardsByOwner(account).then((result: any) => {
-            setBoards(result.map((board: any) => ({ id: board.id, name: board.name, owner: board.owner, pins: board.pins })));
-        });
-    }
+    }, [pin, address, allBoardsByAddress, editSavedPinStatus, editCreatedPinStatus]);
 
     //TODO created edit pin event 
     async function editCreatedPin() {
-        const tx = await pinManagerContract?.editCreatedPin(pin.id as string, pinTitle, pinDescription, newPinBoardId);
+        await writeEditCreatedPin({ args: [pin.id as string, pinTitle, pinDescription, newPinBoardId] })
         setEditPinModalOpen(false);
+        setNewPinBoardId('');
         router.push('/profile');
-        await tx.wait()
     }
 
     //TODO saved edit pin event 
-    async function editSavedPin() {
-        const tx = await boardManagerContract?.editSavedPin(pin.id as string, pinBoardId, newPinBoardId);
+    const editSavedPin = async () => {
+        await writeEditSavedPin({ args: [pin.id as string, pinBoardId, newPinBoardId] })
         setEditPinModalOpen(false);
+        setNewPinBoardId('');
         router.push('/profile');
-        await tx.wait()
     }
 
     return (
@@ -76,7 +103,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                     <button
                         className="px-4 py-2 transition-colors text-white bg-red-600 disabled:!bg-transparent disabled:!text-gray-400 rounded-3xl"
                         disabled={(isOwner && pinTitle?.length === 0) || (!isOwner && (newPinBoardId !== '' ? pinBoardId === newPinBoardId : newPinBoardId === ''))}
-                        onClick={isOwner ? editCreatedPin : editSavedPin}
+                        onClick={isOwner ? () => editCreatedPin() : () => editSavedPin()}
                     >
                         Done
                     </button>
@@ -102,7 +129,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                     <div>
                         <Select placeholder='Select option' value={newPinBoardId !== '' ? newPinBoardId : pinBoardId} onChange={(e) => setNewPinBoardId(e.target.value)}>
                             {boards.map((board) =>
-                                <option key={board.id} value={board.id.toNumber()}>{board.name}</option>
+                                <option key={board.id} value={Number(board.id)}>{board.name}</option>
                             )}
                         </Select>
                     </div>
