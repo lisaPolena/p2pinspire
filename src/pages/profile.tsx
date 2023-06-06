@@ -41,14 +41,15 @@ export default function Profile() {
         },
     });
 
-    //TODO: does not work 
+    //TODO: does not work, der listener wird schon ausgeführt bevor die transaction fertig ist
     const unwatchBoardCreated = useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
         eventName: 'BoardCreated',
         listener(log) {
             console.log(log)
-            onBoardCreated;
+            getAllBoards();
+            setLoadCreateBoardTransaction(false);
         },
     });
 
@@ -91,27 +92,12 @@ export default function Profile() {
             if (!isConnected) router.push('/');
         }, 2000);
 
-        const timeoutIdCreateBoard = setTimeout(() => {
-            setLoadCreateBoardTransaction(false);
-        }, 1000);
-
         getAllBoards();
-
-        //TODO: Events umschreiben wegen wigma 
-        //if (boardCreatedEvent) boardManagerContract?.on(boardCreatedEvent, onBoardCreated);
-        //boardManagerContract?.on('BoardDeleted', handleBoardDeleted);
-        //pinManagerContract?.on(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
-        //boardManagerContract?.on('PinSaved', () => getAllBoards());
 
         return () => {
             clearTimeout(timeoutId);
-            clearTimeout(timeoutIdCreateBoard);
-            //if (boardCreatedEvent) boardManagerContract?.off(boardCreatedEvent, onBoardCreated);
-            //boardManagerContract?.off('BoardDeleted', handleBoardDeleted);
-            //pinManagerContract?.off(pinManagerContract?.filters.PinCreated(null, null, null, null, null, address), () => getAllBoards());
-            //boardManagerContract?.off('PinSaved', () => getAllBoards());
         }
-    }, [isConnected, address, loadCreateBoardTransaction, loadDeleteBoardTransaction, allBoardsByAddress, allPinsByAddress, allBoards])
+    }, [isConnected, address, loadCreateBoardTransaction, loadDeleteBoardTransaction, allBoardsByAddress, allPinsByAddress])
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {
@@ -131,7 +117,6 @@ export default function Profile() {
                 const boardPins = allPins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
                 const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
                 const mergedPins = [...boardPins, ...pins];
-                console.log('mergedPins', mergedPins);
                 setBoards((prevBoards) => {
                     return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, owner: board.owner, pins: mergedPins }]
                         .sort((a, b) => Number(a.id) - Number(b.id));
@@ -139,7 +124,6 @@ export default function Profile() {
             });
         }
     }
-
 
     return (
         <>
