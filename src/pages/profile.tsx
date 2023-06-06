@@ -75,13 +75,14 @@ export default function Profile() {
         },
     });
 
+    //TODO: does not work es macht es zwar aber bei getAllBoards sind die neuen noch nicht dabei...
     const unwatchPinCreated = useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
         abi: pinManager.abi,
         eventName: 'PinCreated',
         listener(log) {
             console.log(log)
-            getAllBoards();
+            if (log) getAllBoards();
         },
     });
 
@@ -119,6 +120,7 @@ export default function Profile() {
         });;
 
     function getAllBoards() {
+        console.log('getAllBoards');
         if (allBoards.length === 0) {
             setBoards([]);
             return;
@@ -129,6 +131,7 @@ export default function Profile() {
                 const boardPins = allPins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
                 const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
                 const mergedPins = [...boardPins, ...pins];
+                console.log('mergedPins', mergedPins);
                 setBoards((prevBoards) => {
                     return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, owner: board.owner, pins: mergedPins }]
                         .sort((a, b) => Number(a.id) - Number(b.id));

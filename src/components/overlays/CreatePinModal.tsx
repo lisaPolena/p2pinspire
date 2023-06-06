@@ -15,6 +15,7 @@ const CreatePinModal: React.FC = () => {
     const [pinDescription, setPinDescription] = useState<string>('');
     const [pinBoardId, setPinBoardId] = useState<string>('');
     const [pinImage, setPinImage] = useState<any>(null);
+    const [createdPin, setCreatedPin] = useState<any>(null);
     const { createPinModalOpen, setCreatePinModalOpen } = useAppState();
     const [boards, setBoards] = useState<any[]>([]);
     const ipfs = useIpfs();
@@ -26,7 +27,8 @@ const CreatePinModal: React.FC = () => {
         functionName: 'getBoardsByOwner',
         args: [address],
         onSuccess(data) {
-            setBoards(data as Board[]);
+            const res = data as Board[];
+            setBoards(res.map((board) => ({ id: Number(board.id), name: board.name, owner: board.owner, pins: board.pins })));
         },
     });
 
@@ -52,10 +54,6 @@ const CreatePinModal: React.FC = () => {
         },
     });
 
-    useEffect(() => {
-
-    }, [isConnected, address, allBoardsByAddress, createPinStatus])
-
     const handleCreatePin = async () => {
         if (!pinTitle || !pinBoardId || (pinDescription && pinDescription.length > 50) || !pinImage) {
             console.log('error');
@@ -64,6 +62,8 @@ const CreatePinModal: React.FC = () => {
         const result = await ipfs.add(pinImage);
         await createPin({ args: [pinTitle, pinDescription, result.path, pinBoardId] })
         setCreatePinModalOpen(false);
+        const board = boards.find((board) => board.id === Number(pinBoardId))
+        setCreatedPin({ img: result.path, boardName: board.name })
         clearForm();
         handleLoadingCreatingPinToast();
     }
@@ -75,13 +75,17 @@ const CreatePinModal: React.FC = () => {
         setPinImage(null);
     }
 
+    //TODO; fix this, createdPin ist immmer ein hinter her, mit AppState probieren oder so
     function handleSavedPinToast() {
+        if (!createdPin) return;
         toast({
             position: 'top',
             render: () => (
-                <div className='text-white bg-zinc-800 rounded-xl h-[70px] flex items-center justify-center' >
-                    Saved Pin to
-                </ div >
+                <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
+                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${createdPin.img}`}
+                        className="object-cover w-[50px] h-[50px] rounded-2xl" />
+                    <p>Saved Pin to <strong>{createdPin.boardName}</strong></p>
+                </div>
             ),
         })
     }
@@ -90,8 +94,8 @@ const CreatePinModal: React.FC = () => {
         toast({
             position: 'top',
             render: () => (
-                <div className='text-white bg-zinc-800 rounded-xl h-[70px] flex flex-col items-center justify-center' >
-                    <p>Pin creating...</p>
+                <div className='text-white bg-zinc-800 rounded-full h-[70px] flex flex-col items-center justify-center' >
+                    <p>The Pin is being created...</p>
                     <Progress size='xs' isIndeterminate />
                 </div>
             ),
