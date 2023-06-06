@@ -41,14 +41,14 @@ export default function Profile() {
         },
     });
 
-    //TODO: does not work, der listener wird schon ausgeführt bevor die transaction fertig ist
     const unwatchBoardCreated = useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
         eventName: 'BoardCreated',
-        listener(log) {
-            console.log(log)
-            getAllBoards();
+        listener(log: any) {
+            if (log[0].address !== address && unwatchBoardCreated !== undefined) unwatchBoardCreated();
+            const args = log[0].args;
+            onBoardCreated(Number(args.boardId), args.boardName, args.owner);
             setLoadCreateBoardTransaction(false);
         },
     });
@@ -57,8 +57,9 @@ export default function Profile() {
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
         eventName: 'BoardDeleted',
-        listener(log) {
-            //TODO: es hört auf zu laden aber das gelöschte board ist noch da
+        listener(log: any) {
+            console.log(log);
+            console.log(log.args);
             if (log) {
                 getAllBoards();
                 setLoadDeleteBoardTransaction(0);
@@ -81,8 +82,8 @@ export default function Profile() {
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
         abi: pinManager.abi,
         eventName: 'PinCreated',
-        listener(log) {
-            console.log(log)
+        listener(log: any) {
+            console.log(log.args)
             if (log) getAllBoards();
         },
     });
@@ -101,8 +102,8 @@ export default function Profile() {
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {
-            return [...prevBoards.filter(({ id }) => id !== boardId), { id: boardId, name: boardName, owner: owner, pins: [] }]
-                .sort((a, b) => a.id - b.id);
+            return [...prevBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, owner: owner, pins: [] }]
+                .sort((a, b) => Number(a.id) - Number(b.id));
         });;
 
     function getAllBoards() {
