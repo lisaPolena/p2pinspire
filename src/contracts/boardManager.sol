@@ -121,9 +121,11 @@ contract BoardManager {
      * @param boardId ID of the board to get
      * @return Board struct containing board information
      * Requirements:
+     * - Board ID cannot be zero
      * - Board with the given ID must exist
      */
     function getBoardById(uint256 boardId) public view returns (Board memory) {
+        require(boardId != 0, "Board ID cannot be zero.");
         require(boardId <= currentBoardId, "Board does not exist.");
         require(boards[boardId].owner != address(0), "Board does not exist.");
         return boards[boardId];

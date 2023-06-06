@@ -113,9 +113,11 @@ contract PinManager {
      * @param pinId ID of the pin to get
      * @return Pin struct containing pin information
      * Requirements:
+     * - Pin ID must be greater than 0
      * - Pin with the given ID must exist
      */
     function getPinById(uint256 pinId) public view returns (Pin memory) {
+        require(pinId != 0, "Pin ID must be greater than 0.");
         require(pinId <= currentPinId, "Pin does not exist.");
         require(pins[pinId].owner != address(0), "Pin does not exist.");
         return pins[pinId];
