@@ -58,12 +58,10 @@ export default function Profile() {
         abi: boardManager.abi,
         eventName: 'BoardDeleted',
         listener(log: any) {
-            console.log(log);
-            console.log(log.args);
-            if (log) {
-                getAllBoards();
-                setLoadDeleteBoardTransaction(0);
-            }
+            if (log[0].address !== address && unwatchBoardDeleted !== undefined) console.log('unwatch')
+            const args = log[0].args
+            onBoardDeleted(Number(args.boardId))
+            setLoadDeleteBoardTransaction(0);
         },
     });
 
@@ -98,13 +96,19 @@ export default function Profile() {
         return () => {
             clearTimeout(timeoutId);
         }
-    }, [isConnected, address, loadCreateBoardTransaction, loadDeleteBoardTransaction, allBoardsByAddress, allPinsByAddress, allBoards])
+    }, [isConnected, address, allBoardsByAddress, allPinsByAddress, allBoards])
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {
             return [...prevBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, owner: owner, pins: [] }]
                 .sort((a, b) => Number(a.id) - Number(b.id));
-        });;
+        });
+
+    const onBoardDeleted = (boardId: number) => {
+        setBoards((prevBoards) => {
+            return prevBoards.filter(({ id }) => id !== boardId).sort((a, b) => a.id - b.id);;
+        });
+    };
 
     function getAllBoards() {
         if (allBoards.length === 0) {
