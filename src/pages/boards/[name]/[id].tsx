@@ -51,6 +51,26 @@ export default function DetailBoard() {
         },
     });
 
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'PinDeleted',
+        listener(log: any) {
+            const args = log[0].args;
+            onPinDeleted(Number(args.pinId));
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'SavedPinDeleted',
+        listener(log: any) {
+            const args = log[0].args;
+            onPinDeleted(Number(args.pinId));
+        },
+    });
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (!isConnected) router.push('/');
@@ -84,6 +104,13 @@ export default function DetailBoard() {
             setIsLoading(false);
         }
     }
+
+    const onPinDeleted = (pinId: number) => {
+        setPins((prevPins) => {
+            console.log(prevPins);
+            return prevPins.filter(({ id }) => Number(id) !== pinId).sort((a, b) => a.id - b.id);
+        });
+    };
 
     return (
         <>
