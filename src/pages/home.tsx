@@ -3,17 +3,19 @@ import { Navbar } from '@/components/general/Navbar'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
 import { useAppState } from '@/components/general/AppStateContext';
-import { useAccount, useContractRead } from 'wagmi';
+import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
+import React from 'react';
+import { Skeleton, Stack } from '@chakra-ui/react';
 
 export default function Home() {
   const { address, isConnected } = useAccount()
   const router = useRouter();
   const [pins, setPins] = useState<Pin[]>([]);
   const [notOwnPins, setNotOwnPins] = useState<Pin[]>([]);
-  const { allBoards, setAllBoards } = useAppState();
+  const { allBoards, setAllBoards, loadSavePinTransaction, setLoadSavePinTransaction } = useAppState();
   const [boards, setBoards] = useState<Board[]>([]);
 
   const { data: allBoardsByAddress } = useContractRead({
@@ -33,6 +35,18 @@ export default function Home() {
     onSuccess(data) {
       const res = data as Pin[];
       setNotOwnPins(res.filter((pin: Pin) => pin.owner !== address));
+    },
+  });
+
+  useContractEvent({
+    address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+    abi: boardManager.abi,
+    eventName: 'PinSaved',
+    listener(log: any) {
+      const args = log[0].args;
+      console.log(args);
+      onPinSaved(Number(args.pinId));
+      setLoadSavePinTransaction(0);
     },
   });
 
@@ -56,6 +70,12 @@ export default function Home() {
     }
   }
 
+  const onPinSaved = (pinId: number) => {
+    setPins((prevPins) => {
+      return prevPins.filter(({ id }) => Number(id) !== pinId);
+    });
+  };
+
   return (
     <>
       <Head>
@@ -70,13 +90,22 @@ export default function Home() {
 
         <div className="grid grid-cols-2 gap-3 px-4 relative top-[50px] mt-2">
           {pins.map((pin: any) => (
-            <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}`)}>
-              <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
-                alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
-              <div className='mb-4'>
-                <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
-              </div>
-            </div>
+            <React.Fragment key={pin.id}>
+              {loadSavePinTransaction && loadSavePinTransaction === Number(pin.id) ? (
+                <Stack>
+                  <Skeleton height='215px' width='100%' fadeDuration={4} />
+                  <Skeleton height='15px' width='70%' fadeDuration={4} />
+                </Stack>
+              ) : (
+                <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}`)}>
+                  <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
+                    alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
+                  <div className='mb-4'>
+                    <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
 

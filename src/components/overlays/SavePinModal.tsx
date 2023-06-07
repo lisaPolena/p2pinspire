@@ -15,11 +15,12 @@ interface SavePinModalProps {
 const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => {
     const { pinId } = props;
     const { address, isConnected } = useAccount()
-    const { savePinModalOpen, setSavePinModalOpen } = useAppState();
+    const { savePinModalOpen, setSavePinModalOpen, setLoadSavePinTransaction } = useAppState();
     const router = useRouter();
     const [boardId, setBoardId] = useState<number | null>(null);
     const [boards, setBoards] = useState<any[]>([]);
-    const [pins, setPins] = useState<Pin[]>([]);
+    const [pin, setPin] = useState<Pin | null>(null);
+    const id = pinId ?? router.query.id;
     const toast = useToast();
 
     const {
@@ -51,40 +52,22 @@ const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => 
         functionName: 'getAllPins',
         onSuccess(data) {
             const res = data as Pin[];
-            setPins(res);
+            const pin = res.find((pin: Pin) => Number(pin.id) === Number(id));
+            setPin(pin ?? null);
         },
     });
 
-    useEffect(() => {
-        getAllBoards();
-
-    }, [address, allBoardsByAddress, allPinsByAddress]);
-
-    function getAllBoards() {
-        if (boards.length === 0) {
-            setBoards([]);
-            return;
-        }
-
-        if (allBoardsByAddress && allPinsByAddress) {
-            boards.map((board: Board) => {
-                const boardPins = pins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
-                const moreBoardPins = pins.filter((pin: Pin) => pin.boardId === board.id);
-                const mergedPins = [...boardPins, ...moreBoardPins];
-                setBoards((prevBoards) => {
-                    return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, owner: board.owner, pins: mergedPins }]
-                        .sort((a, b) => Number(a.id) - Number(b.id));
-                });
-            });
-        }
-    }
-
     const handleSavePinToBoard = async (boardId: number) => {
         setSavePinModalOpen(false);
-        await savePinToBoard({ args: [boardId, pinId] });
+        if (pin) {
+            await savePinToBoard({ args: [boardId, pin.id, pin.title, pin.description, pin.imageHash, pin.owner] });
+            setLoadSavePinTransaction(Number(pin.id) ?? 0);
+        } else {
+            console.log('no pin');
+        }
         router.push('/home');
         //handleSavedPinToast(false, boardId);
-    }
+    };
 
     function handleSavedPinToast(finished: boolean, boardId: number) {
         toast({

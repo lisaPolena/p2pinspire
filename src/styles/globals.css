@@ -60,8 +60,16 @@ a {
 
 .css-fn9p53,
 .css-10v7w68,
-.css-18264pz {
+.css-18264pz,
+.css-1fipqyn,
+.css-x4frkn {
   border-radius: 1.5rem !important;
+}
+
+.css-10v7w68,
+.css-18264pz,
+.css-x4frkn {
+  margin-left: 0.5rem !important;
 }
 
 .slide-in {

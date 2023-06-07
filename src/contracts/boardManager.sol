@@ -38,9 +38,20 @@ contract BoardManager {
     /**
      * @dev Event emitted when a pin is saved to a board
      * @param pinId ID of the saved pin
+     * @param title Title of the pin saved
+     * @param description Description of the pin saved
+     * @param imageHash IPFS hash of the pin's image
      * @param boardId ID of the board the pin is saved to
+     * @param owner Owner of the pin saved
      */
-    event PinSaved(uint256 pinId, uint256 boardId);
+    event PinSaved(
+        uint256 pinId,
+        string title,
+        string description,
+        string imageHash,
+        uint256 boardId,
+        string owner
+    );
 
     /**
      * @dev Event emitted when a saved pin is edited
@@ -171,18 +182,36 @@ contract BoardManager {
     /* @dev Save a new pin to a board
      * @param boardId ID of the board to save the pin to
      * @param pinId ID of the pin to save
+     * @param pinTitle Title of the pin to save
+     * @param pinDescription Description of the pin to save
+     * @param pinImageHash IPFS hash of the pin's image
+     * @param pinOwner Owner of the pin to save
      * Requirements:
      * - Board with the given ID must exist
      * - Pin ID must be unique within the board
      */
-    function savePinToBoard(uint256 boardId, uint256 pinId) public {
+    function savePinToBoard(
+        uint256 boardId,
+        uint256 pinId,
+        string memory pinTitle,
+        string memory pinDescription,
+        string memory pinImageHash,
+        string memory pinOwner
+    ) public {
         require(boardId <= currentBoardId, "Board does not exist.");
         require(pinId > 0, "Pin ID must be greater than zero.");
 
         Board storage board = boards[boardId];
         board.pins.push(pinId);
 
-        emit PinSaved(pinId, boardId);
+        emit PinSaved(
+            pinId,
+            pinTitle,
+            pinDescription,
+            pinImageHash,
+            boardId,
+            pinOwner
+        );
     }
 
     /**

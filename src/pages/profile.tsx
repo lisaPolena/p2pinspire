@@ -41,48 +41,46 @@ export default function Profile() {
         },
     });
 
-    const unwatchBoardCreated = useContractEvent({
+    useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
         eventName: 'BoardCreated',
         listener(log: any) {
-            if (log[0].address !== address && unwatchBoardCreated !== undefined) unwatchBoardCreated();
             const args = log[0].args;
             onBoardCreated(Number(args.boardId), args.boardName, args.owner);
             setLoadCreateBoardTransaction(false);
         },
     });
 
-    const unwatchBoardDeleted = useContractEvent({
+    useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
         eventName: 'BoardDeleted',
         listener(log: any) {
-            if (log[0].address !== address && unwatchBoardDeleted !== undefined) console.log('unwatch')
             const args = log[0].args
             onBoardDeleted(Number(args.boardId))
             setLoadDeleteBoardTransaction(0);
         },
     });
 
-    const unwatchPinSaved = useContractEvent({
+    //TODO: event beim smart contract anpassen, dass es alle daten zurück gibt und eine onPinSaved funktion schreiben
+    useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
         eventName: 'PinSaved',
-        listener(log) {
-            console.log(log)
-            getAllBoards();
+        listener(log: any) {
+            const args = log[0].args;
+            onPinCreatedOrSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
         },
     });
 
-    //TODO: does not work es macht es zwar aber bei getAllBoards sind die neuen noch nicht dabei...
-    const unwatchPinCreated = useContractEvent({
+    useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
         abi: pinManager.abi,
         eventName: 'PinCreated',
         listener(log: any) {
-            console.log(log.args)
-            if (log) getAllBoards();
+            const args = log[0].args;
+            onPinCreatedOrSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
         },
     });
 
@@ -107,6 +105,18 @@ export default function Profile() {
     const onBoardDeleted = (boardId: number) => {
         setBoards((prevBoards) => {
             return prevBoards.filter(({ id }) => id !== boardId).sort((a, b) => a.id - b.id);;
+        });
+    };
+
+    const onPinCreatedOrSaved = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
+        const newPin = { id: pinId, title: title, description: description, imageHash: imageHash, boardId: boardId, owner: owner };
+        setBoards((prevBoards) => {
+            return prevBoards.map((board) => {
+                if (board.id === boardId) {
+                    return { ...board, pins: [...board.pins, newPin] };
+                }
+                return board;
+            });
         });
     };
 
