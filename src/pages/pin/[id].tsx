@@ -6,7 +6,7 @@ import { Button } from '@chakra-ui/react';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { useAccount, useContractRead } from 'wagmi';
+import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import pinManager from '../../contracts/build/PinManager.json';
 import boardManager from '../../contracts/build/BoardManager.json';
 
@@ -40,6 +40,17 @@ export default function DetailPin() {
         onSuccess(data) {
             const res = data as Board;
             setBoard(res);
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'CreatedPinEdited',
+        listener(log: any) {
+            const args = log[0].args;
+            const newPin = { ...pin, title: args.newTitle, description: args.newDescription } as Pin;
+            setPin(newPin);
         },
     });
 

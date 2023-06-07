@@ -6,7 +6,7 @@ import DeleteModal from './DeleteModal';
 import { useRouter } from 'next/router';
 import boardManager from '../../contracts/build/BoardManager.json';
 import pinManager from '../../contracts/build/PinManager.json';
-import { useAccount, useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi';
+import { useAccount, useContractEvent, useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi';
 import { Board } from '@/common/types/structs';
 
 interface EditPinModalProps {
@@ -81,7 +81,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
         await writeEditCreatedPin({ args: [pin.id as string, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
         setEditPinModalOpen(false);
         setNewPinBoardId('');
-        router.push('/profile');
+        if (newPinBoardId != '') router.push('/profile');
     }
 
     //TODO saved edit pin event 
