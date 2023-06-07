@@ -8,6 +8,9 @@ import { useEffect, useState } from 'react'
 import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import pinManager from '../../../contracts/build/PinManager.json';
 import boardManager from '../../../contracts/build/BoardManager.json';
+import { IoAdd } from "react-icons/io5";
+import AddModal from '@/components/overlays/AddModal';
+import CreatePinModal from '@/components/overlays/CreatePinModal';
 
 export default function DetailBoard() {
     const { address, isConnected } = useAccount()
@@ -17,7 +20,7 @@ export default function DetailBoard() {
     const [pins, setPins] = useState<Pin[]>([]);
     const [tmpPins, setTmpPins] = useState<Pin[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const { boardView } = useAppState();
+    const { boardView, setAddModalOpen } = useAppState();
 
     const { data: boardById } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
@@ -71,6 +74,16 @@ export default function DetailBoard() {
         },
     });
 
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'PinCreated',
+        listener(log: any) {
+            const args = log[0].args;
+            onPinCreated(Number(args.pinId), args.title, args.descriptiongs, args.imageHash, args.boardId, args.owner);
+        },
+    });
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (!isConnected) router.push('/');
@@ -109,6 +122,14 @@ export default function DetailBoard() {
         setPins((prevPins) => {
             console.log(prevPins);
             return prevPins.filter(({ id }) => Number(id) !== pinId).sort((a, b) => a.id - b.id);
+        });
+    };
+
+    const onPinCreated = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
+        const newPin = { id: pinId, title: title, description: description, imageHash: imageHash, boardId: boardId, owner: owner };
+        setPins((prevPins) => {
+            return [...prevPins.filter(({ id }) => Number(id) !== Number(boardId)), newPin]
+                .sort((a, b) => Number(a.id) - Number(b.id));
         });
     };
 
@@ -165,9 +186,12 @@ export default function DetailBoard() {
                         size='xl'
                     />
                 )}
+                <button onClick={() => setAddModalOpen(true)} className='flex fixed w-[50px] h-[50px] rounded-full bottom-5 left-[45vw] bg-secondary items-center justify-center'>
+                    <IoAdd color='white' size={30} />
+                </button>
             </main>
-
-
+            <AddModal />
+            <CreatePinModal boardId={board ? Number(board.id) : null} />
         </>
     )
 }

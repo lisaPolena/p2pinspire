@@ -21,7 +21,7 @@ interface AppBarProps {
 
 export const AppBar = (props: AppBarProps) => {
   const { isBoard, isSavedPin, title, showTitle, board, pin } = props;
-  const { setEditModalOpen, setFilterBoardModalOpen } = useAppState();
+  const { setEditModalOpen, setFilterBoardModalOpen, createPinModalOpen } = useAppState();
   const [longTitle, setLongTitle] = useState<boolean>(false);
   const router = useRouter();
 
@@ -35,11 +35,11 @@ export const AppBar = (props: AppBarProps) => {
   return (
     <>
       <div className={`fixed inset-x-0 top-0 grid grid-cols-3 ${isBoard ? 'bg-black' : 'bg-transparent'} h-[50px] pt-3 px-2 z-10`}>
-        <div className={`text-2xl ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'}`} onClick={() => router.back()}><IoChevronBack /></div>
+        <div className={`text-2xl ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'}`} onClick={() => !createPinModalOpen ? router.back() : null}>{!createPinModalOpen && <IoChevronBack />}</div>
         <div className={`text-center ${longTitle ? 'mt-[-0.5rem]' : ''}`}>{showTitle && title ? title : ''}</div>
         <div className={`flex justify-end gap-6 ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'} `}>
-          {isBoard && <div className='text-2xl' onClick={() => setFilterBoardModalOpen(true)}><IoFilter /></div>}
-          <div className='text-2xl' onClick={() => setEditModalOpen(true)}><IoIosMore /></div>
+          {isBoard && <div className='text-2xl' onClick={() => !createPinModalOpen ? setFilterBoardModalOpen(true) : null}>{!createPinModalOpen && <IoFilter />}</div>}
+          <div className='text-2xl' onClick={() => !createPinModalOpen ? setEditModalOpen(true) : null}>{!createPinModalOpen && <IoIosMore />}</div>
         </div>
       </div>
       <EditGeneralModal isBoard={isBoard} isSavedPin={isSavedPin} />

@@ -9,7 +9,11 @@ import { useAccount, useContractEvent, useContractRead, useContractWrite } from 
 import { Board } from '@/common/types/structs';
 import { useIpfs } from '@/common/functions/contracts';
 
-const CreatePinModal: React.FC = () => {
+interface CreatePinModalProps {
+    boardId?: number | null;
+}
+
+const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     const { address, isConnected } = useAccount()
     const [pinTitle, setPinTitle] = useState<string>('');
     const [pinDescription, setPinDescription] = useState<string>('');
@@ -54,14 +58,15 @@ const CreatePinModal: React.FC = () => {
     });
 
     const handleCreatePin = async () => {
-        if (!pinTitle || !pinBoardId || (pinDescription && pinDescription.length > 50) || !pinImage) {
+        if (!pinTitle || (pinDescription && pinDescription.length > 50) || !pinImage) {
             console.log('error');
             return;
         }
         const result = await ipfs.add(pinImage);
-        await createPin({ args: [pinTitle, pinDescription, result.path, pinBoardId] })
+        const bId = boardId ? boardId : pinBoardId;
+        await createPin({ args: [pinTitle, pinDescription, result.path, bId] })
         setCreatePinModalOpen(false);
-        const board = boards.find((board) => board.id === Number(pinBoardId))
+        const board = boards.find((board) => board.id === Number(bId))
         setCreatedPin({ boardName: board.name, imageHash: result.path });
         clearForm();
         handleLoadingCreatingPinToast();
@@ -123,11 +128,13 @@ const CreatePinModal: React.FC = () => {
                     <Input variant='unstyled' placeholder='Say more about this Pin' defaultValue={pinDescription} onChange={(e) => setPinDescription(e.target.value)} />
                 </div>
 
-                <div>
-                    <Select placeholder='Select option' onChange={(e) => setPinBoardId(e.target.value)}>
-                        {boards.map((board) => <option key={Number(board.id)} value={Number(board.id)}>{board.name}</option>)}
-                    </Select>
-                </div>
+                {!boardId &&
+                    <div>
+                        <Select placeholder='Select option' onChange={(e) => setPinBoardId(e.target.value)}>
+                            {boards.map((board) => <option key={Number(board.id)} value={Number(board.id)}>{board.name}</option>)}
+                        </Select>
+                    </div>
+                }
             </div>
         </Modal>
     );
