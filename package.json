@@ -15,6 +15,7 @@
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@rainbow-me/rainbowkit": "^1.0.1",
+    "@rainbow-me/rainbowkit-siwe-next-auth": "^0.2.0",
     "@truffle/hdwallet-provider": "^2.1.11",
     "@types/node": "18.14.2",
     "@types/react": "18.0.28",

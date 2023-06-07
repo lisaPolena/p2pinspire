@@ -2,6 +2,7 @@ import Head from 'next/head'
 import { Navbar } from '@/components/general/Navbar'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
+import { useSession } from "next-auth/react"
 import { useAppState } from '@/components/general/AppStateContext';
 import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import boardManager from '../contracts/build/BoardManager.json';
@@ -12,6 +13,7 @@ import { Skeleton, Stack } from '@chakra-ui/react';
 
 export default function Home() {
   const { address, isConnected } = useAccount()
+  const { data: session, status } = useSession()
   const router = useRouter();
   const [pins, setPins] = useState<Pin[]>([]);
   const [notOwnPins, setNotOwnPins] = useState<Pin[]>([]);
@@ -51,17 +53,13 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!isConnected) router.push('/');
-    }, 2000);
+    if (!isConnected && status === 'unauthenticated' && !session) {
+      router.push('/')
+    }
 
     getAllPins();
 
-    return () => {
-      clearTimeout(timeoutId);
-    };
-
-  }, [address, isConnected, boards])
+  }, [address, isConnected, boards, status])
 
   function getAllPins() {
     if (allBoardsByAddress && allPins) {

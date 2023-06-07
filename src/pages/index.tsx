@@ -1,27 +1,20 @@
 import Head from 'next/head'
-import { useEffect } from 'react'
-import { useRouter } from 'next/router';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount } from 'wagmi';
+import { useSession } from "next-auth/react"
+import { useAccount } from "wagmi"
+import { useEffect } from "react"
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useRouter } from 'next/router'
 
 export default function Index() {
-  // active: returns a boolean to check if user is connected
-  // activate: to authenticate the user’s wallet
-  //const { active, activate } = useWeb3React()
   const { address, isConnected } = useAccount()
+  const { data: session, status } = useSession()
   const router = useRouter();
 
   useEffect(() => {
-    if (isConnected) router.push('/home');
-  }, [isConnected])
-
-  // async function connect() {
-  //   try {
-  //     await activate(injected);
-  //   } catch (ex) {
-  //     console.log(ex)
-  //   }
-  // }
+    if (isConnected && status === 'authenticated' && session) {
+      router.push('/home')
+    }
+  }, [isConnected, session])
 
   return (
     <>
@@ -35,9 +28,6 @@ export default function Index() {
         <div className="z-10 flex flex-col h-[40vh] bg-black justify-between w-screen items-center pt-12 pb-8 shadow-index">
           <img className='w-24' src='/assets/logo.png' alt='Logo'></img>
           <h2>Welcome to Web3 Pinterest</h2>
-          {/* <Button width={'70%'} borderRadius={'50px'} colorScheme='primary' variant='solid' onClick={connect}>
-            Connect MetaMask
-          </Button> */}
           <ConnectButton accountStatus={'full'} />
         </div>
       </main>

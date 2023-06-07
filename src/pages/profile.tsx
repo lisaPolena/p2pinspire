@@ -10,9 +10,11 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
+import { useSession } from "next-auth/react"
 
 export default function Profile() {
     const { address, isConnected } = useAccount()
+    const { data: session, status } = useSession()
     const [boards, setBoards] = useState<any[]>([]);
     const [allBoards, setAllBoards] = useState<Board[]>([]);
     const [allPins, setAllPins] = useState<Pin[]>([]);
@@ -108,16 +110,13 @@ export default function Profile() {
     });
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (!isConnected) router.push('/');
-        }, 2000);
+        if (!isConnected && status === 'unauthenticated' && !session) {
+            router.push('/')
+        }
 
         getAllBoards();
 
-        return () => {
-            clearTimeout(timeoutId);
-        }
-    }, [isConnected, address, allBoardsByAddress, allPinsByAddress, allBoards])
+    }, [isConnected, status, session, allBoardsByAddress, allPinsByAddress, allBoards])
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {

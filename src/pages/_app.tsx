@@ -1,11 +1,10 @@
+import { GetSiweMessageOptions, RainbowKitSiweNextAuthProvider } from '@rainbow-me/rainbowkit-siwe-next-auth';
 import { AppStateProvider } from '@/components/general/AppStateContext';
-import MetamaskProvider from '@/components/general/MetaMaskProvider';
+import { SessionProvider } from "next-auth/react";
 import '@/styles/globals.css'
 import customTheme from '@/theme';
 import { ChakraProvider } from '@chakra-ui/react'
 import type { AppProps } from 'next/app'
-import { Web3Provider } from '@ethersproject/providers'
-import { Web3ReactProvider } from "@web3-react/core";
 
 import '@rainbow-me/rainbowkit/styles.css';
 
@@ -14,10 +13,9 @@ import {
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { mainnet, polygon, optimism, arbitrum, polygonMumbai } from 'wagmi/chains';
+import { mainnet, polygon, polygonMumbai } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
-import { useEffect } from 'react';
 
 export default function App({ Component, pageProps }: AppProps) {
 
@@ -28,25 +26,36 @@ export default function App({ Component, pageProps }: AppProps) {
       publicProvider()
     ]
   );
+
   const { connectors } = getDefaultWallets({
     appName: 'Web3Pinterest',
     projectId: '875210f269badbd4a01da1fab3ee5fde',
     chains
   });
+
   const wagmiConfig = createConfig({
     autoConnect: true,
     connectors,
     publicClient
   })
 
+  const getSiweMessageOptions: GetSiweMessageOptions = () => ({
+    statement: 'Sign in to Web3Pinterest',
+  });
+
   return (
     <AppStateProvider>
       <WagmiConfig config={wagmiConfig}>
-        <RainbowKitProvider chains={chains}>
-          <ChakraProvider theme={customTheme}>
-            <Component {...pageProps} />
-          </ChakraProvider>
-        </RainbowKitProvider>
+        <SessionProvider session={pageProps.session} refetchInterval={0}>
+          <RainbowKitSiweNextAuthProvider getSiweMessageOptions={getSiweMessageOptions}>
+            <RainbowKitProvider chains={chains}>
+              <ChakraProvider theme={customTheme}>
+                <Component {...pageProps} />
+              </ChakraProvider>
+            </RainbowKitProvider>
+          </RainbowKitSiweNextAuthProvider>
+
+        </SessionProvider>
       </WagmiConfig>
     </AppStateProvider>
 
