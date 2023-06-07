@@ -5,15 +5,16 @@ import { useRouter } from 'next/router';
 import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack } from '@chakra-ui/react';
 import { useAppState } from '@/components/general/AppStateContext';
 import React from 'react';
-import { useAccount, useContractEvent, useContractRead } from 'wagmi';
+import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
+import { watchAccount } from '@wagmi/core'
 
 export default function Profile() {
-    const { address, isConnected } = useAccount()
+    const { address, isConnected, connector: activeConnector } = useAccount()
     const { data: session, status } = useSession()
     const [boards, setBoards] = useState<any[]>([]);
     const [allBoards, setAllBoards] = useState<Board[]>([]);
@@ -116,7 +117,25 @@ export default function Profile() {
 
         getAllBoards();
 
-    }, [isConnected, status, session, allBoardsByAddress, allPinsByAddress, allBoards])
+        const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
+            if (account) {
+                console.log('new account', account)
+            } else if (chain) {
+                console.log('new chain', chain)
+            }
+        }
+
+        if (activeConnector) {
+            activeConnector.on('change', handleConnectorUpdate)
+        }
+
+        return () => {
+            if (activeConnector) {
+                activeConnector.off('change', handleConnectorUpdate)
+            }
+        }
+
+    }, [isConnected, status, session, allBoardsByAddress, allPinsByAddress, allBoards, activeConnector])
 
     const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
         setBoards((prevBoards) => {
