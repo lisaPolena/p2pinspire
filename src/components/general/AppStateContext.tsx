@@ -1,8 +1,9 @@
+import { Board } from '@/common/types/structs';
 import React, { createContext, useContext, useState } from 'react';
 
 interface AppStateContextProps {
-  allBoards: any[];
-  setAllBoards: (boards: any[]) => void;
+  allBoards: Board[];
+  setAllBoards: (boards: Board[]) => void;
   createBoardModalOpen: boolean;
   setCreateBoardModalOpen: (open: boolean) => void;
   navbarModalOpen: boolean;
@@ -48,7 +49,7 @@ export const useAppState = () => {
 };
 
 export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const [allBoards, setAllBoards] = useState<any[]>([]);
+  const [allBoards, setAllBoards] = useState<Board[]>([]);
   const [navbarModalOpen, setNavbarModalOpen] = useState<boolean>(false);
   const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
   const [createPinModalOpen, setCreatePinModalOpen] = useState<boolean>(false);
