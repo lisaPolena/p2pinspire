@@ -8,6 +8,7 @@ import pinManager from '../../contracts/build/PinManager.json';
 import { useAccount, useContractEvent, useContractRead, useContractWrite } from 'wagmi';
 import { Board } from '@/common/types/structs';
 import { useIpfs } from '@/common/functions/contracts';
+import ImageUploader from '../general/ImageUploader';
 
 interface CreatePinModalProps {
     boardId?: number | null;
@@ -18,11 +19,12 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     const [pinTitle, setPinTitle] = useState<string>('');
     const [pinDescription, setPinDescription] = useState<string>('');
     const [pinBoardId, setPinBoardId] = useState<string>('');
-    const [pinImage, setPinImage] = useState<any>(null);
+    const [pinImage, setPinImage] = useState<string>('');
     const { createPinModalOpen, setCreatePinModalOpen, createdPin, setCreatedPin } = useAppState();
     const [boards, setBoards] = useState<any[]>([]);
     const ipfs = useIpfs();
     const toast = useToast()
+    const [imageLoading, setImageLoading] = useState<boolean>(false);
 
     const { data: allBoardsByAddress } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
@@ -62,12 +64,11 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
             console.log('error');
             return;
         }
-        const result = await ipfs.add(pinImage);
         const bId = boardId ? boardId : pinBoardId;
-        await createPin({ args: [pinTitle, pinDescription, result.path, bId] })
+        await createPin({ args: [pinTitle, pinDescription, pinImage, bId] })
         setCreatePinModalOpen(false);
         const board = boards.find((board) => board.id === Number(bId))
-        setCreatedPin({ boardName: board.name, imageHash: result.path });
+        setCreatedPin({ boardName: board.name, imageHash: pinImage });
         clearForm();
         handleLoadingCreatingPinToast();
     }
@@ -76,7 +77,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         setPinTitle('');
         setPinDescription('');
         setPinBoardId('');
-        setPinImage(null);
+        setPinImage('');
     }
 
     //TODO; fix this, createdPin ist immmer ein hinter her, mit AppState probieren oder so --> funktioniert nicht
@@ -106,8 +107,21 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         })
     }
 
+    const handleImageUpload = async (image: File | null) => {
+        if (!image) return;
+        setImageLoading(true);
+        const res = await ipfs.add(image);
+        setImageLoading(false);
+        setPinImage(res.path);
+    }
+
+    const handleClose = () => {
+        setCreatePinModalOpen(false);
+        clearForm();
+    }
+
     return (
-        <Modal isOpen={createPinModalOpen} closeModal={() => setCreatePinModalOpen(false)} title="Add new Pin" height='h-[95%]'>
+        <Modal isOpen={createPinModalOpen} closeModal={handleClose} title="Add new Pin" height='h-[95%]'>
             <div className='absolute top-3 right-3'>
                 <button
                     className="px-4 py-2 text-white transition-colors bg-red-600 rounded-3xl"
@@ -117,7 +131,14 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
                 </button>
             </div>
             <div className='flex flex-col gap-4'>
-                <input type="file" accept="image/*" onChange={(e: ChangeEvent<HTMLInputElement>) => setPinImage(e.target.files ? e.target.files[0] : null)} />
+                {!pinImage ? (
+                    <ImageUploader handleUpload={handleImageUpload} isLoading={imageLoading} />
+                ) : (
+
+                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pinImage}`}
+                        className="object-cover m-auto w-80 h-80 rounded-2xl" />
+                )}
+
                 <div>
                     <p>Title</p>
                     <Input variant='unstyled' placeholder='Give your Pin a title' defaultValue={pinTitle} onChange={(e) => setPinTitle(e.target.value)} />
