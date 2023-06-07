@@ -109,6 +109,8 @@ contract BoardManager {
         require(bytes(newName).length != 0, "New board name cannot be empty.");
 
         boards[boardId].name = newName;
+
+        emit BoardEdited(boardId, newName);
     }
 
     /**

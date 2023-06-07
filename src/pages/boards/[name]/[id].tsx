@@ -5,13 +5,13 @@ import { Spinner } from '@chakra-ui/react';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { useAccount, useContractRead } from 'wagmi';
+import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import pinManager from '../../../contracts/build/PinManager.json';
 import boardManager from '../../../contracts/build/BoardManager.json';
 
 export default function DetailBoard() {
     const { address, isConnected } = useAccount()
-    const [board, setBoard] = useState<any>(null);
+    const [board, setBoard] = useState<Board | null>(null);
     const [showTitle, setShowTitle] = useState<boolean>(false);
     const router = useRouter()
     const [pins, setPins] = useState<Pin[]>([]);
@@ -37,6 +37,17 @@ export default function DetailBoard() {
         onSuccess(data) {
             const res = data as Pin[];
             setTmpPins(res);
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'BoardEdited',
+        listener(log: any) {
+            const args = log[0].args;
+            const newBoard = { ...board, name: args.newName } as Board;
+            setBoard(newBoard);
         },
     });
 
