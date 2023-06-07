@@ -38,13 +38,19 @@ contract PinManager {
      * @param pinId ID of the pin edited
      * @param newTitle New title of the pin edited
      * @param newDescription New description of the pin edited
-     * @param boardId ID of the new board
+     * @param imageHash IPFS hash of the pin's image
+     * @param newBoardId ID of the new board
+     * @param oldBoardId ID of the old board
+     * @param owner Owner of the pin edited
      */
     event CreatedPinEdited(
         uint256 pinId,
         string newTitle,
         string newDescription,
-        uint256 boardId
+        string imageHash,
+        uint256 newBoardId,
+        uint256 oldBoardId,
+        address owner
     );
 
     /**
@@ -144,10 +150,19 @@ contract PinManager {
             msg.sender == pins[pinId].owner,
             "Only the pin owner can edit the pin."
         );
+        uint256 oldBoardId = pins[pinId].boardId;
         pins[pinId].title = newTitle;
         pins[pinId].description = newDescription;
         pins[pinId].boardId = newBoardId;
-        emit CreatedPinEdited(pinId, newTitle, newDescription, newBoardId);
+        emit CreatedPinEdited(
+            pinId,
+            newTitle,
+            newDescription,
+            pins[pinId].imageHash,
+            newBoardId,
+            oldBoardId,
+            pins[pinId].owner
+        );
     }
 
     /**

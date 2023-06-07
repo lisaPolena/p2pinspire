@@ -63,7 +63,6 @@ export default function Profile() {
         },
     });
 
-    //TODO: event beim smart contract anpassen, dass es alle daten zurück gibt und eine onPinSaved funktion schreiben
     useContractEvent({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
         abi: boardManager.abi,
@@ -81,6 +80,30 @@ export default function Profile() {
         listener(log: any) {
             const args = log[0].args;
             onPinCreatedOrSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'CreatedPinEdited',
+        listener(log: any) {
+            const args = log[0].args;
+            if (args.oldBoardId !== args.newBoardId) {
+                onCreatedPinEdited(Number(args.pinId), args.newTitle, args.newDescription, args.imageHash, Number(args.oldBoardId), Number(args.newBoardId), args.owner);
+            }
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'SavedPinEdited',
+        listener(log: any) {
+            const args = log[0].args;
+            if (args.oldBoardId !== args.newBoardId) {
+                onSavedPinEdited(Number(args.pinId), Number(args.oldBoardId), Number(args.newBoardId));
+            }
         },
     });
 
@@ -114,6 +137,36 @@ export default function Profile() {
             return prevBoards.map((board) => {
                 if (board.id === boardId) {
                     return { ...board, pins: [...board.pins, newPin] };
+                }
+                return board;
+            });
+        });
+    };
+
+    const onCreatedPinEdited = (pinId: number, title: string, description: string, imageHash: string, oldBoardId: number, newBoardId: number, owner: string) => {
+        const newPin = { id: pinId, title: title, description: description, imageHash: imageHash, boardId: newBoardId, owner: owner };
+        setBoards((prevBoards) => {
+            return prevBoards.map((board) => {
+                if (board.id === oldBoardId) {
+                    return { ...board, pins: board.pins.filter((pin: { id: number; }) => Number(pin.id) !== pinId) };
+                }
+                if (board.id === newBoardId) {
+                    return { ...board, pins: [...board.pins, newPin] };
+                }
+                return board;
+            });
+        });
+    };
+
+    const onSavedPinEdited = (pinId: number, oldBoardId: number, newBoardId: number) => {
+        setBoards((prevBoards) => {
+            const pin = prevBoards.find((board) => board.id === oldBoardId)?.pins.find((pin: { id: number; }) => Number(pin.id) === pinId);
+            return prevBoards.map((board) => {
+                if (board.id === oldBoardId) {
+                    return { ...board, pins: board.pins.filter((pin: { id: number; }) => Number(pin.id) !== pinId) };
+                }
+                if (board.id === newBoardId) {
+                    return { ...board, pins: [...board.pins, pin] };
                 }
                 return board;
             });

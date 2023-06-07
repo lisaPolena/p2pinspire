@@ -56,9 +56,10 @@ contract BoardManager {
     /**
      * @dev Event emitted when a saved pin is edited
      * @param pinId ID of the pin edited
-     * @param boardId ID of the new board
+     * @param oldBoardId ID of the old board
+     * @param newBoardId ID of the new board
      */
-    event SavedPinEdited(uint256 pinId, uint256 boardId);
+    event SavedPinEdited(uint256 pinId, uint256 oldBoardId, uint256 newBoardId);
 
     /**
      * @dev Event emitted when a saved pin is deleted
@@ -252,7 +253,7 @@ contract BoardManager {
         // Save pin to the new board
         newBoard.pins.push(pinId);
 
-        emit SavedPinEdited(pinId, newBoardId);
+        emit SavedPinEdited(pinId, boardId, newBoardId);
     }
 
     /**
