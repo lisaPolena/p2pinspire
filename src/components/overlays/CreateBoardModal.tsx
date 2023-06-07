@@ -4,11 +4,13 @@ import { useAppState } from '../general/AppStateContext';
 import { Input, Switch } from '@chakra-ui/react';
 import boardManager from '../../contracts/build/BoardManager.json';
 import { useContractWrite } from 'wagmi';
+import { useRouter } from 'next/router';
 
 const CreateBoardModal: React.FC = () => {
     const { createBoardModalOpen, setCreateBoardModalOpen } = useAppState();
     const { setLoadCreateBoardTransaction } = useAppState();
     const [boardName, setBoardName] = React.useState('');
+    const router = useRouter();
 
     const {
         data: createBoardData,
@@ -31,6 +33,8 @@ const CreateBoardModal: React.FC = () => {
     const handleCreateBoard = async () => {
         await createBoard({ args: [boardName] });
         setCreateBoardModalOpen(false);
+        if (!window.location.href.includes('profile'))
+            router.push('/profile');
         setLoadCreateBoardTransaction(true);
     }
 
