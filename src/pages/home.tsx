@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
 import { useSession } from "next-auth/react"
 import { useAppState } from '@/components/general/AppStateContext';
-import { useAccount, useContractEvent, useContractRead } from 'wagmi';
+import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wagmi';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
@@ -12,7 +12,7 @@ import React from 'react';
 import { Skeleton, Stack } from '@chakra-ui/react';
 
 export default function Home() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, connector: activeConnector } = useAccount()
   const { data: session, status } = useSession()
   const router = useRouter();
   const [pins, setPins] = useState<Pin[]>([]);
@@ -59,7 +59,26 @@ export default function Home() {
 
     getAllPins();
 
-  }, [address, isConnected, boards, status])
+    const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
+      if (account) {
+        //TODO: workaround 
+        window.location.reload();
+      } else if (chain) {
+        console.log('new chain', chain)
+      }
+    }
+
+    if (activeConnector) {
+      activeConnector.on('change', handleConnectorUpdate)
+    }
+
+    return () => {
+      if (activeConnector) {
+        activeConnector.off('change', handleConnectorUpdate)
+      }
+    }
+
+  }, [address, isConnected, boards, status, activeConnector])
 
   function getAllPins() {
     if (allBoardsByAddress && allPins) {

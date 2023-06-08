@@ -28,7 +28,7 @@ export default function Index() {
         <div className="z-10 flex flex-col h-[40vh] bg-black justify-between w-screen items-center pt-12 pb-8 shadow-index">
           <img className='w-24' src='/assets/logo.png' alt='Logo'></img>
           <h2>Welcome to Web3 Pinterest</h2>
-          <ConnectButton accountStatus={'full'} />
+          <ConnectButton accountStatus={'full'} label='Connect' />
         </div>
       </main>
     </>

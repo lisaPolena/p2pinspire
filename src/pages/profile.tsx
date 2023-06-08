@@ -12,6 +12,7 @@ import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
 import { watchAccount } from '@wagmi/core'
+import { AppBar } from '@/components/general/AppBar';
 
 export default function Profile() {
     const { address, isConnected, connector: activeConnector } = useAccount()
@@ -215,12 +216,13 @@ export default function Profile() {
             <Head>
                 <title>Profile</title>
             </Head>
-            <main className='min-h-screen bg-black mb-18'>
-                <div className='w-[95%] flex flex-col justify-center items-center'>
-                    <ConnectButton accountStatus={'avatar'} />
+            <main className='min-h-screen bg-black'>
+                <AppBar isBoard={false} isSavedPin={false} hideBackButton={true} />
+                <div className='w-[95%] flex flex-col justify-center items-center mb-10 relative top-20'>
+                    <ConnectButton label='Connect' />
                 </div>
 
-                <div className='flex flex-col items-center'>
+                <div className='relative flex flex-col items-center top-20'>
                     <Tabs variant='soft-rounded' colorScheme='primary' defaultIndex={1} size='md' align='center'>
                         <TabList>
                             <Tab key={'Tab-1'}>Created</Tab>
