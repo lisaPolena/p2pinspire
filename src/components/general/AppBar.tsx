@@ -7,21 +7,23 @@ import EditBoardModal from "../overlays/EditBoardModal";
 import { useEffect, useState } from "react";
 import EditPinModal from "../overlays/EditPinModal";
 import FilterBoardModal from "../overlays/FilterBoardModal";
+import { Board, Pin } from "@/common/types/structs";
 
 interface AppBarProps {
   isBoard: boolean;
   isSavedPin: boolean;
   title?: string;
   showTitle?: boolean;
-  board?: any;
-  pin?: any;
+  board?: Board | null;
+  pin?: Pin | null;
   hideBackButton?: boolean
+  pins?: Pin[] | null;
 }
 
 //TODO: add shadow if scroll position is > 0 (showtitle is true)
 
 export const AppBar = (props: AppBarProps) => {
-  const { isBoard, isSavedPin, title, showTitle, board, pin, hideBackButton } = props;
+  const { isBoard, isSavedPin, title, showTitle, board, pin, hideBackButton, pins } = props;
   const { setEditModalOpen, setFilterBoardModalOpen, createPinModalOpen } = useAppState();
   const [longTitle, setLongTitle] = useState<boolean>(false);
   const router = useRouter();
@@ -47,7 +49,7 @@ export const AppBar = (props: AppBarProps) => {
         </div>
       </div>
       <EditGeneralModal isBoard={isBoard} isSavedPin={isSavedPin} />
-      <EditBoardModal board={board} />
+      <EditBoardModal board={board ?? null} pins={pins ?? null} />
       <EditPinModal pin={pin} />
       <FilterBoardModal />
     </>

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, Switch } from '@chakra-ui/react';
+import { Input, Switch, Textarea } from '@chakra-ui/react';
 import boardManager from '../../contracts/build/BoardManager.json';
 import { useContractWrite } from 'wagmi';
 import { useRouter } from 'next/router';
@@ -9,7 +9,8 @@ import { useRouter } from 'next/router';
 const CreateBoardModal: React.FC = () => {
     const { createBoardModalOpen, setCreateBoardModalOpen } = useAppState();
     const { setLoadCreateBoardTransaction } = useAppState();
-    const [boardName, setBoardName] = React.useState('');
+    const [boardName, setBoardName] = useState<string>('');
+    const [boardDescription, setBoardDescription] = useState<string>('');
     const router = useRouter();
 
     const {
@@ -42,11 +43,12 @@ const CreateBoardModal: React.FC = () => {
 
     useEffect(() => {
         setBoardName('');
+        setBoardDescription('');
 
     }, [createBoardModalOpen])
 
     const handleCreateBoard = async () => {
-        await createBoard({ args: [boardName, ''] });
+        await createBoard({ args: [boardName, boardDescription] });
         setCreateBoardModalOpen(false);
         if (!window.location.href.includes('profile'))
             router.push('/profile');
@@ -67,10 +69,18 @@ const CreateBoardModal: React.FC = () => {
 
             <div className='flex flex-col gap-4'>
                 <div>
-                    <p>Board name</p>
+                    <p>Board Name</p>
                     <Input variant='unstyled' placeholder='Add' defaultValue={boardName} onChange={(e) => setBoardName(e.target.value)} />
                 </div>
 
+                <div>
+                    <p>Board Description</p>
+                    <Textarea
+                        variant='unstyled' placeholder='Add what you board is about' size={'lg'}
+                        defaultValue={boardDescription}
+                        onChange={(e) => setBoardDescription(e.target.value)}
+                    />
+                </div>
 
                 <div>
                     <p>Collaborators</p>

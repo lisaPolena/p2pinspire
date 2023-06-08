@@ -6,11 +6,12 @@ import { Progress } from '@chakra-ui/react'
 import boardManager from '../../contracts/build/BoardManager.json';
 import pinManager from '../../contracts/build/PinManager.json';
 import { useAccount, useContractEvent, useContractRead, useContractWrite } from 'wagmi';
-import { Board } from '@/common/types/structs';
+import { Board, Pin } from '@/common/types/structs';
 import { useIpfs } from '@/common/functions/contracts';
 import ImageUploader from '../general/ImageUploader';
 import SavePinModal from './SavePinModal';
 import { IoChevronBack, IoCheckmarkSharp } from "react-icons/io5";
+import { BsClipboardPulse } from 'react-icons/bs';
 
 
 interface CreatePinModalProps {
@@ -24,7 +25,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     const [pinBoardId, setPinBoardId] = useState<number>(0);
     const [pinImage, setPinImage] = useState<string>('');
     const { createPinModalOpen, setCreatePinModalOpen, createdPin, setCreatedPin } = useAppState();
-    const [boards, setBoards] = useState<any[]>([]);
+    const [boards, setBoards] = useState<Board[]>([]);
     const ipfs = useIpfs();
     const toast = useToast()
     const [imageLoading, setImageLoading] = useState<boolean>(false);
@@ -37,7 +38,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         args: [address],
         onSuccess(data) {
             const res = data as Board[];
-            setBoards(res.map((board) => ({ id: Number(board.id), name: board.name, owner: board.owner, pins: board.pins })));
+            setBoards(res.map((board) => ({ id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: board.pins, boardCoverHash: board.boardCoverHash })));
         },
     });
 
@@ -63,6 +64,26 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         },
     });
 
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'BoardCreated',
+        listener(log: any) {
+            const args = log[0].args;
+            onBoardCreated(Number(args.boardId), args.boardName, args.newDescription, args.owner);
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'BoardDeleted',
+        listener(log: any) {
+            const args = log[0].args
+            onBoardDeleted(Number(args.boardId))
+        },
+    });
+
     const handleCreatePin = async () => {
         if (!pinTitle || (pinDescription && pinDescription.length > 50) || !pinImage) {
             console.log('error');
@@ -73,7 +94,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         setCreatePinModalOpen(false);
         setBoardSlideOpen(false);
         const board = boards.find((board) => board.id === Number(bId))
-        setCreatedPin({ boardName: board.name, imageHash: pinImage });
+        if (board) setCreatedPin({ boardName: board.name, imageHash: pinImage });
         clearForm();
         handleLoadingCreatingPinToast();
     }
@@ -125,6 +146,18 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         setBoardSlideOpen(false);
         clearForm();
     }
+
+    const onBoardCreated = (boardId: number, boardName: string, boardDescription: string, owner: string) =>
+        setBoards((prevBoards) => {
+            return [...prevBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, description: boardDescription, owner: owner, pins: [], boardCoverHash: '' }]
+                .sort((a, b) => Number(a.id) - Number(b.id));
+        });
+
+    const onBoardDeleted = (boardId: number) => {
+        setBoards((prevBoards) => {
+            return prevBoards.filter(({ id }) => id !== boardId).sort((a, b) => a.id - b.id);
+        });
+    };
 
     return (
         <>
@@ -185,11 +218,12 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
                                 <ListItem key={Number(board.id)} onClick={() => setPinBoardId(Number(board.id))}>
                                     <div className='flex items-center h-16'>
 
-                                        {board.pins?.length > 0 && board.pins[0].imageHash ? (
-                                            <img className='w-14 h-14 rounded-xl' src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`} alt='board' />
-                                        ) : (
-                                            <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
-                                        )}
+                                        {board.boardCoverHash != '' ? (
+                                            <img className='w-14 h-14 rounded-xl' src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`} alt='board' />
+                                        ) :
+                                            (
+                                                <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
+                                            )}
 
 
                                         <div className='justify-center ml-4'>

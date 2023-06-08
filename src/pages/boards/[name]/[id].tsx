@@ -4,7 +4,7 @@ import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner } from '@chakra-ui/react';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import pinManager from '../../../contracts/build/PinManager.json';
 import boardManager from '../../../contracts/build/BoardManager.json';
@@ -31,6 +31,12 @@ export default function DetailBoard() {
             const res = data as Board;
             setBoard(res);
         },
+        onError(err) {
+            if (err.message.includes('Board does not exist.')) {
+                console.log('Board does not exist.');
+                router.push('/profile');
+            }
+        },
     });
 
     const { data: allPins } = useContractRead({
@@ -49,7 +55,7 @@ export default function DetailBoard() {
         eventName: 'BoardEdited',
         listener(log: any) {
             const args = log[0].args;
-            const newBoard = { ...board, name: args.newName, description: args.newDescription, boardCoverHash: args.boardCoverHash } as Board;
+            const newBoard = { id: args.boardId, name: args.newName, description: args.newDescription, owner: args.owner, pins: args.pins, boardCoverHash: args.boardCoverHash } as Board;
             setBoard(newBoard);
         },
     });
@@ -120,8 +126,7 @@ export default function DetailBoard() {
 
     const onPinDeleted = (pinId: number) => {
         setPins((prevPins) => {
-            console.log(prevPins);
-            return prevPins.filter(({ id }) => Number(id) !== pinId).sort((a, b) => a.id - b.id);
+            return prevPins.filter(({ id }) => Number(id) !== pinId);
         });
     };
 
@@ -139,13 +144,21 @@ export default function DetailBoard() {
                 <title>Detail</title>
             </Head>
             <main className='min-h-screen overflow-auto bg-black mb-18'>
-                <AppBar isBoard={true} isSavedPin={false} title={board ? board.name : ''} showTitle={showTitle} board={board} />
+                <AppBar isBoard={true} isSavedPin={false} title={board ? board.name : ''} showTitle={showTitle} board={board} pins={pins} />
                 {board ? (
                     <div className='relative top-[50px]'>
                         <div className='mt-10 mb-10 text-center'>
-                            <h1 className="text-3xl font-bold text-white mx-auto break-normal max-w-[12rem]">
-                                {board ? board.name : ''}
+                            <h1 className="text-3xl font-bold text-white mx-auto break-normal max-w-[20rem]">
+                                {board.name ?? ''}
                             </h1>
+                            {board.description &&
+                                <>
+                                    <hr className='w-2/4 m-auto mt-4'></hr>
+                                    <div className='px-6 mt-4'>
+                                        <p className='text-sm text-tertiary'>{board.description}</p>
+                                    </div>
+                                </>
+                            }
                         </div>
                         {!isLoading ? (
                             <>

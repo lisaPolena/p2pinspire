@@ -1,20 +1,26 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, Switch } from '@chakra-ui/react';
+import { Input, Slide, Switch, Textarea } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
 import boardManager from '../../contracts/build/BoardManager.json';
 import { useContractWrite } from 'wagmi';
+import { IoAdd, IoChevronBack } from 'react-icons/io5';
+import { RiEditCircleFill } from 'react-icons/ri';
+import { Board, Pin } from '@/common/types/structs';
 
 interface EditGeneralModalProps {
-    board: any;
+    board: Board | null;
+    pins?: Pin[] | null;
 }
 
 const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
-    const { board } = props;
+    const { board, pins } = props;
     const { editBoardModalOpen, setEditBoardModalOpen, deleteModalOpen, setDeleteModalOpen } = useAppState();
-    const [boardName, setBoardName] = React.useState<string>('');
-    const [boardDescription, setBoardDescripton] = React.useState<string>('');
+    const [boardName, setBoardName] = useState<string>('');
+    const [boardDescription, setBoardDescription] = useState<string>('');
+    const [boardCoverImage, setBoardCoverImage] = useState<string>('');
+    const [pinSlideOpen, setPinSlideOpen] = useState<boolean>(false);
 
     const {
         data: editBoardData,
@@ -33,13 +39,14 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
 
         if (board) {
             setBoardName(board.name);
-            setBoardDescripton(board.description);
+            setBoardDescription(board.description);
+            setBoardCoverImage(board.boardCoverHash);
         }
 
-    }, [board ? board.name : '', board ? board.description : '', editBoardStatus]);
+    }, [board, editBoardModalOpen]);
 
     const handleEditBoard = async () => {
-        await editBoard({ args: [board.id as string, boardName, '', ''] })
+        await editBoard({ args: [board?.id, boardName, boardDescription, boardCoverImage] })
         setEditBoardModalOpen(false);
     }
 
@@ -58,8 +65,21 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
                 </div >
                 <div className='flex flex-col gap-4'>
                     <div>
-                        <p>Board cover</p>
+                        <p className='mb-2'>Board cover</p>
+
+                        {!boardCoverImage ? (
+                            <div className='flex items-center justify-center w-40 h-40 mt-2 border-2 border-white border-dashed rounded-3xl' onClick={() => setPinSlideOpen(true)}>
+                                <IoAdd size={30} />
+                            </div>
+                        ) : (
+                            <div onClick={() => setPinSlideOpen(true)}>
+                                <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${boardCoverImage}`}
+                                    className="object-cover w-40 h-40 rounded-2xl" />
+                                <RiEditCircleFill size={23} className='absolute left-36 top-60' color='white' />
+                            </div>
+                        )}
                     </div>
+
                     <div>
                         <p>Board name</p>
                         <Input variant='unstyled' placeholder='Add' defaultValue={boardName} onChange={(e) => setBoardName(e.target.value)} />
@@ -67,7 +87,11 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
 
                     <div>
                         <p>Description</p>
-                        <Input variant='unstyled' placeholder='Add what your board is about' defaultValue={boardDescription} onChange={(e) => setBoardDescripton(e.target.value)} />
+                        <Textarea
+                            variant='unstyled' placeholder='Add what you board is about' size={'lg'}
+                            defaultValue={boardDescription}
+                            onChange={(e) => setBoardDescription(e.target.value)}
+                        />
                     </div>
 
                     <div>
@@ -107,8 +131,31 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
                     </div>
 
                 </div>
+                <Slide direction='right' in={pinSlideOpen} style={{ zIndex: 20 }}>
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] h-full">
+                        <div className="flex items-center gap-24">
+                            <button className="text-white" onClick={() => setPinSlideOpen(false)}>
+                                <IoChevronBack size={30} />
+                            </button>
+                            <h2 className="text-base font-bold text-white">Set Board Cover</h2>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 px-4 relative top-[50px] mt-2">
+                        {pins?.map((pin: any) => (
+                            <div key={pin.id} onClick={() => {
+                                setBoardCoverImage(pin.imageHash)
+                                setPinSlideOpen(false)
+                            }
+                            }>
+                                <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
+                                    alt={pin.title} className="object-cover w-full rounded-2xl max-h-52" />
+                            </div>
+                        ))}
+                    </div>
+                </Slide>
             </Modal>
             <DeleteModal isOpen={deleteModalOpen} closeModal={() => setDeleteModalOpen(false)} isBoard={true} board={board} />
+
         </>
     );
 };

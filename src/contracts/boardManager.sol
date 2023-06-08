@@ -35,12 +35,16 @@ contract BoardManager {
      * @param boardId ID of the board edited
      * @param newName New name of the board edited
      * @param newDescription New description of the board edited
+     * @param owner Owner of the board edited
+     * @param pins Array of pin IDs saved to the board
      * @param boardCoverHash New IPFS hash of the board cover image
      */
     event BoardEdited(
         uint256 boardId,
         string newName,
         string newDescription,
+        address indexed owner,
+        uint256[] pins,
         string boardCoverHash
     );
 
@@ -145,7 +149,14 @@ contract BoardManager {
         boards[boardId].description = newDescription;
         boards[boardId].boardCoverHash = boardCoverHash;
 
-        emit BoardEdited(boardId, newName, newDescription, boardCoverHash);
+        emit BoardEdited(
+            boardId,
+            newName,
+            newDescription,
+            boards[boardId].owner,
+            boards[boardId].pins,
+            boardCoverHash
+        );
     }
 
     /**
