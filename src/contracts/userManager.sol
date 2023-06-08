@@ -2,42 +2,57 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
-//import "hardhat/console.sol";
+import {User} from "./common/types.sol";
 
 contract UserManager {
-    struct User {
-        uint id;
-        string username;
-        bytes32 passwordHash;
-    }
+    mapping(address => User) public users; // Mapping to store user information by user address
+    mapping(string => address) public usernameToUserAddress; // Mapping to store user address by username
+    uint public userCount; // Total number of users
 
-    mapping(uint => User) public users;
-    mapping(string => uint) public usernameToUserId;
-    uint public userCount;
+    event UserCreated(address userAddress); // Event emitted when a new user is created
 
-    function registerUser(
-        string memory _username,
-        bytes32 _passwordHash
-    ) public {
-        require(usernameToUserId[_username] == 0, "Username already exists.");
-        User memory user = User(userCount + 1, _username, _passwordHash);
-        users[user.id] = user;
-        usernameToUserId[_username] = user.id;
+    /**
+     * @dev Create a new user
+     * @param userAddress Address of the user
+     * @return address Address of the created user
+     */
+    function createUser(address userAddress) public returns (address) {
         userCount++;
+
+        // Initialize user properties
+        string memory name;
+        string memory username;
+        string memory profileImageHash;
+        string memory bio;
+        address[] memory following;
+        address[] memory followers;
+
+        // Create user object
+        User memory user = User(
+            userAddress,
+            name,
+            username,
+            profileImageHash,
+            bio,
+            following,
+            followers
+        );
+
+        // Store user in the mapping
+        users[userAddress] = user;
+
+        // Emit event for user creation
+        emit UserCreated(userAddress);
+
+        return userAddress;
     }
 
-    function authenticateUser(
-        string memory _username,
-        bytes32 _passwordHash
-    ) public view returns (bool) {
-        uint userId = usernameToUserId[_username];
-        if (userId == 0) {
-            return false;
-        }
-        return users[userId].passwordHash == _passwordHash;
-    }
-
-    function getUser(uint _id) public view returns (User memory) {
-        return users[_id];
+    /**
+     * @dev Get user information by user address
+     * @param userAddress Address of the user
+     * @return User struct containing user information
+     */
+    function getUser(address userAddress) public view returns (User memory) {
+        return users[userAddress];
     }
 }

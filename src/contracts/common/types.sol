@@ -25,3 +25,16 @@ struct Pin {
     address owner; //owner of the pin
     uint256 boardId; //id of the board where the pin is saved
 }
+
+/**
+ * @dev Struct to store user information
+ */
+struct User {
+    address userAddress; //address of the user
+    string name; //name of the user
+    string username; //username of the user
+    string profileImageHash; //hash of the profile image
+    string bio; //bio of the user
+    address[] following; //addresses that the user follows
+    address[] followers; //addresses that follow the user
+}
