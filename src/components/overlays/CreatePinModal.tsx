@@ -71,6 +71,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         const bId = boardId ? boardId : pinBoardId;
         await createPin({ args: [pinTitle, pinDescription, pinImage, bId] })
         setCreatePinModalOpen(false);
+        setBoardSlideOpen(false);
         const board = boards.find((board) => board.id === Number(bId))
         setCreatedPin({ boardName: board.name, imageHash: pinImage });
         clearForm();
