@@ -16,9 +16,10 @@ export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter();
   const [pins, setPins] = useState<Pin[]>([]);
-  const [notOwnPins, setNotOwnPins] = useState<Pin[]>([]);
+  const [allPins, setAllPins] = useState<Pin[]>([]);
   const { allBoards, setAllBoards, loadSavePinTransaction, setLoadSavePinTransaction } = useAppState();
   const [boards, setBoards] = useState<Board[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { data: allBoardsByAddress } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
@@ -28,15 +29,20 @@ export default function Home() {
     onSuccess(data) {
       setBoards(data as Board[]);
     },
+    onError(error) {
+      console.log(error);
+    },
   });
 
-  const { data: allPins } = useContractRead({
+  const { data: allPinsData } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
     abi: pinManager.abi,
     functionName: 'getAllPins',
     onSuccess(data) {
-      const res = data as Pin[];
-      setNotOwnPins(res.filter((pin: Pin) => pin.owner !== address));
+      setAllPins(data as Pin[]);
+    },
+    onError(error) {
+      console.log(error);
     },
   });
 
@@ -61,8 +67,11 @@ export default function Home() {
 
     const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
       if (account) {
-        //TODO: workaround 
-        window.location.reload();
+        setIsLoading(true);
+        const timeout = setTimeout(() => {
+          setIsLoading(false);
+        }, 2000);
+        console.log('new account', account)
       } else if (chain) {
         console.log('new chain', chain)
       }
@@ -78,12 +87,12 @@ export default function Home() {
       }
     }
 
-  }, [address, isConnected, boards, status, activeConnector])
+  }, [address, isConnected, boards, status, activeConnector, allPinsData])
 
   function getAllPins() {
-    if (allBoardsByAddress && allPins) {
+    if (allBoardsByAddress && allPinsData) {
       const boardPins = boards.map((board: any) => board.pins.map((pin: any) => pin)).flat();
-      setPins(notOwnPins.filter((pin: { owner: any; id: number; }) => pin.owner !== address && !boardPins.includes(pin.id)));
+      setPins(allPins.filter((pin: { owner: any; id: any; }) => pin.owner !== address && !boardPins.includes(pin.id)));
     }
   }
 
@@ -106,26 +115,53 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 px-4 relative top-[50px] mt-2">
-          {pins.map((pin: any) => (
-            <React.Fragment key={pin.id}>
-              {loadSavePinTransaction && loadSavePinTransaction === Number(pin.id) ? (
-                <Stack>
-                  <Skeleton height='215px' width='100%' fadeDuration={4} />
-                  <Skeleton height='15px' width='70%' fadeDuration={4} />
-                </Stack>
-              ) : (
-                <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}`)}>
-                  <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
-                    alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
-                  <div className='mb-4'>
-                    <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
-                  </div>
-                </div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
+          {!isLoading ? (
+            <>
+              {pins.map((pin: any) => (
+                <React.Fragment key={pin.id}>
+                  {loadSavePinTransaction && loadSavePinTransaction === Number(pin.id) ? (
+                    <Stack>
+                      <Skeleton height='215px' width='100%' fadeDuration={4} />
+                      <Skeleton height='15px' width='70%' fadeDuration={4} />
+                    </Stack>
+                  ) : (
+                    <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}`)}>
+                      <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
+                        alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
+                      <div className='mb-4'>
+                        <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
+                      </div>
+                    </div>
+                  )}
+                </React.Fragment>
 
+              ))}
+            </>
+          ) : (
+            <>
+              <Stack>
+                <Skeleton height='215px' width='100%' fadeDuration={4} />
+                <Skeleton height='15px' width='70%' fadeDuration={4} />
+              </Stack>
+              <Stack>
+                <Skeleton height='215px' width='100%' fadeDuration={4} />
+                <Skeleton height='15px' width='70%' fadeDuration={4} />
+              </Stack>
+              <Stack>
+                <Skeleton height='215px' width='100%' fadeDuration={4} />
+                <Skeleton height='15px' width='70%' fadeDuration={4} />
+              </Stack>
+              <Stack>
+                <Skeleton height='215px' width='100%' fadeDuration={4} />
+                <Skeleton height='15px' width='70%' fadeDuration={4} />
+              </Stack>
+              <Stack>
+                <Skeleton height='215px' width='100%' fadeDuration={4} />
+                <Skeleton height='15px' width='70%' fadeDuration={4} />
+              </Stack>
+            </>
+          )}
+        </div>
       </main>
       <Navbar />
     </>
