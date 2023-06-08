@@ -12,6 +12,7 @@ import ImageUploader from '../general/ImageUploader';
 import SavePinModal from './SavePinModal';
 import { IoChevronBack, IoCheckmarkSharp } from "react-icons/io5";
 import { BsClipboardPulse } from 'react-icons/bs';
+import { getBoardsFromStorage } from '@/common/functions/boards';
 
 
 interface CreatePinModalProps {
@@ -24,7 +25,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     const [pinDescription, setPinDescription] = useState<string>('');
     const [pinBoardId, setPinBoardId] = useState<number>(0);
     const [pinImage, setPinImage] = useState<string>('');
-    const { allBoards, createPinModalOpen, setCreatePinModalOpen, createdPin, setCreatedPin } = useAppState();
+    const { allBoards, setAllBoards, createPinModalOpen, setCreatePinModalOpen, createdPin, setCreatedPin } = useAppState();
     const ipfs = useIpfs();
     const toast = useToast()
     const [imageLoading, setImageLoading] = useState<boolean>(false);
@@ -41,16 +42,14 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         onError(err) {
             console.log('error ', err);
         }
-    })
-
-    const unwatchPinCreated = useContractEvent({
-        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
-        abi: pinManager.abi,
-        eventName: 'PinCreated',
-        listener(log) {
-            handleSavedPinToast();
-        },
     });
+
+    useEffect(() => {
+        if (allBoards.length === 0) {
+            const storageBoards = getBoardsFromStorage();
+            setAllBoards(storageBoards);
+        }
+    }, [])
 
     const handleCreatePin = async () => {
         if (!pinTitle || (pinDescription && pinDescription.length > 50) || !pinImage) {
@@ -74,20 +73,6 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         setPinImage('');
     }
 
-    //TODO; fix this, createdPin ist immmer ein hinter her, mit AppState probieren oder so --> funktioniert nicht
-    function handleSavedPinToast() {
-        if (!createdPin) return;
-        toast({
-            position: 'top',
-            render: () => (
-                <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
-                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${createdPin.imageHash}`}
-                        className="object-cover w-[50px] h-[50px] rounded-2xl" />
-                    <p>Saved Pin to <strong>{createdPin.boardName}</strong></p>
-                </div>
-            ),
-        })
-    }
 
     function handleLoadingCreatingPinToast() {
         toast({

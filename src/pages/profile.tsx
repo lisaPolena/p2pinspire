@@ -2,7 +2,7 @@ import Head from 'next/head'
 import { Navbar } from '@/components/general/Navbar'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
-import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack } from '@chakra-ui/react';
+import { Tabs, TabList, Tab, TabPanels, TabPanel, Skeleton, Stack, useToast } from '@chakra-ui/react';
 import { useAppState } from '@/components/general/AppStateContext';
 import React from 'react';
 import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wagmi';
@@ -12,6 +12,7 @@ import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
 import { AppBar } from '@/components/general/AppBar';
+import { getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 
 export default function Profile() {
     const { address, isConnected, connector: activeConnector } = useAccount()
@@ -19,6 +20,7 @@ export default function Profile() {
     const { allBoards, setAllBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
     const router = useRouter();
     const [ownPins, setOwnPins] = useState<any[]>([]);
+    const toast = useToast()
 
     const { data: allPinsByAddress } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
@@ -69,6 +71,7 @@ export default function Profile() {
         listener(log: any) {
             const args = log[0].args;
             onPinCreatedOrSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
+            handleSavedPinToast(args.imageHash, Number(args.boardId));
         },
     });
 
@@ -79,6 +82,7 @@ export default function Profile() {
         listener(log: any) {
             const args = log[0].args;
             onPinCreatedOrSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
+            handleSavedPinToast(args.imageHash, Number(args.boardId));
         },
     });
 
@@ -131,11 +135,32 @@ export default function Profile() {
             router.push('/')
         }
 
+        if (allBoards.length === 0) {
+            const storageBoards = getBoardsFromStorage();
+            setAllBoards(storageBoards);
+        }
+
         const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
             if (account) {
-                console.log('new account', account)
+                router.push('/home')
+                toast({
+                    position: 'top',
+                    render: () => (
+                        <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
+                            <p>Account changed to <strong>{account.slice(0, 4)}...{account.slice(38, account.length)}</strong></p>
+                        </div>
+                    ),
+                })
             } else if (chain) {
-                console.log('new chain', chain)
+                toast({
+                    position: 'top',
+                    render: () => (
+                        <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
+                            <p>{chain.unsupported ? 'Sry, the network is not supported!' : 'You changed the network.'}</p>
+                        </div>
+                    ),
+                })
+
             }
         }
 
@@ -156,11 +181,13 @@ export default function Profile() {
             .sort((a, b) => Number(a.id) - Number(b.id));
 
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onBoardDeleted = (boardId: number) => {
         const updatedBoards = allBoards.filter(({ id }) => id !== boardId).sort((a, b) => a.id - b.id);
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onBoardEdited = (boardId: number, boardTitle: string, boardDescription: string, boardCoverHash: string) => {
@@ -171,6 +198,7 @@ export default function Profile() {
             return board;
         });
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onPinCreatedOrSaved = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
@@ -183,6 +211,7 @@ export default function Profile() {
         });
 
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onCreatedPinEdited = (pinId: number, title: string, description: string, imageHash: string, oldBoardId: number, newBoardId: number, owner: string) => {
@@ -198,6 +227,7 @@ export default function Profile() {
         });
 
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onSavedPinEdited = (pinId: number, oldBoardId: number, newBoardId: number) => {
@@ -213,6 +243,7 @@ export default function Profile() {
         });
 
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onPinDeleted = (pinId: number, boardId: number) => {
@@ -224,7 +255,22 @@ export default function Profile() {
         });
 
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
+
+    function handleSavedPinToast(imageHash: string, boardId: number) {
+        const boardName = allBoards.find((board) => board.id === boardId)?.name as string;
+        toast({
+            position: 'top',
+            render: () => (
+                <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
+                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${imageHash}`}
+                        className="object-cover w-[50px] h-[50px] rounded-2xl" />
+                    <p>Saved Pin to <strong>{boardName}</strong></p>
+                </div>
+            ),
+        })
+    }
 
     return (
         <>

@@ -9,6 +9,7 @@ import pinManager from '../../contracts/build/PinManager.json';
 import { useAccount, useContractWrite } from 'wagmi';
 import { Board } from '@/common/types/structs';
 import { IoChevronBack, IoCheckmarkSharp, IoChevronForward } from "react-icons/io5";
+import { getBoardsFromStorage } from '@/common/functions/boards';
 
 interface EditPinModalProps {
     pin: any;
@@ -17,7 +18,7 @@ interface EditPinModalProps {
 const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) => {
     const { pin } = props;
     const { address, isConnected } = useAccount()
-    const { allBoards, editPinModalOpen, setEditPinModalOpen, deletePinModalOpen, setDeletePinModalOpen } = useAppState();
+    const { allBoards, setAllBoards, editPinModalOpen, setEditPinModalOpen, deletePinModalOpen, setDeletePinModalOpen } = useAppState();
     const [pinTitle, setPinTitle] = useState<string>('');
     const [pinDescription, setPinDescripton] = useState<string>('');
     const [pinBoardId, setPinBoardId] = useState<string | number>('');
@@ -55,6 +56,11 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
 
     useEffect(() => {
         const { boardId } = router.query;
+
+        if (allBoards.length === 0) {
+            const storageBoards = getBoardsFromStorage();
+            setAllBoards(storageBoards);
+        }
 
         if (pin && pin.owner === address) {
             setIsOwner(true);

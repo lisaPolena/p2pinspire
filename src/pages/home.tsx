@@ -9,7 +9,8 @@ import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import React from 'react';
-import { Skeleton, Stack } from '@chakra-ui/react';
+import { Skeleton, Stack, useToast } from '@chakra-ui/react';
+import { storeBoardsInStorage } from '@/common/functions/boards';
 
 export default function Home() {
   const { address, isConnected, connector: activeConnector } = useAccount()
@@ -20,6 +21,7 @@ export default function Home() {
   const { allBoards, setAllBoards, loadSavePinTransaction, setLoadSavePinTransaction } = useAppState();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const toast = useToast()
 
   const { data: allBoardsByAddress } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
@@ -64,6 +66,7 @@ export default function Home() {
       const args = log[0].args;
       onPinSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
       setLoadSavePinTransaction(0);
+      handleSavedPinToast(args.imageHash, Number(args.boardId));
     },
   });
 
@@ -121,6 +124,7 @@ export default function Home() {
       }).sort((a, b) => Number(a.id) - Number(b.id)) as Board[];
 
       setAllBoards(updatedBoards);
+      storeBoardsInStorage(updatedBoards);
     }
   }
 
@@ -137,7 +141,22 @@ export default function Home() {
     });
 
     setAllBoards(updatedBoards);
+    storeBoardsInStorage(updatedBoards);
   };
+
+  function handleSavedPinToast(imageHash: string, boardId: number) {
+    const boardName = allBoards.find((board) => board.id === boardId)?.name as string;
+    toast({
+      position: 'top',
+      render: () => (
+        <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
+          <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${imageHash}`}
+            className="object-cover w-[50px] h-[50px] rounded-2xl" />
+          <p>Saved Pin to <strong>{boardName}</strong></p>
+        </div>
+      ),
+    })
+  }
 
   return (
     <>

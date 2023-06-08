@@ -11,6 +11,7 @@ import boardManager from '../../../contracts/build/BoardManager.json';
 import { IoAdd } from "react-icons/io5";
 import AddModal from '@/components/overlays/AddModal';
 import CreatePinModal from '@/components/overlays/CreatePinModal';
+import { getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 
 export default function DetailBoard() {
     const { address, isConnected } = useAccount()
@@ -109,6 +110,11 @@ export default function DetailBoard() {
 
         getPinsByBoardId();
 
+        if (allBoards.length === 0) {
+            const storageBoards = getBoardsFromStorage();
+            setAllBoards(storageBoards);
+        }
+
         if (board && board.owner !== address)
             router.push('/profile');
 
@@ -150,6 +156,7 @@ export default function DetailBoard() {
         });
 
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onPinCreated = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
@@ -181,6 +188,7 @@ export default function DetailBoard() {
             return board;
         });
         setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     return (
