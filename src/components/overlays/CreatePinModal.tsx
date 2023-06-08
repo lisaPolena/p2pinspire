@@ -24,23 +24,11 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     const [pinDescription, setPinDescription] = useState<string>('');
     const [pinBoardId, setPinBoardId] = useState<number>(0);
     const [pinImage, setPinImage] = useState<string>('');
-    const { createPinModalOpen, setCreatePinModalOpen, createdPin, setCreatedPin } = useAppState();
-    const [boards, setBoards] = useState<Board[]>([]);
+    const { allBoards, createPinModalOpen, setCreatePinModalOpen, createdPin, setCreatedPin } = useAppState();
     const ipfs = useIpfs();
     const toast = useToast()
     const [imageLoading, setImageLoading] = useState<boolean>(false);
     const [boardSlideOpen, setBoardSlideOpen] = useState<boolean>(false);
-
-    const { data: allBoardsByAddress } = useContractRead({
-        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
-        abi: boardManager.abi,
-        functionName: 'getBoardsByOwner',
-        args: [address],
-        onSuccess(data) {
-            const res = data as Board[];
-            setBoards(res.map((board) => ({ id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: board.pins, boardCoverHash: board.boardCoverHash })));
-        },
-    });
 
     const {
         data: createPinData,
@@ -64,26 +52,6 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         },
     });
 
-    useContractEvent({
-        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
-        abi: boardManager.abi,
-        eventName: 'BoardCreated',
-        listener(log: any) {
-            const args = log[0].args;
-            onBoardCreated(Number(args.boardId), args.boardName, args.newDescription, args.owner);
-        },
-    });
-
-    useContractEvent({
-        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
-        abi: boardManager.abi,
-        eventName: 'BoardDeleted',
-        listener(log: any) {
-            const args = log[0].args
-            onBoardDeleted(Number(args.boardId))
-        },
-    });
-
     const handleCreatePin = async () => {
         if (!pinTitle || (pinDescription && pinDescription.length > 50) || !pinImage) {
             console.log('error');
@@ -93,7 +61,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         await createPin({ args: [pinTitle, pinDescription, pinImage, bId] })
         setCreatePinModalOpen(false);
         setBoardSlideOpen(false);
-        const board = boards.find((board) => board.id === Number(bId))
+        const board = allBoards.find((board) => board.id === Number(bId))
         if (board) setCreatedPin({ boardName: board.name, imageHash: pinImage });
         clearForm();
         handleLoadingCreatingPinToast();
@@ -146,18 +114,6 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         setBoardSlideOpen(false);
         clearForm();
     }
-
-    const onBoardCreated = (boardId: number, boardName: string, boardDescription: string, owner: string) =>
-        setBoards((prevBoards) => {
-            return [...prevBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, description: boardDescription, owner: owner, pins: [], boardCoverHash: '' }]
-                .sort((a, b) => Number(a.id) - Number(b.id));
-        });
-
-    const onBoardDeleted = (boardId: number) => {
-        setBoards((prevBoards) => {
-            return prevBoards.filter(({ id }) => id !== boardId).sort((a, b) => a.id - b.id);
-        });
-    };
 
     return (
         <>
@@ -214,17 +170,24 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
                             <h2 className="text-base text-white">Your Boards</h2>
                         </div>
                         <List>
-                            {boards.map((board: any) => (
+                            {allBoards.map((board: any) => (
                                 <ListItem key={Number(board.id)} onClick={() => setPinBoardId(Number(board.id))}>
                                     <div className='flex items-center h-16'>
 
                                         {board.boardCoverHash != '' ? (
-                                            <img className='w-14 h-14 rounded-xl' src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`} alt='board' />
-                                        ) :
-                                            (
-                                                <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
-                                            )}
+                                            <img className='w-14 h-14 rounded-xl'
+                                                src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`} alt='board' />
+                                        ) : (
+                                            <>
+                                                {board.pins?.length > 0 && board.pins[0].imageHash ? (
+                                                    <img className='w-14 h-14 rounded-xl'
+                                                        src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`} alt='board' />
+                                                ) : (
+                                                    <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
 
+                                                )}
+                                            </>
+                                        )}
 
                                         <div className='justify-center ml-4'>
                                             <h2 className='text-lg font-bold'>{board.name}</h2>

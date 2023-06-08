@@ -20,7 +20,7 @@ export default function DetailBoard() {
     const [pins, setPins] = useState<Pin[]>([]);
     const [tmpPins, setTmpPins] = useState<Pin[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const { boardView, setAddModalOpen } = useAppState();
+    const { allBoards, setAllBoards, boardView, setAddModalOpen } = useAppState();
 
     const { data: boardById } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
@@ -57,6 +57,7 @@ export default function DetailBoard() {
             const args = log[0].args;
             const newBoard = { id: args.boardId, name: args.newName, description: args.newDescription, owner: args.owner, pins: args.pins, boardCoverHash: args.boardCoverHash } as Board;
             setBoard(newBoard);
+            onBoardEdited(Number(args.boardId), args.newName, args.newDescription, args.boardCoverHash);
         },
     });
 
@@ -66,7 +67,7 @@ export default function DetailBoard() {
         eventName: 'PinDeleted',
         listener(log: any) {
             const args = log[0].args;
-            onPinDeleted(Number(args.pinId));
+            onPinDeleted(Number(args.pinId), Number(args.boardId));
         },
     });
 
@@ -76,7 +77,7 @@ export default function DetailBoard() {
         eventName: 'SavedPinDeleted',
         listener(log: any) {
             const args = log[0].args;
-            onPinDeleted(Number(args.pinId));
+            onPinDeleted(Number(args.pinId), Number(args.boardId));
         },
     });
 
@@ -87,6 +88,17 @@ export default function DetailBoard() {
         listener(log: any) {
             const args = log[0].args;
             onPinCreated(Number(args.pinId), args.title, args.description, args.imageHash, args.boardId, args.owner);
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'CreatedPinEdited',
+        listener(log: any) {
+            const args = log[0].args;
+            const boardId = args.newBoardId ?? args.oldBoardId;
+            onPinEdited(Number(args.pinId), args.newTitle, args.newDescription, args.imageHash, Number(boardId));
         },
     });
 
@@ -116,7 +128,8 @@ export default function DetailBoard() {
 
     function getPinsByBoardId() {
         if (boardById && board && allPins) {
-            const boardPins = tmpPins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
+            const boardPinsIds = board.pins.map((id: Pin) => id)
+            const boardPins = tmpPins.filter((pin: Pin) => boardPinsIds.find((id) => Number(id) === Number(pin.id)));
             const pins = tmpPins.filter((pin: Pin) => pin.boardId === board.id);
             const mergedPins = [...boardPins, ...pins];
             setPins(mergedPins);
@@ -124,10 +137,19 @@ export default function DetailBoard() {
         }
     }
 
-    const onPinDeleted = (pinId: number) => {
+    const onPinDeleted = (pinId: number, boardId: number) => {
         setPins((prevPins) => {
             return prevPins.filter(({ id }) => Number(id) !== pinId);
         });
+
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === boardId) {
+                return { ...board, pins: board.pins.filter((pin) => Number(pin.id) !== pinId) as Pin[] };
+            }
+            return board;
+        });
+
+        setAllBoards(updatedBoards);
     };
 
     const onPinCreated = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
@@ -136,6 +158,29 @@ export default function DetailBoard() {
             return [...prevPins.filter(({ id }) => Number(id) !== Number(boardId)), newPin]
                 .sort((a, b) => Number(a.id) - Number(b.id));
         });
+    };
+
+    const onPinEdited = (pinId: number, title: string, description: string, imageHash: string, boardId: number) => {
+        setPins((prevPins) => {
+            const updatedPins = prevPins.map((pin) => {
+                if (Number(pin.id) === pinId) {
+                    return { ...pin, title, description, imageHash, boardId };
+                }
+                return pin;
+            });
+
+            return updatedPins.sort((a, b) => Number(a.id) - Number(b.id));
+        });
+    };
+
+    const onBoardEdited = (boardId: number, boardTitle: string, boardDescription: string, boardCoverHash: string) => {
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === boardId) {
+                return { ...board, name: boardTitle, description: boardDescription, boardCoverHash: boardCoverHash };
+            }
+            return board;
+        });
+        setAllBoards(updatedBoards);
     };
 
     return (
@@ -208,3 +253,5 @@ export default function DetailBoard() {
         </>
     )
 }
+
+

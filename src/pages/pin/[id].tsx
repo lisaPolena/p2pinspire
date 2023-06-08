@@ -49,7 +49,7 @@ export default function DetailPin() {
         eventName: 'CreatedPinEdited',
         listener(log: any) {
             const args = log[0].args;
-            const newPin = { ...pin, title: args.newTitle, description: args.newDescription } as Pin;
+            const newPin = { ...pin, title: args.newTitle, description: args.newDescription, imageHash: args.imageHash } as Pin;
             setPin(newPin);
         },
     });

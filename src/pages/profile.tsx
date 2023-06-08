@@ -16,22 +16,9 @@ import { AppBar } from '@/components/general/AppBar';
 export default function Profile() {
     const { address, isConnected, connector: activeConnector } = useAccount()
     const { data: session, status } = useSession()
-    const [boards, setBoards] = useState<any[]>([]);
-    const [allBoards, setAllBoards] = useState<Board[]>([]);
-    const [allPins, setAllPins] = useState<Pin[]>([]);
-    const { loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
+    const { allBoards, setAllBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
     const router = useRouter();
     const [ownPins, setOwnPins] = useState<any[]>([]);
-
-    const { data: allBoardsByAddress } = useContractRead({
-        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
-        abi: boardManager.abi,
-        functionName: 'getBoardsByOwner',
-        args: [address],
-        onSuccess(data) {
-            setAllBoards(data as Board[]);
-        },
-    });
 
     const { data: allPinsByAddress } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
@@ -39,7 +26,6 @@ export default function Profile() {
         functionName: 'getAllPins',
         onSuccess(data) {
             const res = data as Pin[];
-            setAllPins(res);
             setOwnPins(res.filter((pin: Pin) => pin.owner === address));
         },
     });
@@ -50,7 +36,7 @@ export default function Profile() {
         eventName: 'BoardCreated',
         listener(log: any) {
             const args = log[0].args;
-            onBoardCreated(Number(args.boardId), args.boardName, args.newDescription, args.owner);
+            onBoardCreated(Number(args.boardId), args.boardName, args.boardDescription, args.owner);
             setLoadCreateBoardTransaction(false);
         },
     });
@@ -63,6 +49,16 @@ export default function Profile() {
             const args = log[0].args
             onBoardDeleted(Number(args.boardId))
             setLoadDeleteBoardTransaction(0);
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'BoardEdited',
+        listener(log: any) {
+            const args = log[0].args;
+            onBoardEdited(Number(args.boardId), args.newName, args.newDescription, args.boardCoverHash);
         },
     });
 
@@ -110,12 +106,30 @@ export default function Profile() {
         },
     });
 
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+        abi: pinManager.abi,
+        eventName: 'PinDeleted',
+        listener(log: any) {
+            const args = log[0].args;
+            onPinDeleted(Number(args.pinId), Number(args.boardId));
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+        abi: boardManager.abi,
+        eventName: 'SavedPinDeleted',
+        listener(log: any) {
+            const args = log[0].args;
+            onPinDeleted(Number(args.pinId), Number(args.boardId));
+        },
+    });
+
     useEffect(() => {
         if (!isConnected && status === 'unauthenticated' && !session) {
             router.push('/')
         }
-
-        getAllBoards();
 
         const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
             if (account) {
@@ -135,80 +149,82 @@ export default function Profile() {
             }
         }
 
-    }, [isConnected, status, session, allBoardsByAddress, allPinsByAddress, allBoards, activeConnector])
+    }, [isConnected, status, session, allPinsByAddress, allBoards, activeConnector])
 
-    const onBoardCreated = (boardId: number, boardName: string, boardDescription: string, owner: string) =>
-        setBoards((prevBoards) => {
-            return [...prevBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, description: boardDescription, owner: owner, pins: [], boardCoverHash: '' }]
-                .sort((a, b) => Number(a.id) - Number(b.id));
-        });
+    const onBoardCreated = (boardId: number, boardName: string, boardDescription: string, owner: string) => {
+        const updatedBoards = [...allBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, description: boardDescription, owner: owner, pins: [], boardCoverHash: '' }]
+            .sort((a, b) => Number(a.id) - Number(b.id));
+
+        setAllBoards(updatedBoards);
+    };
 
     const onBoardDeleted = (boardId: number) => {
-        setBoards((prevBoards) => {
-            return prevBoards.filter(({ id }) => id !== boardId).sort((a, b) => a.id - b.id);;
+        const updatedBoards = allBoards.filter(({ id }) => id !== boardId).sort((a, b) => a.id - b.id);
+        setAllBoards(updatedBoards);
+    };
+
+    const onBoardEdited = (boardId: number, boardTitle: string, boardDescription: string, boardCoverHash: string) => {
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === boardId) {
+                return { ...board, name: boardTitle, description: boardDescription, boardCoverHash: boardCoverHash };
+            }
+            return board;
         });
+        setAllBoards(updatedBoards);
     };
 
     const onPinCreatedOrSaved = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
         const newPin = { id: pinId, title: title, description: description, imageHash: imageHash, boardId: boardId, owner: owner };
-        setBoards((prevBoards) => {
-            return prevBoards.map((board) => {
-                if (board.id === boardId) {
-                    return { ...board, pins: [...board.pins, newPin] };
-                }
-                return board;
-            });
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === boardId) {
+                return { ...board, pins: [...board.pins, newPin] };
+            }
+            return board;
         });
+
+        setAllBoards(updatedBoards);
     };
 
     const onCreatedPinEdited = (pinId: number, title: string, description: string, imageHash: string, oldBoardId: number, newBoardId: number, owner: string) => {
         const newPin = { id: pinId, title: title, description: description, imageHash: imageHash, boardId: newBoardId, owner: owner };
-        setBoards((prevBoards) => {
-            return prevBoards.map((board) => {
-                if (board.id === oldBoardId) {
-                    return { ...board, pins: board.pins.filter((pin: { id: number; }) => Number(pin.id) !== pinId) };
-                }
-                if (board.id === newBoardId) {
-                    return { ...board, pins: [...board.pins, newPin] };
-                }
-                return board;
-            });
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === oldBoardId) {
+                return { ...board, pins: board.pins.filter((pin: { id: number; }) => Number(pin.id) !== pinId) };
+            }
+            if (board.id === newBoardId) {
+                return { ...board, pins: [...board.pins, newPin] };
+            }
+            return board;
         });
+
+        setAllBoards(updatedBoards);
     };
 
     const onSavedPinEdited = (pinId: number, oldBoardId: number, newBoardId: number) => {
-        setBoards((prevBoards) => {
-            const pin = prevBoards.find((board) => board.id === oldBoardId)?.pins.find((pin: { id: number; }) => Number(pin.id) === pinId);
-            return prevBoards.map((board) => {
-                if (board.id === oldBoardId) {
-                    return { ...board, pins: board.pins.filter((pin: { id: number; }) => Number(pin.id) !== pinId) };
-                }
-                if (board.id === newBoardId) {
-                    return { ...board, pins: [...board.pins, pin] };
-                }
-                return board;
-            });
+        const pin = allBoards.find((board) => board.id === oldBoardId)?.pins.find((pin: { id: number; }) => Number(pin.id) === pinId) as Pin;
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === oldBoardId) {
+                return { ...board, pins: board.pins.filter((pin) => Number(pin.id) !== pinId) as Pin[] };
+            }
+            if (board.id === newBoardId) {
+                return { ...board, pins: [...board.pins, pin] };
+            }
+            return board;
         });
+
+        setAllBoards(updatedBoards);
     };
 
-    function getAllBoards() {
-        if (allBoards.length === 0) {
-            setBoards([]);
-            return;
-        }
+    const onPinDeleted = (pinId: number, boardId: number) => {
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === boardId) {
+                return { ...board, pins: board.pins.filter((pin) => Number(pin.id) !== pinId) as Pin[] };
+            }
+            return board;
+        });
 
-        if (allBoardsByAddress && allPinsByAddress) {
-            allBoards.map((board: Board) => {
-                const boardPins = allPins.filter((pin: Pin) => board.pins.find((pinId: number) => Number(pinId) === Number(pin.id)));
-                const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
-                const mergedPins = [...boardPins, ...pins];
-                setBoards((prevBoards) => {
-                    return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: mergedPins, boardCoverHash: board.boardCoverHash }]
-                        .sort((a, b) => Number(a.id) - Number(b.id));
-                });
-            });
-        }
-    }
+        setAllBoards(updatedBoards);
+    };
 
     return (
         <>
@@ -247,7 +263,7 @@ export default function Profile() {
                             </TabPanel>
                             <TabPanel key={'TabPanel-2'} width='100vw'>
                                 <div className='grid grid-cols-2 gap-4'>
-                                    {boards?.map(({ id, name, pins }) => (
+                                    {allBoards?.map(({ id, name, pins }) => (
                                         <React.Fragment key={id}>
                                             {loadDeleteBoardTransaction && loadDeleteBoardTransaction === Number(id) ? (
                                                 <Stack>

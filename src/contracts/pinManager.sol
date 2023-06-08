@@ -30,8 +30,9 @@ contract PinManager {
     /**
      * @dev Event emitted when a pin is deleted
      * @param pinId ID of the pin deleted
+     * @param boardId ID of the board the pin belonged to
      */
-    event PinDeleted(uint256 pinId);
+    event PinDeleted(uint256 pinId, uint256 boardId);
 
     /**
      * @dev Event emitted when a created pin is edited
@@ -110,7 +111,7 @@ contract PinManager {
             msg.sender == pins[pinId].owner,
             "Only the pin owner can delete the pin."
         );
-        emit PinDeleted(pinId);
+        emit PinDeleted(pinId, pins[pinId].boardId);
         delete pins[pinId];
     }
 

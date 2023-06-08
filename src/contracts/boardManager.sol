@@ -129,6 +129,7 @@ contract BoardManager {
      * @param boardId ID of the board to edit
      * @param newName New name for the board
      * @param newDescription New description for the board
+     * @param boardCoverHash New IPFS hash of the board cover image
      * Requirements:
      * - Only the board owner can edit the board
      * - Board with the given ID must exist

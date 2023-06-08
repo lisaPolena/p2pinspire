@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, List, ListItem, Select, Slide } from '@chakra-ui/react';
+import { Input, List, ListItem, Slide } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
 import { useRouter } from 'next/router';
 import boardManager from '../../contracts/build/BoardManager.json';
 import pinManager from '../../contracts/build/PinManager.json';
-import { useAccount, useContractEvent, useContractRead, useContractWrite, usePrepareContractWrite } from 'wagmi';
+import { useAccount, useContractWrite } from 'wagmi';
 import { Board } from '@/common/types/structs';
 import { IoChevronBack, IoCheckmarkSharp, IoChevronForward } from "react-icons/io5";
 
@@ -17,31 +17,15 @@ interface EditPinModalProps {
 const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) => {
     const { pin } = props;
     const { address, isConnected } = useAccount()
-    const { editPinModalOpen, setEditPinModalOpen, deletePinModalOpen, setDeletePinModalOpen } = useAppState();
+    const { allBoards, editPinModalOpen, setEditPinModalOpen, deletePinModalOpen, setDeletePinModalOpen } = useAppState();
     const [pinTitle, setPinTitle] = useState<string>('');
     const [pinDescription, setPinDescripton] = useState<string>('');
     const [pinBoardId, setPinBoardId] = useState<string | number>('');
     const [newPinBoardId, setNewPinBoardId] = useState<string | number>('');
     const [isOwner, setIsOwner] = useState<boolean>(false);
-    const [boards, setBoards] = useState<Board[]>([]);
     const router = useRouter();
     const [boardSlideOpen, setBoardSlideOpen] = useState<boolean>(false);
-    const [board, setBoard] = useState<Board | null>(null);
-
-    const { data: allBoardsByAddress } = useContractRead({
-        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
-        abi: boardManager.abi,
-        functionName: 'getBoardsByOwner',
-        args: [address],
-        onSuccess(data) {
-            const res = data as Board[];
-            setBoards(res);
-            if (pinBoardId) {
-                const b = res.find((board: Board) => Number(board.id) === pinBoardId) ?? null;
-                setBoard(b);
-            }
-        },
-    });
+    const [board, setBoard] = useState<any>(null);
 
     const {
         data: savedPinData,
@@ -77,12 +61,20 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
             setPinTitle(pin.title);
             setPinDescripton(pin.description);
             setPinBoardId(Number(pin.boardId));
+            if (pin.boardId && !newPinBoardId) {
+                const b = allBoards.find(board => board.id === Number(pin.boardId) ?? null);
+                setBoard(b);
+            }
         } else {
             setIsOwner(false);
             setPinBoardId(Number(boardId));
+            if (boardId && !newPinBoardId) {
+                const b = allBoards.find(board => board.id === Number(boardId) ?? null);
+                setBoard(b);
+            }
         }
 
-    }, [pin, address, allBoardsByAddress, editSavedPinStatus, editCreatedPinStatus, newPinBoardId]);
+    }, [pin, address, editSavedPinStatus, editCreatedPinStatus, newPinBoardId, router.query]);
 
     //TODO created edit pin event 
     async function editCreatedPin() {
@@ -148,17 +140,29 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                     <div className='flex items-center mx-4 border-white' onClick={() => setBoardSlideOpen(true)}>
                         {board ? (
                             <>
-                                {pin && pin.imageHash ? (
+                                {board.boardCoverHash != '' ? (
                                     <img className='w-12 h-12 rounded-xl'
-                                        src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`} alt='board' />
+                                        src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`} alt='board' />
                                 ) : (
-                                    <div className='w-12 h-12 bg-gray-200 rounded-xl'></div>
+                                    <>
+                                        {board.pins?.length > 0 && board.pins[0].imageHash ? (
+                                            <img className='w-12 h-12 rounded-xl'
+                                                src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`} alt='board' />
+                                        ) : (
+                                            <div className='w-12 h-12 bg-gray-200 rounded-xl'></div>
+
+                                        )}
+                                    </>
                                 )}
                                 <h2 className='ml-4 text-lg font-bold'>{board.name}</h2>
                                 <IoChevronForward size={30} className='absolute right-5' />
+
                             </>
+
+
                         ) : (
                             <>
+                                <div className='w-12 h-12 bg-gray-200 rounded-xl'></div>
                                 <h2 className='ml-4 text-lg font-bold'>Choose Board</h2>
                                 <IoChevronForward size={30} className='absolute right-5' />
                             </>
@@ -183,16 +187,25 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                             <h2 className="text-base text-white">Your Boards</h2>
                         </div>
                         <List>
-                            {boards.map((board: any) => (
+                            {allBoards.map((board: any) => (
                                 <ListItem key={Number(board.id)} onClick={() => handleNewBoard(board)}
                                 >
                                     <div className='flex items-center h-16'>
 
-                                        {board.pins?.length > 0 && board.pins[0].imageHash ? (
-                                            <img className='w-14 h-14 rounded-xl' src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`} alt='board' />
+                                        {board.boardCoverHash != '' ? (
+                                            <img className='w-14 h-14 rounded-xl' src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`} alt='board' />
                                         ) : (
-                                            <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
+                                            <>
+                                                {board.pins?.length > 0 && board.pins[0].imageHash ? (
+                                                    <img className='w-14 h-14 rounded-xl' src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`} alt='board' />
+                                                ) : (
+                                                    <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
+                                                )}
+                                            </>
                                         )}
+
+
+
 
 
                                         <div className='justify-center ml-4'>

@@ -15,10 +15,8 @@ interface SavePinModalProps {
 const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => {
     const { pinId } = props;
     const { address, isConnected } = useAccount()
-    const { savePinModalOpen, setSavePinModalOpen, setLoadSavePinTransaction } = useAppState();
+    const { allBoards, savePinModalOpen, setSavePinModalOpen, setLoadSavePinTransaction } = useAppState();
     const router = useRouter();
-    const [boardId, setBoardId] = useState<number | null>(null);
-    const [boards, setBoards] = useState<any[]>([]);
     const [pin, setPin] = useState<Pin | null>(null);
     const id = pinId ?? router.query.id;
     const toast = useToast();
@@ -35,16 +33,6 @@ const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => 
             console.log('error ', err);
         }
     })
-
-    const { data: allBoardsByAddress } = useContractRead({
-        address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
-        abi: boardManager.abi,
-        functionName: 'getBoardsByOwner',
-        args: [address],
-        onSuccess(data) {
-            setBoards(data as Board[]);
-        },
-    });
 
     const { data: allPinsByAddress } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
@@ -98,14 +86,23 @@ const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => 
     return (
         <Modal isOpen={savePinModalOpen} closeModal={() => setSavePinModalOpen(false)} title='Save to board' height='h-full' >
             <List>
-                {boards.map((board: any) => (
+                {allBoards.map((board: any) => (
                     <ListItem key={Number(board.id)} onClick={() => handleSavePinToBoard(Number(board.id))}>
                         <div className='flex items-center h-16'>
 
-                            {board.pins?.length > 0 && board.pins[0].imageHash ? (
-                                <img className='w-14 h-14 rounded-xl' src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`} alt='board' />
+                            {board.boardCoverHash != '' ? (
+                                <img className='w-14 h-14 rounded-xl'
+                                    src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`} alt='board' />
                             ) : (
-                                <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
+                                <>
+                                    {board.pins?.length > 0 && board.pins[0].imageHash ? (
+                                        <img className='w-14 h-14 rounded-xl'
+                                            src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`} alt='board' />
+                                    ) : (
+                                        <div className='bg-gray-200 w-14 h-14 rounded-xl'></div>
+
+                                    )}
+                                </>
                             )}
 
                             <div className='justify-center ml-4'>

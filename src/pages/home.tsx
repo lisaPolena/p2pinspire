@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { Navbar } from '@/components/general/Navbar'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router';
 import { useSession } from "next-auth/react"
 import { useAppState } from '@/components/general/AppStateContext';
@@ -34,6 +34,16 @@ export default function Home() {
     },
   });
 
+  const { data: allPinsByAddress } = useContractRead({
+    address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+    abi: pinManager.abi,
+    functionName: 'getAllPins',
+    onSuccess(data) {
+      const res = data as Pin[];
+      setAllPins(res);
+    },
+  });
+
   const { data: allPinsData } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
     abi: pinManager.abi,
@@ -52,8 +62,7 @@ export default function Home() {
     eventName: 'PinSaved',
     listener(log: any) {
       const args = log[0].args;
-      console.log(args);
-      onPinSaved(Number(args.pinId));
+      onPinSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
       setLoadSavePinTransaction(0);
     },
   });
@@ -64,6 +73,7 @@ export default function Home() {
     }
 
     getAllPins();
+    getAllBoards();
 
     const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
       if (account) {
@@ -96,10 +106,37 @@ export default function Home() {
     }
   }
 
-  const onPinSaved = (pinId: number) => {
+  function getAllBoards() {
+    if (boards.length === 0) {
+      return;
+    }
+
+    if (allBoardsByAddress && allPinsByAddress) {
+      const updatedBoards = boards.map((board) => {
+        const boardPinsIds = board.pins.map((id: Pin) => id);
+        const boardPins = allPins.filter((pin: Pin) => boardPinsIds.find((id) => Number(id) === Number(pin.id)));
+        const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
+        const mergedPins = [...boardPins, ...pins];
+        return { id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: mergedPins, boardCoverHash: board.boardCoverHash };
+      }).sort((a, b) => Number(a.id) - Number(b.id)) as Board[];
+
+      setAllBoards(updatedBoards);
+    }
+  }
+
+  const onPinSaved = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
     setPins((prevPins) => {
       return prevPins.filter(({ id }) => Number(id) !== pinId);
     });
+    const newPin = { id: pinId, title: title, description: description, imageHash: imageHash, boardId: boardId, owner: owner };
+    const updatedBoards = allBoards.map((board) => {
+      if (board.id === boardId) {
+        return { ...board, pins: [...board.pins, newPin] };
+      }
+      return board;
+    });
+
+    setAllBoards(updatedBoards);
   };
 
   return (
