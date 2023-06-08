@@ -241,7 +241,7 @@ export default function Profile() {
                                     </div>
                                 ) : (
                                     <div className='flex flex-col items-center justify-center'>
-                                        <p className='text-lg font-bold'>You haven't created any pins yet.</p>
+                                        <p className='text-lg font-bold'>You haven not created any pins yet.</p>
                                         <p className='text-lg font-bold'>Create your first pin.</p>
                                     </div>
                                 )}

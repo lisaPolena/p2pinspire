@@ -25,7 +25,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
         abi: boardManager.abi,
         functionName: 'editBoard',
         onError(err) {
-            console.log('error ', err);
+            console.log('error', err);
         }
     })
 
@@ -101,7 +101,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
                         <div className='flex justify-between item-center' onClick={() => setDeleteModalOpen(true)}>
                             <div>
                                 <p className='font-bold'>Delete Board</p>
-                                <p className='text-gray-400 text-s'>Delete this board and all of its Pins forever. You can't undo this.</p>
+                                <p className='text-gray-400 text-s'>Delete this board and all of its Pins forever. You can not undo this.</p>
                             </div>
                         </div>
                     </div>

@@ -21,7 +21,22 @@ const CreateBoardModal: React.FC = () => {
         abi: boardManager.abi,
         functionName: 'createBoard',
         onError(err) {
-            console.log('error ', err);
+            if (err.message.includes('User denied transaction signature')) {
+                setCreateBoardModalOpen(false);
+                console.log('User denied transaction signature');
+            }
+            switch (err.message) {
+                case 'User denied transaction signature':
+                    setCreateBoardModalOpen(false);
+                    console.log('User denied transaction signature');
+                    break;
+                case 'Transaction was not mined within 750 seconds, please make sure your transaction was properly sent. Be aware that it might still be mined!':
+                    setCreateBoardModalOpen(false);
+                    console.log('Transaction was not mined within 750 seconds, please make sure your transaction was properly sent. Be aware that it might still be mined!');
+                    break;
+                default:
+                    console.log(err);
+            }
         },
     })
 
