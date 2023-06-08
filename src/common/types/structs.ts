@@ -6,6 +6,7 @@ export interface Board {
     description: string;
     owner: string;
     pins: number[];
+    boardCoverHash: string;
 }
 
 export interface Pin {

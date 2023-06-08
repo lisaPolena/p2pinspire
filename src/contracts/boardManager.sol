@@ -14,11 +14,13 @@ contract BoardManager {
      * @dev Event emitted when a new board is created
      * @param boardId ID of the board created
      * @param boardName Name of the board created
+     * @param boardDescription Description of the board created
      * @param owner Owner of the board created
      */
     event BoardCreated(
         uint256 boardId,
         string boardName,
+        string boardDescription,
         address indexed owner
     );
 
@@ -32,8 +34,15 @@ contract BoardManager {
      * @dev Event emitted when a board is edited
      * @param boardId ID of the board edited
      * @param newName New name of the board edited
+     * @param newDescription New description of the board edited
+     * @param boardCoverHash New IPFS hash of the board cover image
      */
-    event BoardEdited(uint256 boardId, string newName);
+    event BoardEdited(
+        uint256 boardId,
+        string newName,
+        string newDescription,
+        string boardCoverHash
+    );
 
     /**
      * @dev Event emitted when a pin is saved to a board
@@ -81,16 +90,33 @@ contract BoardManager {
     /**
      * @dev Create a new board
      * @param boardName Name of the board to create
+     * @param boardDescription Description of the board to create
      * Requirements:
      * - boardName cannot be an empty string
      */
-    function createBoard(string memory boardName) public returns (uint256) {
+    function createBoard(
+        string memory boardName,
+        string memory boardDescription
+    ) public returns (uint256) {
         require(bytes(boardName).length != 0, "Board name cannot be empty.");
         currentBoardId++;
         uint256[] memory pins;
-        Board memory board = Board(currentBoardId, boardName, msg.sender, pins);
+        string memory boardCoverHash;
+        Board memory board = Board(
+            currentBoardId,
+            boardName,
+            boardDescription,
+            msg.sender,
+            pins,
+            boardCoverHash
+        );
         boards[currentBoardId] = board;
-        emit BoardCreated(currentBoardId, boardName, msg.sender);
+        emit BoardCreated(
+            currentBoardId,
+            boardName,
+            boardDescription,
+            msg.sender
+        );
         return currentBoardId;
     }
 
@@ -98,11 +124,17 @@ contract BoardManager {
      * @dev Edit board information
      * @param boardId ID of the board to edit
      * @param newName New name for the board
+     * @param newDescription New description for the board
      * Requirements:
      * - Only the board owner can edit the board
      * - Board with the given ID must exist
      */
-    function editBoard(uint256 boardId, string memory newName) public {
+    function editBoard(
+        uint256 boardId,
+        string memory newName,
+        string memory newDescription,
+        string memory boardCoverHash
+    ) public {
         require(
             msg.sender == boards[boardId].owner,
             "Only the board owner can edit the board."
@@ -110,8 +142,10 @@ contract BoardManager {
         require(bytes(newName).length != 0, "New board name cannot be empty.");
 
         boards[boardId].name = newName;
+        boards[boardId].description = newDescription;
+        boards[boardId].boardCoverHash = boardCoverHash;
 
-        emit BoardEdited(boardId, newName);
+        emit BoardEdited(boardId, newName, newDescription, boardCoverHash);
     }
 
     /**

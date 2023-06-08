@@ -39,7 +39,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
     }, [board ? board.name : '', board ? board.description : '', editBoardStatus]);
 
     const handleEditBoard = async () => {
-        await editBoard({ args: [board.id as string, boardName] })
+        await editBoard({ args: [board.id as string, boardName, '', ''] })
         setEditBoardModalOpen(false);
     }
 

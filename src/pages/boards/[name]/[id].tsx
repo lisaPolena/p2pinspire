@@ -49,7 +49,7 @@ export default function DetailBoard() {
         eventName: 'BoardEdited',
         listener(log: any) {
             const args = log[0].args;
-            const newBoard = { ...board, name: args.newName } as Board;
+            const newBoard = { ...board, name: args.newName, description: args.newDescription, boardCoverHash: args.boardCoverHash } as Board;
             setBoard(newBoard);
         },
     });
@@ -80,7 +80,7 @@ export default function DetailBoard() {
         eventName: 'PinCreated',
         listener(log: any) {
             const args = log[0].args;
-            onPinCreated(Number(args.pinId), args.title, args.descriptiongs, args.imageHash, args.boardId, args.owner);
+            onPinCreated(Number(args.pinId), args.title, args.description, args.imageHash, args.boardId, args.owner);
         },
     });
 

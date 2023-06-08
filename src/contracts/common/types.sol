@@ -8,8 +8,10 @@ pragma solidity >=0.7.0 <0.9.0;
 struct Board {
     uint256 id; // Unique identifier for board
     string name; // Name of board
+    string description; // Description of board
     address owner; // Address of board owner
     uint256[] pins; // Array of pin numbers on the board
+    string boardCoverHash; // IPFS hash of the board cover image
 }
 
 /**
@@ -22,13 +24,4 @@ struct Pin {
     string imageHash; //hash for the image
     address owner; //owner of the pin
     uint256 boardId; //id of the board where the pin is saved
-}
-
-/**
- * @dev Struct to store user information
- */
-struct User {
-    uint256 id;
-    string username;
-    bytes32 passwordHash;
 }

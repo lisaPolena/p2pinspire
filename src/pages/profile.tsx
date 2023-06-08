@@ -11,7 +11,6 @@ import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
-import { watchAccount } from '@wagmi/core'
 import { AppBar } from '@/components/general/AppBar';
 
 export default function Profile() {
@@ -51,7 +50,7 @@ export default function Profile() {
         eventName: 'BoardCreated',
         listener(log: any) {
             const args = log[0].args;
-            onBoardCreated(Number(args.boardId), args.boardName, args.owner);
+            onBoardCreated(Number(args.boardId), args.boardName, args.newDescription, args.owner);
             setLoadCreateBoardTransaction(false);
         },
     });
@@ -138,9 +137,9 @@ export default function Profile() {
 
     }, [isConnected, status, session, allBoardsByAddress, allPinsByAddress, allBoards, activeConnector])
 
-    const onBoardCreated = (boardId: number, boardName: string, owner: string) =>
+    const onBoardCreated = (boardId: number, boardName: string, boardDescription: string, owner: string) =>
         setBoards((prevBoards) => {
-            return [...prevBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, owner: owner, pins: [] }]
+            return [...prevBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, description: boardDescription, owner: owner, pins: [], boardCoverHash: '' }]
                 .sort((a, b) => Number(a.id) - Number(b.id));
         });
 
@@ -204,7 +203,7 @@ export default function Profile() {
                 const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
                 const mergedPins = [...boardPins, ...pins];
                 setBoards((prevBoards) => {
-                    return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, owner: board.owner, pins: mergedPins }]
+                    return [...prevBoards.filter(({ id, owner }) => Number(id) !== Number(board.id) && owner === address), { id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: mergedPins, boardCoverHash: board.boardCoverHash }]
                         .sort((a, b) => Number(a.id) - Number(b.id));
                 });
             });

@@ -46,7 +46,7 @@ const CreateBoardModal: React.FC = () => {
     }, [createBoardModalOpen])
 
     const handleCreateBoard = async () => {
-        await createBoard({ args: [boardName] });
+        await createBoard({ args: [boardName, ''] });
         setCreateBoardModalOpen(false);
         if (!window.location.href.includes('profile'))
             router.push('/profile');
