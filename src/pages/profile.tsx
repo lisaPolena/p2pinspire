@@ -297,7 +297,7 @@ export default function Profile() {
             </Head>
             <main className='min-h-screen bg-black'>
                 <AppBar isBoard={false} isSavedPin={false} hideBackButton={true} />
-                <div className='absolute z-20 top-2 left-28'>
+                <div className='absolute z-[10] top-2 left-28'>
                     <ConnectButton label='Connect' />
                 </div>
 
