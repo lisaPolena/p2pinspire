@@ -20,7 +20,7 @@ export const Navbar = () => {
         <Link href={'/home'} className='flex justify-center w-full px-3 py-5 ml-10 align-center'>
           <div className='text-2xl'><IoHome size={25} color={isActive('/home') ? 'white' : 'grey'} /></div>
         </Link>
-        <Link href={''} className='flex justify-center w-full px-3 py-5 align-center'>
+        <Link href={'/search'} className='flex justify-center w-full px-3 py-5 align-center'>
           <div className='text-2xl'><IoSearch size={25} color={isActive('') ? 'white' : 'grey'} /></div>
         </Link>
         <Link href={''} className='flex justify-center w-full px-3 py-5 align-center' onClick={() => setNavbarModalOpen(true)}>
