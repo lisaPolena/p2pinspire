@@ -183,7 +183,7 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-3 px-4 relative top-[50px] mt-2">
           {!isLoading ? (
             <>
-              {pins.map((pin: any) => (
+              {pins.map((pin: Pin) => (
                 <React.Fragment key={pin.id}>
                   {loadSavePinTransaction && loadSavePinTransaction === Number(pin.id) ? (
                     <Stack>
