@@ -10,7 +10,7 @@ import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import React from 'react';
 import { Skeleton, Stack, useToast } from '@chakra-ui/react';
-import { storeBoardsInStorage } from '@/common/functions/boards';
+import { clearStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
 
 export default function Home() {
@@ -79,18 +79,6 @@ export default function Home() {
     getAllPins();
     getAllBoards();
 
-    const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
-      if (account) {
-        setIsLoading(true);
-        const timeout = setTimeout(() => {
-          setIsLoading(false);
-        }, 2000);
-        console.log('new account', account)
-      } else if (chain) {
-        console.log('new chain', chain)
-      }
-    }
-
     if (activeConnector) {
       activeConnector.on('change', handleConnectorUpdate)
     }
@@ -102,6 +90,31 @@ export default function Home() {
     }
 
   }, [address, isConnected, boards, status, activeConnector, allPinsData])
+
+  const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
+    if (account) {
+      clearStorage();
+      setIsLoading(true);
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+      const text = 'Account changed to ' + account.slice(0, 4) + '...' + account.slice(38, account.length);
+      toast({
+        position: 'top',
+        render: () => (
+          <Toast text={text} />
+        ),
+      })
+    } else if (chain) {
+      const text = chain.unsupported ? 'Sry, the network is not supported!' : 'You changed the network.';
+      toast({
+        position: 'top',
+        render: () => (
+          <Toast text={text} />
+        ),
+      })
+    }
+  }
 
   function getAllPins() {
     if (allBoardsByAddress && allPinsData) {

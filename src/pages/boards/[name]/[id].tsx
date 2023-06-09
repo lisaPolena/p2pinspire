@@ -11,7 +11,7 @@ import boardManager from '../../../contracts/build/BoardManager.json';
 import { IoAdd } from "react-icons/io5";
 import AddModal from '@/components/overlays/AddModal';
 import CreatePinModal from '@/components/overlays/CreatePinModal';
-import { getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
+import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 
 export default function DetailBoard() {
     const { address, isConnected } = useAccount()
@@ -115,8 +115,10 @@ export default function DetailBoard() {
             setAllBoards(storageBoards);
         }
 
-        if (board && board.owner !== address)
-            router.push('/profile');
+        if (board && board.owner !== address) {
+            router.push('/home');
+            clearStorage();
+        }
 
         const handleScroll = () => {
             const scrollPosition = window.scrollY;

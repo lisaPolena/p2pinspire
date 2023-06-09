@@ -143,29 +143,6 @@ export default function Profile() {
             setLoadedFromStorage(true);
         }
 
-        const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
-            if (account) {
-                clearStorage();
-                router.push('/home');
-                const text = 'Account changed to ' + account.slice(0, 4) + '...' + account.slice(38, account.length);
-                toast({
-                    position: 'top',
-                    render: () => (
-                        <Toast text={text} />
-                    ),
-                })
-            } else if (chain) {
-                const text = chain.unsupported ? 'Sry, the network is not supported!' : 'You changed the network.';
-                toast({
-                    position: 'top',
-                    render: () => (
-                        <Toast text={text} />
-                    ),
-                })
-
-            }
-        }
-
         if (activeConnector) {
             activeConnector.on('change', handleConnectorUpdate)
         }
@@ -177,6 +154,29 @@ export default function Profile() {
         }
 
     }, [isConnected, status, session, allBoards, activeConnector, loadedFromStorage])
+
+    const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
+        if (account) {
+            clearStorage();
+            router.push('/home');
+            const text = 'Account changed to ' + account.slice(0, 4) + '...' + account.slice(38, account.length);
+            toast({
+                position: 'top',
+                render: () => (
+                    <Toast text={text} />
+                ),
+            })
+        } else if (chain) {
+            const text = chain.unsupported ? 'Sry, the network is not supported!' : 'You changed the network.';
+            toast({
+                position: 'top',
+                render: () => (
+                    <Toast text={text} />
+                ),
+            })
+
+        }
+    }
 
     const onBoardCreated = (boardId: number, boardName: string, boardDescription: string, owner: string) => {
         const updatedBoards = [...allBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, description: boardDescription, owner: owner, pins: [], boardCoverHash: '' }]
