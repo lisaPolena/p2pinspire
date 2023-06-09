@@ -1,20 +1,78 @@
 import Head from 'next/head'
 import { useSession } from "next-auth/react"
-import { useAccount } from "wagmi"
+import { useAccount, useContractRead, useContractWrite } from "wagmi"
 import { useEffect } from "react"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
+import userManager from '../contracts/build/UserManager.json';
+import { Toast } from '@/components/general/Toasts'
+import { useToast } from '@chakra-ui/react'
+import { User } from '@/common/types/structs'
+import { useAppState } from '@/components/general/AppStateContext'
 
 export default function Index() {
   const { address, isConnected } = useAccount()
   const { data: session, status } = useSession()
+  const { setUser } = useAppState();
   const router = useRouter();
+  const toast = useToast();
+
+  const {
+    data: createUserData,
+    status: createUserStatus,
+    writeAsync: createUser,
+  } = useContractWrite({
+    address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
+    abi: userManager.abi,
+    functionName: 'createUser',
+    onError(err) {
+      console.log(err);
+    }
+  });
+
+  const { data: userData } = useContractRead({
+    address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
+    abi: userManager.abi,
+    functionName: 'getUserByAddress',
+    args: [address],
+    onError(error) {
+      console.log('getUserByAdress', error);
+    },
+  });
 
   useEffect(() => {
+    setUser(null);
     if (isConnected && status === 'authenticated' && session) {
-      router.push('/home')
+
+      if (userData) {
+        const res = userData as User;
+        if (res.userAddress === address) {
+          setUser(res);
+          router.push('/home');
+          return;
+        }
+      }
+
+      handleToast('Creating user...', '');
+      handleCreateUser();
+
     }
   }, [isConnected, session])
+
+  async function handleCreateUser() {
+    await createUser({ args: [address] });
+    setUser(userData as User);
+    router.push('/home');
+  }
+
+  function handleToast(message: string, imageHash: string) {
+    toast({
+      position: 'top',
+      render: () => (
+        <Toast text={message} imageHash={imageHash} />
+      ),
+    })
+  }
 
   return (
     <>

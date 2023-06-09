@@ -7,11 +7,12 @@ import { useAppState } from '@/components/general/AppStateContext';
 import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wagmi';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
-import { Board, Pin } from '@/common/types/structs';
+import { Board, Pin, User } from '@/common/types/structs';
 import React from 'react';
 import { Skeleton, Stack, useToast } from '@chakra-ui/react';
 import { clearStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
+import userManager from '../contracts/build/UserManager.json';
 
 export default function Home() {
   const { address, isConnected, connector: activeConnector } = useAccount()
@@ -19,10 +20,20 @@ export default function Home() {
   const router = useRouter();
   const [pins, setPins] = useState<Pin[]>([]);
   const [allPins, setAllPins] = useState<Pin[]>([]);
-  const { allBoards, setAllBoards, loadSavePinTransaction, setLoadSavePinTransaction } = useAppState();
+  const { setUser, allBoards, setAllBoards, user, loadSavePinTransaction, setLoadSavePinTransaction } = useAppState();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const toast = useToast()
+  const toast = useToast();
+
+  const { data: userData } = useContractRead({
+    address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
+    abi: userManager.abi,
+    functionName: 'getUserByAddress',
+    args: [address],
+    onError(error) {
+      console.log('getUserByAdress', error);
+    },
+  });
 
   const { data: allBoardsByAddress } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
@@ -72,7 +83,7 @@ export default function Home() {
   });
 
   useEffect(() => {
-    if (!isConnected && status === 'unauthenticated' && !session) {
+    if (!isConnected || status === 'unauthenticated' || !session || !user) {
       router.push('/')
     }
 
@@ -94,6 +105,18 @@ export default function Home() {
   const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
     if (account) {
       clearStorage();
+
+      //TODO: not working yet
+      if (userData) {
+        const res = userData as User;
+        if (res.userAddress === address) {
+          setUser(res);
+        } else {
+          setUser(null);
+          router.push('/');
+        }
+      }
+
       setIsLoading(true);
       const timeout = setTimeout(() => {
         setIsLoading(false);

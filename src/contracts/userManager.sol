@@ -16,7 +16,7 @@ contract UserManager {
      * @param userAddress Address of the user
      * @return address Address of the created user
      */
-    function createUser(address userAddress) public returns (address) {
+    function createUser(address userAddress) public returns (User memory) {
         userCount++;
 
         // Initialize user properties
@@ -44,7 +44,7 @@ contract UserManager {
         // Emit event for user creation
         emit UserCreated(userAddress);
 
-        return userAddress;
+        return users[userAddress];
     }
 
     /**
@@ -52,7 +52,9 @@ contract UserManager {
      * @param userAddress Address of the user
      * @return User struct containing user information
      */
-    function getUser(address userAddress) public view returns (User memory) {
+    function getUserByAddress(
+        address userAddress
+    ) public view returns (User memory) {
         return users[userAddress];
     }
 }

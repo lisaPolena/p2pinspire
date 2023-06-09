@@ -3,17 +3,27 @@
 export interface Board {
     id: number;
     name: string;
-    description: string;
+    description?: string;
     owner: string;
     pins: Pin[];
-    boardCoverHash: string;
+    boardCoverHash?: string;
 }
 
 export interface Pin {
     id: number;
     title: string;
-    description: string;
+    description?: string;
     imageHash: string;
     owner: string;
     boardId: number;
+}
+
+export interface User {
+    userAddress: string;
+    name?: string;
+    username?: string;
+    profileImageHash?: string;
+    bio?: string;
+    following?: string[];
+    followers?: string[];
 }
