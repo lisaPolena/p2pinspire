@@ -88,7 +88,7 @@ export default function DetailBoard() {
         eventName: 'PinCreated',
         listener(log: any) {
             const args = log[0].args;
-            onPinCreated(Number(args.pinId), args.title, args.description, args.imageHash, args.boardId, args.owner);
+            onPinCreated(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
         },
     });
 
@@ -165,6 +165,16 @@ export default function DetailBoard() {
             return [...prevPins.filter(({ id }) => Number(id) !== Number(boardId)), newPin]
                 .sort((a, b) => Number(a.id) - Number(b.id));
         });
+
+        const updatedBoards = allBoards.map((board) => {
+            if (board.id === boardId) {
+                return { ...board, pins: [...board.pins, newPin] };
+            }
+            return board;
+        });
+
+        setAllBoards(updatedBoards);
+        storeBoardsInStorage(updatedBoards);
     };
 
     const onPinEdited = (pinId: number, title: string, description: string, imageHash: string, boardId: number) => {
