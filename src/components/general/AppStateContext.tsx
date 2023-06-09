@@ -42,6 +42,8 @@ interface AppStateContextProps {
   setAddModalOpen: (open: boolean) => void;
   editProfileModalOpen: boolean;
   setEditProfileModalOpen: (open: boolean) => void;
+  deleteProfile: string;
+  setDeleteProfile: (open: string) => void;
 }
 
 const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
@@ -75,6 +77,7 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
   const [loadSavePinTransaction, setLoadSavePinTransaction] = useState<number>(0);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState<boolean>(false);
+  const [deleteProfile, setDeleteProfile] = useState<string>('');
 
   const contextValue: AppStateContextProps = {
     allBoards,
@@ -137,6 +140,8 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     setAddModalOpen,
     editProfileModalOpen,
     setEditProfileModalOpen,
+    deleteProfile,
+    setDeleteProfile,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;

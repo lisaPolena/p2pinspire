@@ -14,7 +14,7 @@ const DeleteProfileModal: React.FC<DeleteProfileModalProps> = ({ isOpen, closeMo
         <>
             {isOpen &&
                 <OutsideAlerter action={closeModal}>
-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] z-[14] h-[20%]">
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] z-[18] h-[20%]">
                         <div>
                             <h2 className="text-xl text-white">Are you sure?</h2>
                         </div>

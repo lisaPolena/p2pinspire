@@ -13,7 +13,7 @@ import { useRouter } from 'next/router';
 import { clearUserStorage, getUserFromStorage, storeUserInStorage } from '@/common/functions/users';
 
 const EditProfileModal: React.FC = () => {
-    const { user, setUser, editProfileModalOpen, setEditProfileModalOpen } = useAppState();
+    const { user, setUser, editProfileModalOpen, setEditProfileModalOpen, deleteProfile, setDeleteProfile } = useAppState();
     const { address } = useAccount();
     const [newData, setNewData] = useState<boolean>(false);
     const [profileName, setProfileName] = useState<string>('');
@@ -78,10 +78,10 @@ const EditProfileModal: React.FC = () => {
             }
 
             const userAddress = user?.userAddress ?? address ?? '';
-            const name = profileName ?? user?.name ?? '';
-            const bio = profileBio ?? user?.bio ?? '';
-            const username = profileUsername ?? user?.username ?? '';
-            const image = profileImage ?? user?.profileImageHash ?? '';
+            const name = profileName != '' ? profileName : user?.name ?? '';
+            const bio = profileBio != '' ? profileBio : user?.bio ?? '';
+            const username = profileUsername != '' ? profileUsername.replace(/\s/g, '') : user?.username ?? '';
+            const image = profileImage != '' ? profileImage : user?.profileImageHash ?? '';
             handleToast('Profile editing...', '');
             await editUser({ args: [userAddress, name, username, image, bio] });
             setUser({ userAddress, name, username, profileImageHash: image, bio });
@@ -110,6 +110,7 @@ const EditProfileModal: React.FC = () => {
         setDeleteProfileModalOpen(false);
         setEditProfileModalOpen(false);
         await deleteUser({ args: [user?.userAddress ?? address] })
+        setDeleteProfile(user?.userAddress ?? '');
         setUser(null);
         clearUserStorage();
         handleToast('Profile deleting...', '');

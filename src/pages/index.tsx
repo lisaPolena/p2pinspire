@@ -15,7 +15,7 @@ import { storeUserInStorage } from '@/common/functions/users'
 export default function Index() {
   const { address, isConnected } = useAccount()
   const { data: session, status } = useSession()
-  const { setUser } = useAppState();
+  const { setUser, deleteProfile } = useAppState();
   const router = useRouter();
   const toast = useToast();
   const [createUserModalOpen, setCreateUserModalOpen] = useState<boolean>(false);
@@ -48,6 +48,7 @@ export default function Index() {
 
       if (userData) {
         const res = userData as User;
+        if (deleteProfile === res.userAddress) return;
         if (res.userAddress === address) {
           setUser(res);
           storeUserInStorage(res);
@@ -71,6 +72,7 @@ export default function Index() {
     handleToast('Creating user...', '');
     await createUser({ args: [address] });
     setCreateUserModalOpen(false);
+    router.push('/home');
   }
 
   function handleToast(message: string, imageHash: string) {

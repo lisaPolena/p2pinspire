@@ -96,8 +96,6 @@ export default function Home() {
 
   }, [address, isConnected, boards, status, activeConnector, allPinsData, user])
 
-  console.log(user);
-
   const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
     if (account) {
       clearStorage();
