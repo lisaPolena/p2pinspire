@@ -297,11 +297,44 @@ export default function Profile() {
             </Head>
             <main className='min-h-screen bg-black'>
                 <AppBar isBoard={false} isSavedPin={false} hideBackButton={true} />
-                <div className='w-[95%] flex flex-col justify-center items-center mb-10 relative top-20'>
+                <div className='absolute z-20 top-2 left-28'>
                     <ConnectButton label='Connect' />
                 </div>
 
-                <div className='relative flex flex-col items-center top-20'>
+                <div className='flex flex-col items-center justify-center pt-20'>
+                    {user &&
+                        <>
+                            {user.profileImageHash &&
+                                <div className=''>
+                                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${user.profileImageHash}`}
+                                        className="object-cover w-40 h-40 rounded-full" />
+                                </div>
+                            }
+
+                            {user.name &&
+                                <div className='mt-2 text-2xl font-bold text-white'>
+                                    {user.name}
+                                </div>
+                            }
+
+                            {user.username &&
+                                <div className='mt-2 text-sm font-medium text-gray-400'>
+                                    @{user.username}
+                                </div>
+                            }
+
+                            {user.bio &&
+                                <div className='mt-2 text-base font-medium text-white'>
+                                    {user.bio}
+                                </div>
+                            }
+
+                        </>
+                    }
+                </div>
+
+
+                <div className='relative flex flex-col items-center mt-6'>
                     <Tabs variant='soft-rounded' colorScheme='primary' defaultIndex={1} size='md' align='center'>
                         <TabList>
                             <Tab key={'Tab-1'}>Created</Tab>
