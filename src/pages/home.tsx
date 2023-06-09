@@ -110,18 +110,17 @@ export default function Home() {
   }
 
   function getAllBoards() {
-    if (boards.length === 0) {
-      return;
-    }
-
     if (allBoardsByAddress && allPinsByAddress) {
-      const updatedBoards = boards.map((board) => {
-        const boardPinsIds = board.pins.map((id: Pin) => id);
-        const boardPins = allPins.filter((pin: Pin) => boardPinsIds.find((id) => Number(id) === Number(pin.id)));
-        const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
-        const mergedPins = [...boardPins, ...pins];
-        return { id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: mergedPins, boardCoverHash: board.boardCoverHash };
-      }).sort((a, b) => Number(a.id) - Number(b.id)) as Board[];
+      let updatedBoards: Board[] = [];
+      if ((allBoardsByAddress as any[]).length > 0) {
+        updatedBoards = boards.map((board) => {
+          const boardPinsIds = board.pins.map((id: Pin) => id);
+          const boardPins = allPins.filter((pin: Pin) => boardPinsIds.find((id) => Number(id) === Number(pin.id)));
+          const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
+          const mergedPins = [...boardPins, ...pins];
+          return { id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: mergedPins, boardCoverHash: board.boardCoverHash };
+        }).sort((a, b) => Number(a.id) - Number(b.id)) as Board[];
+      }
 
       setAllBoards(updatedBoards);
       storeBoardsInStorage(updatedBoards);

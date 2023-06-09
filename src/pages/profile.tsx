@@ -12,7 +12,7 @@ import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
 import { AppBar } from '@/components/general/AppBar';
-import { getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
+import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 
 export default function Profile() {
     const { address, isConnected, connector: activeConnector } = useAccount()
@@ -21,6 +21,7 @@ export default function Profile() {
     const router = useRouter();
     const [ownPins, setOwnPins] = useState<any[]>([]);
     const toast = useToast()
+    const [loadedFromStorage, setLoadedFromStorage] = useState<boolean>(false);
 
     const { data: allPinsByAddress } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
@@ -135,13 +136,15 @@ export default function Profile() {
             router.push('/')
         }
 
-        if (allBoards.length === 0) {
+        if (allBoards.length === 0 && !loadedFromStorage) {
             const storageBoards = getBoardsFromStorage();
             setAllBoards(storageBoards);
+            setLoadedFromStorage(true);
         }
 
         const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
             if (account) {
+                clearStorage();
                 router.push('/home')
                 toast({
                     position: 'top',
@@ -174,7 +177,7 @@ export default function Profile() {
             }
         }
 
-    }, [isConnected, status, session, allPinsByAddress, allBoards, activeConnector])
+    }, [isConnected, status, session, allBoards, activeConnector, loadedFromStorage])
 
     const onBoardCreated = (boardId: number, boardName: string, boardDescription: string, owner: string) => {
         const updatedBoards = [...allBoards.filter(({ id }) => Number(id) !== Number(boardId)), { id: Number(boardId), name: boardName, description: boardDescription, owner: owner, pins: [], boardCoverHash: '' }]

@@ -1,7 +1,7 @@
 import { Board } from "../types/structs";
 
 
-export function storeBoardsInStorage(boards: Board[]) {
+export function storeBoardsInStorage(boards: Board[]): void {
     const boardsString = JSON.stringify(boards, (key, value) =>
         typeof value === 'bigint'
             ? Number(value)
@@ -16,4 +16,8 @@ export function getBoardsFromStorage(): Board[] {
         return JSON.parse(boards);
     }
     return [];
+}
+
+export function clearStorage(): void {
+    window.sessionStorage.setItem("boards", '');
 }
