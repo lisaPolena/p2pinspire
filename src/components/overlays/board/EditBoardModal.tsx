@@ -10,12 +10,12 @@ import { RiEditCircleFill } from 'react-icons/ri';
 import { Board, Pin } from '@/common/types/structs';
 import { Toast } from '../../general/Toasts';
 
-interface EditGeneralModalProps {
+interface EditBoardModalProps {
     board: Board | null;
     pins?: Pin[] | null;
 }
 
-const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
+const EditBoardModal: React.FC<EditBoardModalProps> = (props: EditBoardModalProps) => {
     const { board, pins } = props;
     const { editBoardModalOpen, setEditBoardModalOpen, deleteModalOpen, setDeleteModalOpen } = useAppState();
     const [boardName, setBoardName] = useState<string>('');

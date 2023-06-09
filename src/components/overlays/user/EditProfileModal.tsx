@@ -3,23 +3,16 @@ import Modal from '../../general/Modal';
 import { useAppState } from '../../general/AppStateContext';
 import { Input, Textarea, useToast } from '@chakra-ui/react';
 import { IoAdd } from 'react-icons/io5';
-import { RiEditCircleFill } from 'react-icons/ri';
-import ImageUploader from '../../general/ImageUploader';
 import { useIpfs } from '@/common/functions/contracts';
 import { AiOutlineLoading } from "react-icons/ai";
 import { useAccount, useContractWrite } from 'wagmi';
 import userManager from '../../../contracts/build/UserManager.json';
 import { Toast } from '../../general/Toasts';
-import CreateProfileModal from './CreateProfileModal';
 import DeleteProfileModal from './DeleteProfile';
 import { useRouter } from 'next/router';
 import { clearUserStorage, getUserFromStorage, storeUserInStorage } from '@/common/functions/users';
-import { User } from '@/common/types/structs';
 
-interface EditProfileModalProps {
-}
-
-const EditProfileModal: React.FC<EditProfileModalProps> = (props: EditProfileModalProps) => {
+const EditProfileModal: React.FC = () => {
     const { user, setUser, editProfileModalOpen, setEditProfileModalOpen } = useAppState();
     const { address } = useAccount();
     const [newData, setNewData] = useState<boolean>(false);

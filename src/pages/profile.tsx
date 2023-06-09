@@ -9,7 +9,7 @@ import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wa
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
-import { Board, Pin } from '@/common/types/structs';
+import { Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
 import { AppBar } from '@/components/general/AppBar';
 import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
@@ -296,7 +296,7 @@ export default function Profile() {
                 <title>Profile</title>
             </Head>
             <main className='min-h-screen bg-black'>
-                <AppBar isBoard={false} isSavedPin={false} hideBackButton={true} isSetting={true} />
+                <AppBar isBoard={false} isSavedPin={false} hideBackButton={true} />
                 <div className='w-[95%] flex flex-col justify-center items-center mb-10 relative top-20'>
                     <ConnectButton label='Connect' />
                 </div>

@@ -1,18 +1,17 @@
 import Head from 'next/head'
 import { Navbar } from '@/components/general/Navbar'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
 import { useSession } from "next-auth/react"
 import { useAppState } from '@/components/general/AppStateContext';
 import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wagmi';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
-import { Board, Pin, User } from '@/common/types/structs';
+import { Board, Pin } from '@/common/types/structs';
 import React from 'react';
 import { Skeleton, Stack, useToast } from '@chakra-ui/react';
 import { clearStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
-import userManager from '../contracts/build/UserManager.json';
 import { getUserFromStorage } from '@/common/functions/users';
 
 export default function Home() {
@@ -102,17 +101,6 @@ export default function Home() {
   const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
     if (account) {
       clearStorage();
-
-      // //TODO: not working yet
-      // if (userData) {
-      //   const res = userData as User;
-      //   if (res.userAddress === address) {
-      //     setUser(res);
-      //   } else {
-      //     setUser(null);
-      //     router.push('/');
-      //   }
-      // }
 
       setIsLoading(true);
       const timeout = setTimeout(() => {

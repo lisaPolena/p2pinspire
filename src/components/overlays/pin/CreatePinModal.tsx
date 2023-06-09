@@ -18,7 +18,6 @@ interface CreatePinModalProps {
 }
 
 const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
-    const { address, isConnected } = useAccount()
     const [pinTitle, setPinTitle] = useState<string>('');
     const [pinDescription, setPinDescription] = useState<string>('');
     const [pinBoardId, setPinBoardId] = useState<number>(0);

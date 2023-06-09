@@ -4,7 +4,7 @@ import { useAppState } from '@/components/general/AppStateContext';
 import { Spinner, useToast } from '@chakra-ui/react';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import pinManager from '../../../contracts/build/PinManager.json';
 import boardManager from '../../../contracts/build/BoardManager.json';

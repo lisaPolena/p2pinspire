@@ -8,12 +8,10 @@ import { Toast } from '../../general/Toasts';
 interface EditGeneralModalProps {
     isBoard: boolean;
     isSavedPin: boolean;
-    isSetting?: boolean;
 }
 
-
 const EditGeneralModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
-    const { isBoard, isSavedPin, isSetting } = props;
+    const { isBoard, isSavedPin } = props;
     const { editModalOpen, setEditModalOpen } = useAppState();
     const { setEditBoardModalOpen, setEditPinModalOpen, setDownloadPin, setEditProfileModalOpen } = useAppState();
     const router = useRouter();
