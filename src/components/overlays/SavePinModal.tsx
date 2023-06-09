@@ -58,7 +58,7 @@ const SavePinModal: React.FC<SavePinModalProps> = (props: SavePinModalProps) => 
     return (
         <Modal isOpen={savePinModalOpen} closeModal={() => setSavePinModalOpen(false)} title='Save to board' height='h-full' >
             <List>
-                {allBoards.map((board: any) => (
+                {allBoards.map((board: Board) => (
                     <ListItem key={Number(board.id)} onClick={() => handleSavePinToBoard(Number(board.id))}>
                         <div className='flex items-center h-16'>
 

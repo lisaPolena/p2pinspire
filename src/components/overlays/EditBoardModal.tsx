@@ -163,7 +163,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 px-4 relative top-[50px] mt-2">
-                        {pins?.map((pin: any) => (
+                        {pins?.map((pin: Pin) => (
                             <div key={pin.id} onClick={() => {
                                 setBoardCoverImage(pin.imageHash)
                                 setPinSlideOpen(false)

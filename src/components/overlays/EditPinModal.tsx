@@ -7,13 +7,13 @@ import { useRouter } from 'next/router';
 import boardManager from '../../contracts/build/BoardManager.json';
 import pinManager from '../../contracts/build/PinManager.json';
 import { useAccount, useContractWrite } from 'wagmi';
-import { Board } from '@/common/types/structs';
+import { Board, Pin } from '@/common/types/structs';
 import { IoChevronBack, IoCheckmarkSharp, IoChevronForward } from "react-icons/io5";
 import { getBoardsFromStorage } from '@/common/functions/boards';
 import { Toast } from '../general/Toasts';
 
 interface EditPinModalProps {
-    pin: any;
+    pin: Pin;
 }
 
 const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) => {
@@ -27,7 +27,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
     const [isOwner, setIsOwner] = useState<boolean>(false);
     const router = useRouter();
     const [boardSlideOpen, setBoardSlideOpen] = useState<boolean>(false);
-    const [board, setBoard] = useState<any>(null);
+    const [board, setBoard] = useState<Board | null>(null);
     const toast = useToast();
 
     const {
@@ -70,14 +70,14 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
             setPinDescripton(pin.description);
             setPinBoardId(Number(pin.boardId));
             if (pin.boardId && !newPinBoardId) {
-                const b = allBoards.find(board => board.id === Number(pin.boardId) ?? null);
+                const b = allBoards.find(board => board.id === Number(pin.boardId) ?? null) as Board;
                 setBoard(b);
             }
         } else {
             setIsOwner(false);
             setPinBoardId(Number(boardId));
             if (boardId && !newPinBoardId) {
-                const b = allBoards.find(board => board.id === Number(boardId) ?? null);
+                const b = allBoards.find(board => board.id === Number(boardId) ?? null) as Board;
                 setBoard(b);
             }
         }
@@ -96,7 +96,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
             }
             return;
         }
-        await writeEditCreatedPin({ args: [pin.id as string, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
+        await writeEditCreatedPin({ args: [pin.id, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
         setEditPinModalOpen(false);
         handleToast('Pin ' + pinTitle + ' editing...', '');
         setNewPinBoardId('');
@@ -105,7 +105,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
 
     const editSavedPin = async () => {
         if (newPinBoardId !== '') {
-            await writeEditSavedPin({ args: [pin.id as string, pinBoardId, newPinBoardId] })
+            await writeEditSavedPin({ args: [pin.id, pinBoardId, newPinBoardId] })
         }
         setEditPinModalOpen(false);
         handleToast('Pin editing...', '');
@@ -218,7 +218,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
                             <h2 className="text-base text-white">Your Boards</h2>
                         </div>
                         <List>
-                            {allBoards.map((board: any) => (
+                            {allBoards.map((board: Board) => (
                                 <ListItem key={Number(board.id)} onClick={() => handleNewBoard(board)}
                                 >
                                     <div className='flex items-center h-16'>

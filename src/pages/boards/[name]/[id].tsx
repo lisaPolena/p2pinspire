@@ -248,7 +248,7 @@ export default function DetailBoard() {
                                     <p className='text-[1.2rem] ml-[1.3rem] mb-[0.4rem] font-semibold'>{pins && pins.length ? pins.length + ' Pins' : '0 Pins'}</p>
                                 </div>
                                 <div className={`grid ${boardView === 'wide' ? 'grid-cols-1' : (boardView === 'compact' ? 'grid-cols-3' : 'grid-cols-2')} gap-3 px-4`}>
-                                    {pins.map((pin: any) => (
+                                    {pins.map((pin: Pin) => (
                                         <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${board.id}`)}>
                                             <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
                                                 alt={pin.title} className={`object-cover w-full rounded-2xl ${boardView === 'wide' ? 'max-h-96' : (boardView === 'compact' ? 'max-h-40' : 'max-h-72')}`} />

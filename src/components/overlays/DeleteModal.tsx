@@ -7,13 +7,14 @@ import boardManager from '../../contracts/build/BoardManager.json';
 import pinManager from '../../contracts/build/PinManager.json';
 import { useContractWrite } from 'wagmi';
 import { Toast } from '../general/Toasts';
+import { Board, Pin } from '@/common/types/structs';
 
 interface DeleteModalProps {
     isOpen: boolean;
     isBoard: boolean;
     closeModal: () => void;
-    board?: any;
-    pin?: any;
+    board?: Board | null;
+    pin?: Pin | null;
     isOwner?: boolean;
     savedPinBoardId?: string | number;
 }
@@ -86,7 +87,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
         } else if (pin && !isOwner) {
             setDeletePinModalOpen(false);
             setEditPinModalOpen(false);
-            await deleteSavedPin({ args: [pin.id as string, savedPinBoardId] })
+            await deleteSavedPin({ args: [pin.id, savedPinBoardId] })
             router.back();
         } else {
             //TODO: handle error

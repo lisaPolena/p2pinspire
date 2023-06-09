@@ -20,7 +20,7 @@ export default function Profile() {
     const { data: session, status } = useSession()
     const { allBoards, setAllBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
     const router = useRouter();
-    const [ownPins, setOwnPins] = useState<any[]>([]);
+    const [ownPins, setOwnPins] = useState<Pin[]>([]);
     const toast = useToast()
     const [loadedFromStorage, setLoadedFromStorage] = useState<boolean>(false);
 
@@ -306,7 +306,7 @@ export default function Profile() {
                             <TabPanel key={'TabPanel-1'}>
                                 {ownPins?.length !== 0 ? (
                                     <div className={`grid grid-cols-3 gap-3 px-3 mt-4`}>
-                                        {ownPins.map((pin: any) => (
+                                        {ownPins.map((pin: Pin) => (
                                             <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${pin.boardId}`)}>
                                                 <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
                                                     alt={pin.title} className={`object-cover w-full rounded-2xl h-36`} />

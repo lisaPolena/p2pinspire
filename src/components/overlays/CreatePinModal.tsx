@@ -10,6 +10,7 @@ import ImageUploader from '../general/ImageUploader';
 import { IoChevronBack, IoCheckmarkSharp } from "react-icons/io5";
 import { getBoardsFromStorage } from '@/common/functions/boards';
 import { Toast } from '../general/Toasts';
+import { Board } from '@/common/types/structs';
 
 
 interface CreatePinModalProps {
@@ -185,7 +186,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
                                 <h2 className="text-base text-white">Your Boards</h2>
                             </div>
                             <List>
-                                {allBoards.map((board: any) => (
+                                {allBoards.map((board: Board) => (
                                     <ListItem key={Number(board.id)} onClick={() => setPinBoardId(Number(board.id))}>
                                         <div className='flex items-center h-16'>
 

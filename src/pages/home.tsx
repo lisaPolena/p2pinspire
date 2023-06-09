@@ -118,8 +118,8 @@ export default function Home() {
 
   function getAllPins() {
     if (allBoardsByAddress && allPinsData) {
-      const boardPins = boards.map((board: any) => board.pins.map((pin: any) => pin)).flat();
-      setPins(allPins.filter((pin: { owner: any; id: any; }) => pin.owner !== address && !boardPins.includes(pin.id)));
+      const boardPins = boards.map((board: Board) => board.pins.map((id: Pin) => Number(id))).flat();
+      setPins(allPins.filter((pin: { owner: string; id: number; }) => pin.owner !== address && !boardPins.includes(pin.id)));
     }
   }
 
