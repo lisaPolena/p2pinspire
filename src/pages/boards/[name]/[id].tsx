@@ -11,7 +11,7 @@ import boardManager from '../../../contracts/build/BoardManager.json';
 import { IoAdd } from "react-icons/io5";
 import AddModal from '@/components/overlays/general/AddModal';
 import CreatePinModal from '@/components/overlays/pin/CreatePinModal';
-import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
+import { clearBoardStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
 
 export default function DetailBoard() {
@@ -125,7 +125,7 @@ export default function DetailBoard() {
 
         if (board && board.owner !== address) {
             router.push('/home');
-            clearStorage();
+            clearBoardStorage();
         }
 
         const handleScroll = () => {

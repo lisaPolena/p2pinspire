@@ -12,7 +12,7 @@ import pinManager from '../contracts/build/PinManager.json';
 import { Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
 import { AppBar } from '@/components/general/AppBar';
-import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
+import { clearBoardStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
 import { getUserFromStorage } from '@/common/functions/users';
 
@@ -167,7 +167,7 @@ export default function Profile() {
 
     const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
         if (account) {
-            clearStorage();
+            clearBoardStorage();
             router.push('/home');
             const text = 'Account changed to ' + account.slice(0, 4) + '...' + account.slice(38, account.length);
             toast({

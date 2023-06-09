@@ -18,6 +18,6 @@ export function getBoardsFromStorage(): Board[] {
     return [];
 }
 
-export function clearStorage(): void {
+export function clearBoardStorage(): void {
     window.sessionStorage.setItem("boards", '');
 }

@@ -10,7 +10,7 @@ import pinManager from '../contracts/build/PinManager.json';
 import { Board, Pin } from '@/common/types/structs';
 import React from 'react';
 import { Skeleton, Stack, useToast } from '@chakra-ui/react';
-import { clearStorage, storeBoardsInStorage } from '@/common/functions/boards';
+import { clearBoardStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
 import { getUserFromStorage } from '@/common/functions/users';
 
@@ -98,7 +98,7 @@ export default function Home() {
 
   const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
     if (account) {
-      clearStorage();
+      clearBoardStorage();
 
       setIsLoading(true);
       const timeout = setTimeout(() => {
