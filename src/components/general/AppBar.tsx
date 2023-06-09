@@ -2,13 +2,13 @@ import { IoChevronBack, IoFilter } from "react-icons/io5";
 import { IoIosMore } from "react-icons/io";
 import { useRouter } from "next/router";
 import { useAppState } from "./AppStateContext";
-import EditGeneralModal from "../overlays/EditGeneralModal";
-import EditBoardModal from "../overlays/EditBoardModal";
+import EditGeneralModal from "../overlays/general/EditGeneralModal";
+import EditBoardModal from "../overlays/board/EditBoardModal";
 import { useEffect, useState } from "react";
-import EditPinModal from "../overlays/EditPinModal";
-import FilterBoardModal from "../overlays/FilterBoardModal";
+import EditPinModal from "../overlays/pin/EditPinModal";
+import FilterBoardModal from "../overlays/board/FilterBoardModal";
 import { Board, Pin } from "@/common/types/structs";
-import EditProfileModal from "../overlays/EditProfileModal";
+import EditProfileModal from "../overlays/user/EditProfileModal";
 
 interface AppBarProps {
   isBoard: boolean;

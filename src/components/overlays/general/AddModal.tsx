@@ -1,6 +1,6 @@
 import React from 'react';
-import Modal from '../general/Modal';
-import { useAppState } from '../general/AppStateContext';
+import Modal from '../../general/Modal';
+import { useAppState } from '../../general/AppStateContext';
 import { List, ListItem } from '@chakra-ui/react';
 
 const AddModal: React.FC = () => {

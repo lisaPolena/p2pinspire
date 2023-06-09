@@ -1,14 +1,14 @@
 import React from 'react';
-import OutsideAlerter from '../general/OutsideClickAlerter';
+import OutsideAlerter from '../../general/OutsideClickAlerter';
 import { Button } from '@chakra-ui/react';
 
-interface DeleteProfileModalProps {
+interface CreateProfileModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    handleDeleteProfile: () => void;
+    handleCreateUser: () => void;
 }
 
-const DeleteProfileModal: React.FC<DeleteProfileModalProps> = ({ isOpen, closeModal, handleDeleteProfile }) => {
+const CreateProfileModal: React.FC<CreateProfileModalProps> = ({ isOpen, closeModal, handleCreateUser }) => {
 
     return (
         <>
@@ -16,11 +16,11 @@ const DeleteProfileModal: React.FC<DeleteProfileModalProps> = ({ isOpen, closeMo
                 <OutsideAlerter action={closeModal}>
                     <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] z-[14] h-[20%]">
                         <div>
-                            <h2 className="text-xl text-white">Are you sure?</h2>
+                            <h2 className="text-xl text-white">You need an account:</h2>
                         </div>
                         <div className='flex justify-evenly'>
                             <Button colorScheme="secondary" borderRadius={'50px'} variant='solid' onClick={closeModal}>Cancel</Button>
-                            <Button colorScheme="primary" borderRadius={'50px'} variant='solid' onClick={handleDeleteProfile}>Delete</Button>
+                            <Button colorScheme="primary" borderRadius={'50px'} variant='solid' onClick={handleCreateUser}>Create</Button>
                         </div>
                     </div>
                 </OutsideAlerter>
@@ -30,4 +30,4 @@ const DeleteProfileModal: React.FC<DeleteProfileModalProps> = ({ isOpen, closeMo
     );
 };
 
-export default DeleteProfileModal;
+export default CreateProfileModal;

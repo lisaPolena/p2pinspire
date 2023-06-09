@@ -2,8 +2,8 @@ import React from 'react';
 import { BsFillPinFill } from "react-icons/bs";
 import { MdSpaceDashboard } from "react-icons/md";
 import { HiClipboardDocumentCheck } from "react-icons/hi2";
-import Modal from '../general/Modal';
-import { useAppState } from '../general/AppStateContext';
+import Modal from '../../general/Modal';
+import { useAppState } from '../../general/AppStateContext';
 
 const NavbarModal: React.FC = () => {
     const { setCreateBoardModalOpen, navbarModalOpen, setNavbarModalOpen, setCreatePinModalOpen } = useAppState();

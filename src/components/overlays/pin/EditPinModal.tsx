@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import Modal from '../general/Modal';
-import { useAppState } from '../general/AppStateContext';
+import Modal from '../../general/Modal';
+import { useAppState } from '../../general/AppStateContext';
 import { Input, List, ListItem, Slide, Textarea, useToast } from '@chakra-ui/react';
-import DeleteModal from './DeleteModal';
+import DeleteModal from '../general/DeleteModal';
 import { useRouter } from 'next/router';
-import boardManager from '../../contracts/build/BoardManager.json';
-import pinManager from '../../contracts/build/PinManager.json';
+import boardManager from '../../../contracts/build/BoardManager.json';
+import pinManager from '../../../contracts/build/PinManager.json';
 import { useAccount, useContractWrite } from 'wagmi';
 import { Board, Pin } from '@/common/types/structs';
 import { IoChevronBack, IoCheckmarkSharp, IoChevronForward } from "react-icons/io5";
 import { getBoardsFromStorage } from '@/common/functions/boards';
-import { Toast } from '../general/Toasts';
+import { Toast } from '../../general/Toasts';
 
 interface EditPinModalProps {
     pin: Pin | null;

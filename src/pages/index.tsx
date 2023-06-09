@@ -9,7 +9,7 @@ import { Toast } from '@/components/general/Toasts'
 import { useToast } from '@chakra-ui/react'
 import { User } from '@/common/types/structs'
 import { useAppState } from '@/components/general/AppStateContext'
-import CreateUserModal from '@/components/overlays/CreateUserModal'
+import CreateProfileModal from '@/components/overlays/user/CreateProfileModal'
 import { storeUserInStorage } from '@/common/functions/users'
 
 export default function Index() {
@@ -101,7 +101,7 @@ export default function Index() {
           <ConnectButton accountStatus={'full'} label='Connect' />
         </div>
       </main>
-      <CreateUserModal isOpen={createUserModalOpen} closeModal={handleCloseCreateUserModal} handleCreateUser={handleCreateUser} />
+      <CreateProfileModal isOpen={createUserModalOpen} closeModal={handleCloseCreateUserModal} handleCreateUser={handleCreateUser} />
     </>
   )
 }

@@ -1,7 +1,7 @@
 import { Board, Pin } from '@/common/types/structs';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
-import SavePinModal from '@/components/overlays/SavePinModal';
+import SavePinModal from '@/components/overlays/pin/SavePinModal';
 import { Button, useToast } from '@chakra-ui/react';
 import Head from 'next/head'
 import { useRouter } from 'next/router'

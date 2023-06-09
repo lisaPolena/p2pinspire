@@ -1,9 +1,9 @@
-import Modal from '../general/Modal';
-import { useAppState } from '../general/AppStateContext';
+import Modal from '../../general/Modal';
+import { useAppState } from '../../general/AppStateContext';
 import { List, ListItem, useToast } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { disconnect } from '@wagmi/core';
-import { Toast } from '../general/Toasts';
+import { Toast } from '../../general/Toasts';
 
 interface EditGeneralModalProps {
     isBoard: boolean;

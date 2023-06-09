@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import Modal from '../general/Modal';
-import { useAppState } from '../general/AppStateContext';
+import Modal from '../../general/Modal';
+import { useAppState } from '../../general/AppStateContext';
 import { useRouter } from 'next/router';
 import { List, ListItem, useToast } from '@chakra-ui/react';
-import boardManager from '../../contracts/build/BoardManager.json';
-import pinManager from '../../contracts/build/PinManager.json';
+import boardManager from '../../../contracts/build/BoardManager.json';
+import pinManager from '../../../contracts/build/PinManager.json';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
 import { Board, Pin } from '@/common/types/structs';
 

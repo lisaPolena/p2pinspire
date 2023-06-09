@@ -1,8 +1,8 @@
 import { List, ListItem } from '@chakra-ui/react';
 import React from 'react';
-import { useAppState } from '../general/AppStateContext';
+import { useAppState } from '../../general/AppStateContext';
 import { IoCheckmarkSharp } from "react-icons/io5";
-import Modal from '../general/Modal';
+import Modal from '../../general/Modal';
 
 const FilterBoardModal: React.FC = () => {
     const { filterBoardModalOpen, setFilterBoardModalOpen, boardView, setBoardView } = useAppState();

@@ -1,12 +1,12 @@
 import React from 'react';
-import { useAppState } from '../general/AppStateContext';
-import OutsideAlerter from '../general/OutsideClickAlerter';
+import { useAppState } from '../../general/AppStateContext';
+import OutsideAlerter from '../../general/OutsideClickAlerter';
 import { Button, useToast } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import boardManager from '../../contracts/build/BoardManager.json';
-import pinManager from '../../contracts/build/PinManager.json';
+import boardManager from '../../../contracts/build/BoardManager.json';
+import pinManager from '../../../contracts/build/PinManager.json';
 import { useContractWrite } from 'wagmi';
-import { Toast } from '../general/Toasts';
+import { Toast } from '../../general/Toasts';
 import { Board, Pin } from '@/common/types/structs';
 
 interface DeleteModalProps {

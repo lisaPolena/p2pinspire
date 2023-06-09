@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import Modal from '../general/Modal';
-import { useAppState } from '../general/AppStateContext';
+import Modal from '../../general/Modal';
+import { useAppState } from '../../general/AppStateContext';
 import { Input, Slide, Switch, Textarea, useToast } from '@chakra-ui/react';
-import DeleteModal from './DeleteModal';
-import boardManager from '../../contracts/build/BoardManager.json';
+import DeleteModal from '../general/DeleteModal';
+import boardManager from '../../../contracts/build/BoardManager.json';
 import { useContractWrite } from 'wagmi';
 import { IoAdd, IoChevronBack } from 'react-icons/io5';
 import { RiEditCircleFill } from 'react-icons/ri';
 import { Board, Pin } from '@/common/types/structs';
-import { Toast } from '../general/Toasts';
+import { Toast } from '../../general/Toasts';
 
 interface EditGeneralModalProps {
     board: Board | null;

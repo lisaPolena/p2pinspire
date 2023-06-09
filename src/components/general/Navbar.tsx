@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { IoHome, IoSearch, IoAdd, IoChatbubbleEllipses, IoPersonCircle } from "react-icons/io5";
-import CreateBoardModal from '../overlays/CreateBoardModal';
-import CreatePinModal from '../overlays/CreatePinModal';
-import NavbarModal from '../overlays/NavbarModal';
+import CreateBoardModal from '../overlays/board/CreateBoardModal';
+import CreatePinModal from '../overlays/pin/CreatePinModal';
+import NavbarModal from '../overlays/general/NavbarModal';
 import { useAppState } from './AppStateContext';
 
 export const Navbar = () => {

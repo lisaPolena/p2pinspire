@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import Modal from '../general/Modal';
-import { useAppState } from '../general/AppStateContext';
+import Modal from '../../general/Modal';
+import { useAppState } from '../../general/AppStateContext';
 import { Input, Switch, Textarea, useToast } from '@chakra-ui/react';
-import boardManager from '../../contracts/build/BoardManager.json';
+import boardManager from '../../../contracts/build/BoardManager.json';
 import { useContractWrite } from 'wagmi';
 import { useRouter } from 'next/router';
-import { Toast } from '../general/Toasts';
+import { Toast } from '../../general/Toasts';
 
 const CreateBoardModal: React.FC = () => {
     const { createBoardModalOpen, setCreateBoardModalOpen } = useAppState();
