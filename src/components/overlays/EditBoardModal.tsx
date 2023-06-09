@@ -41,8 +41,8 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
 
         if (board) {
             setBoardName(board.name);
-            setBoardDescription(board.description);
-            setBoardCoverImage(board.boardCoverHash);
+            setBoardDescription(board.description ?? '');
+            setBoardCoverImage(board.boardCoverHash ?? '');
         }
 
     }, [board, editBoardModalOpen]);

@@ -15,7 +15,7 @@ interface AppBarProps {
   title?: string;
   showTitle?: boolean;
   board?: Board | null;
-  pin?: Pin | null;
+  pin?: Pin;
   hideBackButton?: boolean
   pins?: Pin[] | null;
 }
@@ -50,7 +50,7 @@ export const AppBar = (props: AppBarProps) => {
       </div>
       <EditGeneralModal isBoard={isBoard} isSavedPin={isSavedPin} />
       <EditBoardModal board={board ?? null} pins={pins ?? null} />
-      <EditPinModal pin={pin} />
+      <EditPinModal pin={pin ?? null} />
       <FilterBoardModal />
     </>
   );

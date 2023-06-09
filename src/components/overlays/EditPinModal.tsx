@@ -13,7 +13,7 @@ import { getBoardsFromStorage } from '@/common/functions/boards';
 import { Toast } from '../general/Toasts';
 
 interface EditPinModalProps {
-    pin: Pin;
+    pin: Pin | null;
 }
 
 const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) => {
@@ -67,7 +67,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
         if (pin && pin.owner === address) {
             setIsOwner(true);
             setPinTitle(pin.title);
-            setPinDescripton(pin.description);
+            setPinDescripton(pin.description ?? '');
             setPinBoardId(Number(pin.boardId));
             if (pin.boardId && !newPinBoardId) {
                 const b = allBoards.find(board => board.id === Number(pin.boardId) ?? null) as Board;
@@ -96,21 +96,29 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
             }
             return;
         }
-        await writeEditCreatedPin({ args: [pin.id, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
-        setEditPinModalOpen(false);
-        handleToast('Pin ' + pinTitle + ' editing...', '');
-        setNewPinBoardId('');
-        if (newPinBoardId != '') router.push('/profile');
+        if (pin) {
+            await writeEditCreatedPin({ args: [pin.id, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
+            setEditPinModalOpen(false);
+            handleToast('Pin ' + pinTitle + ' editing...', '');
+            setNewPinBoardId('');
+            if (newPinBoardId != '') router.push('/profile');
+        } else {
+            handleToast('Pin not found!', '');
+        }
     }
 
     const editSavedPin = async () => {
-        if (newPinBoardId !== '') {
-            await writeEditSavedPin({ args: [pin.id, pinBoardId, newPinBoardId] })
+        if (pin) {
+            if (newPinBoardId !== '') {
+                await writeEditSavedPin({ args: [pin.id, pinBoardId, newPinBoardId] })
+            }
+            setEditPinModalOpen(false);
+            handleToast('Pin editing...', '');
+            setNewPinBoardId('');
+            router.push('/profile');
+        } else {
+            handleToast('Pin not found!', '');
         }
-        setEditPinModalOpen(false);
-        handleToast('Pin editing...', '');
-        setNewPinBoardId('');
-        router.push('/profile');
     }
 
     const handleNewBoard = (board: Board) => {
