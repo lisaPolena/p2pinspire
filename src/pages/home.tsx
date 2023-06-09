@@ -126,7 +126,7 @@ export default function Home() {
   function getAllBoards() {
     if (allBoardsByAddress && allPinsByAddress) {
       let updatedBoards: Board[] = [];
-      if ((allBoardsByAddress as any[]).length > 0) {
+      if ((allBoardsByAddress as Board[]).length > 0) {
         updatedBoards = boards.map((board) => {
           const boardPinsIds = board.pins.map((id: Pin) => id);
           const boardPins = allPins.filter((pin: Pin) => boardPinsIds.find((id) => Number(id) === Number(pin.id)));
