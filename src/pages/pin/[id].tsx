@@ -1,4 +1,4 @@
-import { Board, Pin } from '@/common/types/structs';
+import { Board, Pin, PinOwnerData } from '@/common/types/structs';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
 import SavePinModal from '@/components/overlays/pin/SavePinModal';
@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import pinManager from '../../contracts/build/PinManager.json';
 import boardManager from '../../contracts/build/BoardManager.json';
+import userManager from '../../contracts/build/UserManager.json';
 import { Toast } from '@/components/general/Toasts';
 
 export default function DetailPin() {
@@ -20,6 +21,7 @@ export default function DetailPin() {
     const [savePinId, setSavePinId] = useState<number | null>(null);
     const [isSavedPin, setIsSavedPin] = useState<boolean>(false);
     const toast = useToast()
+    const [pinOwner, setPinOwner] = useState<PinOwnerData | null>(null);
 
     const { data: pinbyId, error: pinIdError } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
@@ -42,6 +44,17 @@ export default function DetailPin() {
         onSuccess(data) {
             const res = data as Board;
             setBoard(res);
+        },
+    });
+
+    const { data: pinOwnerData } = useContractRead({
+        address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
+        abi: userManager.abi,
+        functionName: 'getUserByAddress',
+        enabled: !!pin?.owner,
+        args: [pin?.owner],
+        onError(error) {
+            console.log('getUserByAdress', error);
         },
     });
 
@@ -69,13 +82,21 @@ export default function DetailPin() {
         if (router.query.boardId || pin?.owner === address) setIsSavedPin(true)
         else setIsSavedPin(false);
 
+        console.log('pinOwnerData', pinOwnerData);
+
+        if (pinOwnerData) {
+            const res = pinOwnerData as PinOwnerData;
+            const shortAddress = res.userAddress.substring(0, 6) + '...' + res.userAddress.substring(res.userAddress.length - 4, res.userAddress.length);
+            setPinOwner({ userAddress: shortAddress, name: res.name, profileImageHash: res.profileImageHash });
+        }
+
         if (pin && downloadPin) downloadImage(pin.imageHash, pin.title);
 
         return () => {
             clearTimeout(timeoutId);
         };
 
-    }, [router.query, downloadPin, address, isConnected, board, pin]);
+    }, [router.query, downloadPin, address, isConnected, board, pin, pinOwnerData]);
 
     async function downloadImage(hash: string, title: string) {
         const imageSrc = `https://web3-pinterest.infura-ipfs.io/ipfs/${hash}`;
@@ -134,6 +155,20 @@ export default function DetailPin() {
                         <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`} alt={pin?.title}
                             className="object-cover w-full rounded-tl-3xl rounded-tr-3xl " />
                         <div className='p-4 bg-zinc-800 rounded-bl-3xl rounded-br-3xl'>
+                            {pinOwner &&
+                                <div className='flex items-center gap-3 mb-4'>
+                                    {pinOwner.profileImageHash !== '' ? (
+                                        <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pinOwner.profileImageHash}`}
+                                            alt={pinOwner.name} className='w-10 h-10 rounded-full' />
+                                    ) : (
+                                        <div className='w-10 h-10 rounded-full bg-zinc-600' />
+                                    )}
+                                    <p className='text-sm font-semibold'>{pinOwner.name != '' ? pinOwner.name : pinOwner.userAddress}</p>
+                                    {pin.owner !== address &&
+                                        <button className="px-4 py-2 text-white transition-colors bg-red-600 rounded-3xl">Following</button>
+                                    }
+                                </div>
+                            }
                             <h1 className='text-2xl font-semibold'>{pin?.title}</h1>
                             <p>{pin?.description}</p>
                             <div className='flex flex-row justify-center gap-4 mt-6'>

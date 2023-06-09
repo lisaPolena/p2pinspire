@@ -27,3 +27,10 @@ export interface User {
     following?: string[];
     followers?: string[];
 }
+
+export interface PinOwnerData {
+    userAddress: string;
+    name?: string;
+    username?: string;
+    profileImageHash?: string;
+}
