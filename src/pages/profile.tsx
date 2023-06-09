@@ -13,6 +13,7 @@ import { Board, Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
 import { AppBar } from '@/components/general/AppBar';
 import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
+import { Toast } from '@/components/general/Toasts';
 
 export default function Profile() {
     const { address, isConnected, connector: activeConnector } = useAccount()
@@ -145,22 +146,20 @@ export default function Profile() {
         const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
             if (account) {
                 clearStorage();
-                router.push('/home')
+                router.push('/home');
+                const text = 'Account changed to ' + account.slice(0, 4) + '...' + account.slice(38, account.length);
                 toast({
                     position: 'top',
                     render: () => (
-                        <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
-                            <p>Account changed to <strong>{account.slice(0, 4)}...{account.slice(38, account.length)}</strong></p>
-                        </div>
+                        <Toast text={text} />
                     ),
                 })
             } else if (chain) {
+                const text = chain.unsupported ? 'Sry, the network is not supported!' : 'You changed the network.';
                 toast({
                     position: 'top',
                     render: () => (
-                        <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
-                            <p>{chain.unsupported ? 'Sry, the network is not supported!' : 'You changed the network.'}</p>
-                        </div>
+                        <Toast text={text} />
                     ),
                 })
 
@@ -263,14 +262,11 @@ export default function Profile() {
 
     function handleSavedPinToast(imageHash: string, boardId: number) {
         const boardName = allBoards.find((board) => board.id === boardId)?.name as string;
+        const message = 'Pin saved to ' + boardName;
         toast({
             position: 'top',
             render: () => (
-                <div className='text-white bg-zinc-800 rounded-full h-[70px] flex items-center justify-evenly gap-2 px-2' >
-                    <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${imageHash}`}
-                        className="object-cover w-[50px] h-[50px] rounded-2xl" />
-                    <p>Saved Pin to <strong>{boardName}</strong></p>
-                </div>
+                <Toast text={message} imageHash={imageHash} />
             ),
         })
     }

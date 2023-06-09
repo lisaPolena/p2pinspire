@@ -9,6 +9,7 @@ import { useIpfs } from '@/common/functions/contracts';
 import ImageUploader from '../general/ImageUploader';
 import { IoChevronBack, IoCheckmarkSharp } from "react-icons/io5";
 import { getBoardsFromStorage } from '@/common/functions/boards';
+import { Toast } from '../general/Toasts';
 
 
 interface CreatePinModalProps {
@@ -59,7 +60,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         const board = allBoards.find((board) => board.id === Number(bId))
         if (board) setCreatedPin({ boardName: board.name, imageHash: pinImage });
         clearForm();
-        handleLoadingCreatingPinToast();
+        handleLoadingCreatingPinToast('The Pin is being created...');
     }
 
     function clearForm() {
@@ -70,14 +71,11 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     }
 
 
-    function handleLoadingCreatingPinToast() {
+    function handleLoadingCreatingPinToast(message: string) {
         toast({
             position: 'top',
             render: () => (
-                <div className='text-white bg-zinc-800 rounded-full h-[70px] flex flex-col items-center justify-center' >
-                    <p>The Pin is being created...</p>
-                    <Progress size='xs' isIndeterminate />
-                </div>
+                <Toast text={message} />
             ),
         })
     }
