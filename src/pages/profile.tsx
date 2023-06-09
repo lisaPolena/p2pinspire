@@ -343,7 +343,7 @@ export default function Profile() {
                         <TabPanels>
                             <TabPanel key={'TabPanel-1'}>
                                 {ownPins?.length !== 0 ? (
-                                    <div className={`grid grid-cols-3 gap-3 px-3 mt-4`}>
+                                    <div className={`grid grid-cols-3 gap-3 px-3 mt-4 mb-16`}>
                                         {ownPins.map((pin: Pin) => (
                                             <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}?boardId=${pin.boardId}`)}>
                                                 <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
@@ -359,7 +359,7 @@ export default function Profile() {
                                 )}
                             </TabPanel>
                             <TabPanel key={'TabPanel-2'} width='100vw'>
-                                <div className='grid grid-cols-2 gap-4'>
+                                <div className='grid grid-cols-2 gap-4 mb-16'>
                                     {allBoards?.map(({ id, name, pins }) => (
                                         <React.Fragment key={id}>
                                             {loadDeleteBoardTransaction && loadDeleteBoardTransaction === Number(id) ? (
