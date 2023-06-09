@@ -24512,7 +24512,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.14",
-  "updatedAt": "2023-06-09T14:11:19.714Z",
+  "updatedAt": "2023-06-09T18:18:35.071Z",
   "devdoc": {
     "details": "A smart contract for managing boards",
     "events": {

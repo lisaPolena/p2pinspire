@@ -26,7 +26,7 @@ export default function ImageUploader({ handleUpload, isLoading }: ImageUploader
 
     return (
         <Container >
-            <AspectRatio width="100" ratio={1}>
+            <AspectRatio width="50" ratio={1}>
                 <Box
                     borderColor="gray.300"
                     borderStyle="dashed"

@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { useSession } from "next-auth/react"
 import { useAccount, useContractRead, useContractWrite } from "wagmi"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import userManager from '../contracts/build/UserManager.json';
@@ -9,6 +9,8 @@ import { Toast } from '@/components/general/Toasts'
 import { useToast } from '@chakra-ui/react'
 import { User } from '@/common/types/structs'
 import { useAppState } from '@/components/general/AppStateContext'
+import CreateUserModal from '@/components/overlays/CreateUserModal'
+import { storeUserInStorage } from '@/common/functions/users'
 
 export default function Index() {
   const { address, isConnected } = useAccount()
@@ -16,6 +18,7 @@ export default function Index() {
   const { setUser } = useAppState();
   const router = useRouter();
   const toast = useToast();
+  const [createUserModalOpen, setCreateUserModalOpen] = useState<boolean>(false);
 
   const {
     data: createUserData,
@@ -41,28 +44,33 @@ export default function Index() {
   });
 
   useEffect(() => {
-    setUser(null);
     if (isConnected && status === 'authenticated' && session) {
 
       if (userData) {
         const res = userData as User;
         if (res.userAddress === address) {
           setUser(res);
+          storeUserInStorage(res);
           router.push('/home');
           return;
         }
       }
 
-      handleToast('Creating user...', '');
-      handleCreateUser();
+      const timeout = setTimeout(() => {
+        setCreateUserModalOpen(true);
+      }, 2000);
+
+      return () => {
+        clearTimeout(timeout);
+      }
 
     }
-  }, [isConnected, session])
+  }, [isConnected, session, userData])
 
   async function handleCreateUser() {
+    handleToast('Creating user...', '');
     await createUser({ args: [address] });
-    setUser(userData as User);
-    router.push('/home');
+    setCreateUserModalOpen(false);
   }
 
   function handleToast(message: string, imageHash: string) {
@@ -72,6 +80,10 @@ export default function Index() {
         <Toast text={message} imageHash={imageHash} />
       ),
     })
+  }
+
+  function handleCloseCreateUserModal() {
+    setCreateUserModalOpen(false);
   }
 
   return (
@@ -89,6 +101,7 @@ export default function Index() {
           <ConnectButton accountStatus={'full'} label='Connect' />
         </div>
       </main>
+      <CreateUserModal isOpen={createUserModalOpen} closeModal={handleCloseCreateUserModal} handleCreateUser={handleCreateUser} />
     </>
   )
 }

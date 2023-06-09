@@ -14,11 +14,12 @@ import { useSession } from "next-auth/react"
 import { AppBar } from '@/components/general/AppBar';
 import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
+import { getUserFromStorage } from '@/common/functions/users';
 
 export default function Profile() {
     const { address, isConnected, connector: activeConnector } = useAccount()
     const { data: session, status } = useSession()
-    const { allBoards, setAllBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
+    const { user, setUser, allBoards, setAllBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
     const router = useRouter();
     const [ownPins, setOwnPins] = useState<Pin[]>([]);
     const toast = useToast()
@@ -138,8 +139,12 @@ export default function Profile() {
     });
 
     useEffect(() => {
-        if (!isConnected && status === 'unauthenticated' && !session) {
+        if (!isConnected && status === 'unauthenticated' && !session && !user) {
             router.push('/')
+        }
+
+        if (!user) {
+            setUser(getUserFromStorage());
         }
 
         if (allBoards.length === 0 && !loadedFromStorage) {
@@ -291,7 +296,7 @@ export default function Profile() {
                 <title>Profile</title>
             </Head>
             <main className='min-h-screen bg-black'>
-                <AppBar isBoard={false} isSavedPin={false} hideBackButton={true} />
+                <AppBar isBoard={false} isSavedPin={false} hideBackButton={true} isSetting={true} />
                 <div className='w-[95%] flex flex-col justify-center items-center mb-10 relative top-20'>
                     <ConnectButton label='Connect' />
                 </div>

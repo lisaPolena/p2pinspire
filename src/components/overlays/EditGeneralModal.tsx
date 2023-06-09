@@ -1,17 +1,23 @@
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { List, ListItem } from '@chakra-ui/react';
+import { List, ListItem, useToast } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import { disconnect } from '@wagmi/core';
+import { Toast } from '../general/Toasts';
 
 interface EditGeneralModalProps {
     isBoard: boolean;
     isSavedPin: boolean;
+    isSetting?: boolean;
 }
 
 
 const EditGeneralModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModalProps) => {
-    const { isBoard, isSavedPin } = props;
+    const { isBoard, isSavedPin, isSetting } = props;
     const { editModalOpen, setEditModalOpen } = useAppState();
-    const { setEditBoardModalOpen, setEditPinModalOpen, setDownloadPin } = useAppState();
+    const { setEditBoardModalOpen, setEditPinModalOpen, setDownloadPin, setEditProfileModalOpen } = useAppState();
+    const router = useRouter();
+    const toast = useToast();
 
     function handleClickEdit() {
         if (isBoard) {
@@ -28,6 +34,22 @@ const EditGeneralModal: React.FC<EditGeneralModalProps> = (props: EditGeneralMod
             setDownloadPin(true);
             setEditModalOpen(false);
         }
+    }
+
+    async function handleLogout() {
+        await disconnect();
+        setEditModalOpen(false);
+        handleToast('Logged out successfully', '');
+        router.push('/');
+    }
+
+    function handleToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
     }
 
     return (
@@ -53,6 +75,15 @@ const EditGeneralModal: React.FC<EditGeneralModalProps> = (props: EditGeneralMod
 
                 ) : (
                     <>
+                        <ListItem onClick={() => setEditProfileModalOpen(true)}>
+                            <p className='mb-4 text-lg font-bold'>Edit Profile</p>
+                        </ListItem>
+                        <ListItem onClick={handleLogout}>
+                            <p className='mb-4 text-lg font-bold'>Logout</p>
+                        </ListItem>
+                        <ListItem>
+                            <p className='mb-4 text-lg font-bold'>Copy profile link</p>
+                        </ListItem>
                     </>
                 )}
             </List>

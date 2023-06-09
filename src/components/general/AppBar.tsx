@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import EditPinModal from "../overlays/EditPinModal";
 import FilterBoardModal from "../overlays/FilterBoardModal";
 import { Board, Pin } from "@/common/types/structs";
+import EditProfileModal from "../overlays/EditProfileModal";
 
 interface AppBarProps {
   isBoard: boolean;
@@ -18,12 +19,13 @@ interface AppBarProps {
   pin?: Pin;
   hideBackButton?: boolean
   pins?: Pin[] | null;
+  isSetting?: boolean;
 }
 
 //TODO: add shadow if scroll position is > 0 (showtitle is true)
 
 export const AppBar = (props: AppBarProps) => {
-  const { isBoard, isSavedPin, title, showTitle, board, pin, hideBackButton, pins } = props;
+  const { isBoard, isSavedPin, title, showTitle, board, pin, hideBackButton, pins, isSetting } = props;
   const { setEditModalOpen, setFilterBoardModalOpen, createPinModalOpen } = useAppState();
   const [longTitle, setLongTitle] = useState<boolean>(false);
   const router = useRouter();
@@ -48,10 +50,11 @@ export const AppBar = (props: AppBarProps) => {
           <div className='text-2xl' onClick={() => !createPinModalOpen ? setEditModalOpen(true) : null}>{!createPinModalOpen && <IoIosMore />}</div>
         </div>
       </div>
-      <EditGeneralModal isBoard={isBoard} isSavedPin={isSavedPin} />
+      <EditGeneralModal isBoard={isBoard} isSavedPin={isSavedPin} isSetting={isSetting} />
       <EditBoardModal board={board ?? null} pins={pins ?? null} />
       <EditPinModal pin={pin ?? null} />
       <FilterBoardModal />
+      <EditProfileModal />
     </>
   );
 };
