@@ -72,8 +72,8 @@ const EditProfileModal: React.FC = () => {
     const handleEditProfile = async () => {
         if (newData) {
 
-            if (profileBio.length > 50) {
-                handleToast('Bio must be less than 50 characters', '');
+            if (profileBio.length > 300) {
+                handleToast('Bio must be less than 300 characters', '');
                 return;
             }
 

@@ -319,12 +319,12 @@ export default function Profile() {
 
                             {user.username &&
                                 <div className='mt-2 text-sm font-medium text-gray-400'>
-                                    @{user.username}
+                                    @{(user.username).toLowerCase()}
                                 </div>
                             }
 
                             {user.bio &&
-                                <div className='mt-2 text-base font-medium text-white'>
+                                <div className='px-6 mt-2 text-base font-medium text-white'>
                                     {user.bio}
                                 </div>
                             }
