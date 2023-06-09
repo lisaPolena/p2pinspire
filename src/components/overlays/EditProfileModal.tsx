@@ -41,6 +41,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = (props: EditProfileMod
         address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
         abi: userManager.abi,
         functionName: 'editUser',
+        onSuccess() {
+            handleToast('Profile edited!', '');
+        },
         onError(err) {
             console.log('error', err);
         }
@@ -86,11 +89,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = (props: EditProfileMod
             const bio = profileBio ?? user?.bio ?? '';
             const username = profileUsername ?? user?.username ?? '';
             const image = profileImage ?? user?.profileImageHash ?? '';
+            handleToast('Profile editing...', '');
             await editUser({ args: [userAddress, name, username, image, bio] });
             setUser({ userAddress, name, username, profileImageHash: image, bio });
             storeUserInStorage({ userAddress, name, username, profileImageHash: image, bio });
             setEditProfileModalOpen(false);
-            handleToast('Profile editing...', '');
         }
     }
 
