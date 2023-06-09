@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, List, ListItem, Slide } from '@chakra-ui/react';
+import { Input, List, ListItem, Slide, useToast } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
 import { useRouter } from 'next/router';
 import boardManager from '../../contracts/build/BoardManager.json';
@@ -10,6 +10,7 @@ import { useAccount, useContractWrite } from 'wagmi';
 import { Board } from '@/common/types/structs';
 import { IoChevronBack, IoCheckmarkSharp, IoChevronForward } from "react-icons/io5";
 import { getBoardsFromStorage } from '@/common/functions/boards';
+import { Toast } from '../general/Toasts';
 
 interface EditPinModalProps {
     pin: any;
@@ -27,6 +28,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
     const router = useRouter();
     const [boardSlideOpen, setBoardSlideOpen] = useState<boolean>(false);
     const [board, setBoard] = useState<any>(null);
+    const toast = useToast();
 
     const {
         data: savedPinData,
@@ -86,6 +88,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
     async function editCreatedPin() {
         await writeEditCreatedPin({ args: [pin.id as string, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
         setEditPinModalOpen(false);
+        handleToast('Pin ' + pinTitle + ' editing...', '');
         setNewPinBoardId('');
         if (newPinBoardId != '') router.push('/profile');
     }
@@ -96,6 +99,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
             await writeEditSavedPin({ args: [pin.id as string, pinBoardId, newPinBoardId] })
         }
         setEditPinModalOpen(false);
+        handleToast('Pin editing...', '');
         setNewPinBoardId('');
         router.push('/profile');
     }
@@ -104,6 +108,15 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
         setNewPinBoardId(Number(board.id));
         setBoardSlideOpen(false);
         setBoard(board);
+    }
+
+    function handleToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
     }
 
     return (

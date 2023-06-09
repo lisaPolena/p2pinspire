@@ -2,13 +2,14 @@ import { Board, Pin } from '@/common/types/structs';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
 import SavePinModal from '@/components/overlays/SavePinModal';
-import { Button } from '@chakra-ui/react';
+import { Button, useToast } from '@chakra-ui/react';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useAccount, useContractEvent, useContractRead } from 'wagmi';
 import pinManager from '../../contracts/build/PinManager.json';
 import boardManager from '../../contracts/build/BoardManager.json';
+import { Toast } from '@/components/general/Toasts';
 
 export default function DetailPin() {
     const { address, isConnected } = useAccount()
@@ -18,6 +19,7 @@ export default function DetailPin() {
     const { downloadPin, setDownloadPin, setSavePinModalOpen } = useAppState();
     const [savePinId, setSavePinId] = useState<number | null>(null);
     const [isSavedPin, setIsSavedPin] = useState<boolean>(false);
+    const toast = useToast()
 
     const { data: pinbyId, error: pinIdError } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
@@ -51,6 +53,8 @@ export default function DetailPin() {
             const args = log[0].args;
             const newPin = { ...pin, title: args.newTitle, description: args.newDescription, imageHash: args.imageHash } as Pin;
             setPin(newPin);
+            const message = 'Pin ' + args.newTitle + ' edited!';
+            handleEditPinToast(message, args.imageHash);
         },
     });
 
@@ -90,6 +94,15 @@ export default function DetailPin() {
         document.body.removeChild(anchorElement);
         window.URL.revokeObjectURL(href);
         setDownloadPin(false);
+
+        const message = 'Image downloading...';
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} />
+            ),
+        })
+
     }
 
     function handleSavePinToBoard(pinId: number, isOwner: boolean) {
@@ -97,6 +110,16 @@ export default function DetailPin() {
             setSavePinId(pinId);
             setSavePinModalOpen(true);
         }
+    }
+
+
+    function handleEditPinToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
     }
 
     return (

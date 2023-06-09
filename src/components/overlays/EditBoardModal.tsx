@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, Slide, Switch, Textarea } from '@chakra-ui/react';
+import { Input, Slide, Switch, Textarea, useToast } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
 import boardManager from '../../contracts/build/BoardManager.json';
 import { useContractWrite } from 'wagmi';
 import { IoAdd, IoChevronBack } from 'react-icons/io5';
 import { RiEditCircleFill } from 'react-icons/ri';
 import { Board, Pin } from '@/common/types/structs';
+import { Toast } from '../general/Toasts';
 
 interface EditGeneralModalProps {
     board: Board | null;
@@ -21,6 +22,7 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
     const [boardDescription, setBoardDescription] = useState<string>('');
     const [boardCoverImage, setBoardCoverImage] = useState<string>('');
     const [pinSlideOpen, setPinSlideOpen] = useState<boolean>(false);
+    const toast = useToast();
 
     const {
         data: editBoardData,
@@ -48,6 +50,16 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
     const handleEditBoard = async () => {
         await editBoard({ args: [board?.id, boardName, boardDescription, boardCoverImage] })
         setEditBoardModalOpen(false);
+        handleToast(boardName + ' editing...', '');
+    }
+
+    function handleToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
     }
 
     return (

@@ -53,6 +53,7 @@ export default function Profile() {
             const args = log[0].args
             onBoardDeleted(Number(args.boardId))
             setLoadDeleteBoardTransaction(0);
+            handleToast('Board deleted!', '');
         },
     });
 
@@ -63,6 +64,8 @@ export default function Profile() {
         listener(log: any) {
             const args = log[0].args;
             onBoardEdited(Number(args.boardId), args.newName, args.newDescription, args.boardCoverHash);
+            const message = args.newName + ' edited!';
+            handleToast(message, '');
         },
     });
 
@@ -119,6 +122,7 @@ export default function Profile() {
         listener(log: any) {
             const args = log[0].args;
             onPinDeleted(Number(args.pinId), Number(args.boardId));
+            handleToast('Pin deleted!', '');
         },
     });
 
@@ -129,6 +133,7 @@ export default function Profile() {
         listener(log: any) {
             const args = log[0].args;
             onPinDeleted(Number(args.pinId), Number(args.boardId));
+            handleToast('Pin deleted!', '');
         },
     });
 
@@ -263,6 +268,15 @@ export default function Profile() {
     function handleSavedPinToast(imageHash: string, boardId: number) {
         const boardName = allBoards.find((board) => board.id === boardId)?.name as string;
         const message = 'Pin saved to ' + boardName;
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
+    }
+
+    function handleToast(message: string, imageHash: string) {
         toast({
             position: 'top',
             render: () => (

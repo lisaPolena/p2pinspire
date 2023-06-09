@@ -1,11 +1,12 @@
 import React from 'react';
 import { useAppState } from '../general/AppStateContext';
 import OutsideAlerter from '../general/OutsideClickAlerter';
-import { Button } from '@chakra-ui/react';
+import { Button, useToast } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import boardManager from '../../contracts/build/BoardManager.json';
 import pinManager from '../../contracts/build/PinManager.json';
 import { useContractWrite } from 'wagmi';
+import { Toast } from '../general/Toasts';
 
 interface DeleteModalProps {
     isOpen: boolean;
@@ -20,6 +21,7 @@ interface DeleteModalProps {
 const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, board, pin, isOwner, savedPinBoardId }) => {
     const { setDeleteModalOpen, setEditBoardModalOpen, setLoadDeleteBoardTransaction, setDeletePinModalOpen, setEditPinModalOpen } = useAppState();
     const router = useRouter();
+    const toast = useToast();
 
     const {
         data: deleteCreatedPinData,
@@ -66,6 +68,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
             setEditBoardModalOpen(false);
             await deleteBoard({ args: [board.id] })
             setLoadDeleteBoardTransaction(Number(board.id));
+            handleToast('Board deleting...', '');
             router.push('/profile');
         } else {
             //TODO: handle error
@@ -78,6 +81,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
             setDeletePinModalOpen(false);
             setEditPinModalOpen(false);
             await deleteCreatedPin({ args: [pin.id] })
+            handleToast('Pin deleting...', '');
             router.back();
         } else if (pin && !isOwner) {
             setDeletePinModalOpen(false);
@@ -88,6 +92,15 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, isBoard, closeModal, 
             //TODO: handle error
             console.log('no pin to delete');
         }
+    }
+
+    function handleToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
     }
 
     return (

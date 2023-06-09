@@ -1,7 +1,7 @@
 import { Board, Pin } from '@/common/types/structs';
 import { AppBar } from '@/components/general/AppBar';
 import { useAppState } from '@/components/general/AppStateContext';
-import { Spinner } from '@chakra-ui/react';
+import { Spinner, useToast } from '@chakra-ui/react';
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
@@ -12,6 +12,7 @@ import { IoAdd } from "react-icons/io5";
 import AddModal from '@/components/overlays/AddModal';
 import CreatePinModal from '@/components/overlays/CreatePinModal';
 import { clearStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
+import { Toast } from '@/components/general/Toasts';
 
 export default function DetailBoard() {
     const { address, isConnected } = useAccount()
@@ -22,6 +23,7 @@ export default function DetailBoard() {
     const [tmpPins, setTmpPins] = useState<Pin[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const { allBoards, setAllBoards, boardView, setAddModalOpen } = useAppState();
+    const toast = useToast()
 
     const { data: boardById } = useContractRead({
         address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
@@ -59,6 +61,8 @@ export default function DetailBoard() {
             const newBoard = { id: args.boardId, name: args.newName, description: args.newDescription, owner: args.owner, pins: args.pins, boardCoverHash: args.boardCoverHash } as Board;
             setBoard(newBoard);
             onBoardEdited(Number(args.boardId), args.newName, args.newDescription, args.boardCoverHash);
+            const message = args.newName + ' edited!';
+            handleToast(message, '');
         },
     });
 
@@ -69,6 +73,7 @@ export default function DetailBoard() {
         listener(log: any) {
             const args = log[0].args;
             onPinDeleted(Number(args.pinId), Number(args.boardId));
+            handleToast('Pin deleted!', '');
         },
     });
 
@@ -79,6 +84,7 @@ export default function DetailBoard() {
         listener(log: any) {
             const args = log[0].args;
             onPinDeleted(Number(args.pinId), Number(args.boardId));
+            handleToast('Pin deleted!', '');
         },
     });
 
@@ -100,6 +106,8 @@ export default function DetailBoard() {
             const args = log[0].args;
             const boardId = args.newBoardId ?? args.oldBoardId;
             onPinEdited(Number(args.pinId), args.newTitle, args.newDescription, args.imageHash, Number(boardId));
+            const message = 'Pin ' + args.newTitle + ' edited!';
+            handleToast(message, args.imageHash);
         },
     });
 
@@ -202,6 +210,15 @@ export default function DetailBoard() {
         setAllBoards(updatedBoards);
         storeBoardsInStorage(updatedBoards);
     };
+
+    function handleToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
+    }
 
     return (
         <>
