@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, Switch, Textarea } from '@chakra-ui/react';
+import { Input, Switch, Textarea, useToast } from '@chakra-ui/react';
 import boardManager from '../../contracts/build/BoardManager.json';
 import { useContractWrite } from 'wagmi';
 import { useRouter } from 'next/router';
+import { Toast } from '../general/Toasts';
 
 const CreateBoardModal: React.FC = () => {
     const { createBoardModalOpen, setCreateBoardModalOpen } = useAppState();
@@ -12,6 +13,7 @@ const CreateBoardModal: React.FC = () => {
     const [boardName, setBoardName] = useState<string>('');
     const [boardDescription, setBoardDescription] = useState<string>('');
     const router = useRouter();
+    const toast = useToast();
 
     const {
         data: createBoardData,
@@ -48,11 +50,31 @@ const CreateBoardModal: React.FC = () => {
     }, [createBoardModalOpen])
 
     const handleCreateBoard = async () => {
+        if (!boardName || (boardDescription && boardDescription.length > 50)) {
+            if (!boardName) {
+                handleToast('Board Name ist empty!', '');
+                return;
+            }
+            if (boardDescription.length > 50) {
+                handleToast('Description is longer than 50 Characters!', '');
+                return;
+            }
+            return;
+        }
         await createBoard({ args: [boardName, boardDescription] });
         setCreateBoardModalOpen(false);
         if (!window.location.href.includes('profile'))
             router.push('/profile');
         setLoadCreateBoardTransaction(true);
+    }
+
+    function handleToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
     }
 
     return (

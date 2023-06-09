@@ -49,11 +49,26 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     }, [])
 
     const handleCreatePin = async () => {
-        if (!pinTitle || (pinDescription && pinDescription.length > 50) || !pinImage) {
-            console.log('error');
+        const bId = boardId ? boardId : pinBoardId;
+        if (!pinTitle || (pinDescription && pinDescription.length > 50) || !pinImage || !bId) {
+            if (!pinTitle) {
+                handleToast('Title is empty!', '');
+                return;
+            }
+            if (!pinImage) {
+                handleToast('Image is empty!', '');
+                return;
+            }
+            if (pinDescription && pinDescription.length > 50) {
+                handleToast('Description is longer than 50 Characters!', '');
+                return;
+            }
+            if (!bId) {
+                handleToast('No Board selected!', '');
+                return;
+            }
             return;
         }
-        const bId = boardId ? boardId : pinBoardId;
         await createPin({ args: [pinTitle, pinDescription, pinImage, bId] })
         setCreatePinModalOpen(false);
         setBoardSlideOpen(false);
@@ -92,6 +107,15 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
         setCreatePinModalOpen(false);
         setBoardSlideOpen(false);
         clearForm();
+    }
+
+    function handleToast(message: string, imageHash: string) {
+        toast({
+            position: 'top',
+            render: () => (
+                <Toast text={message} imageHash={imageHash} />
+            ),
+        })
     }
 
     return (

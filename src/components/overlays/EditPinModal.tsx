@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Modal from '../general/Modal';
 import { useAppState } from '../general/AppStateContext';
-import { Input, List, ListItem, Slide, useToast } from '@chakra-ui/react';
+import { Input, List, ListItem, Slide, Textarea, useToast } from '@chakra-ui/react';
 import DeleteModal from './DeleteModal';
 import { useRouter } from 'next/router';
 import boardManager from '../../contracts/build/BoardManager.json';
@@ -84,8 +84,18 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
 
     }, [pin, address, editSavedPinStatus, editCreatedPinStatus, newPinBoardId, router.query]);
 
-    //TODO created edit pin event 
     async function editCreatedPin() {
+        if (!pinTitle || (pinDescription && pinDescription.length > 50)) {
+            if (!pinTitle) {
+                handleToast('Title is empty!', '');
+                return;
+            }
+            if (pinDescription && pinDescription.length > 50) {
+                handleToast('Description is longer than 50 Characters!', '');
+                return;
+            }
+            return;
+        }
         await writeEditCreatedPin({ args: [pin.id as string, pinTitle, pinDescription, newPinBoardId != '' ? newPinBoardId : pinBoardId] })
         setEditPinModalOpen(false);
         handleToast('Pin ' + pinTitle + ' editing...', '');
@@ -93,7 +103,6 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
         if (newPinBoardId != '') router.push('/profile');
     }
 
-    //TODO saved edit pin event 
     const editSavedPin = async () => {
         if (newPinBoardId !== '') {
             await writeEditSavedPin({ args: [pin.id as string, pinBoardId, newPinBoardId] })
@@ -147,8 +156,11 @@ const EditBoardModal: React.FC<EditPinModalProps> = (props: EditPinModalProps) =
 
                             <div className='mt-4'>
                                 <p className='text-lg font-semibold'>Description</p>
-                                <Input variant='unstyled' placeholder='Add what your board is about' size={'lg'}
-                                    defaultValue={pinDescription} onChange={(e) => setPinDescripton(e.target.value)} />
+                                <Textarea
+                                    variant='unstyled' placeholder='Add what you board is about' size={'lg'}
+                                    defaultValue={pinDescription}
+                                    onChange={(e) => setPinDescripton(e.target.value)}
+                                />
                             </div>
                         </div>
                     }

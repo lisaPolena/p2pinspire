@@ -48,6 +48,16 @@ const EditBoardModal: React.FC<EditGeneralModalProps> = (props: EditGeneralModal
     }, [board, editBoardModalOpen]);
 
     const handleEditBoard = async () => {
+        if (!boardName || (boardDescription && boardDescription.length > 50)) {
+            if (!boardName) {
+                handleToast('Board Name is empty!', '');
+                return;
+            }
+            if (boardDescription.length > 50) {
+                handleToast('Description is longer than 50 Characters!', '');
+            }
+            return;
+        }
         await editBoard({ args: [board?.id, boardName, boardDescription, boardCoverImage] })
         setEditBoardModalOpen(false);
         handleToast(boardName + ' editing...', '');
