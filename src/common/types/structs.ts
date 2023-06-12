@@ -19,13 +19,14 @@ export interface Pin {
 }
 
 export interface User {
+    id: number;
     userAddress: string;
     name?: string;
     username?: string;
     profileImageHash?: string;
     bio?: string;
-    following?: string[];
-    followers?: string[];
+    following?: number[];
+    followers?: number[];
 }
 
 export interface PinOwnerData {

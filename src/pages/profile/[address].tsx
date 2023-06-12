@@ -34,9 +34,6 @@ export default function DetailProfile() {
                 setProfile(res);
             };
 
-            if (res.followers?.find((follower) => follower === address)) {
-                setIsFollowing(true);
-            };
         },
         onError(error) {
             console.log('getUserByAdress', error);
@@ -93,13 +90,21 @@ export default function DetailProfile() {
 
     useEffect(() => {
 
-    }, [isConnected, profileData, allBoardsByAddress, isFollowing])
+        if (profile && user) {
+            console.log(profile);
+            console.log(user);
+            if (profile.followers?.find((follower) => Number(follower) === user?.id)) {
+                setIsFollowing(true);
+            };
+        }
+
+    }, [isConnected, profileData, allBoardsByAddress, isFollowing, profile, user])
 
     const handleFollowUser = async () => {
         if (user && profile) {
-            await followUser({ args: [user.userAddress, profile.userAddress] });
-            setUser({ ...user, following: user.following ? [...user.following, profile.userAddress] : [profile.userAddress] });
-            storeUserInStorage({ ...user, following: user.following ? [...user.following, profile.userAddress] : [profile.userAddress] });
+            await followUser({ args: [user.id, Number(profile.id)] });
+            setUser({ ...user, following: user.following ? [...user.following, profile.id] : [profile.id] });
+            storeUserInStorage({ ...user, following: user.following ? [...user.following, profile.id] : [profile.id] });
         } else {
             console.log('user or profile is undefined');
         }
@@ -107,15 +112,13 @@ export default function DetailProfile() {
 
     const handleUnfollowUser = async () => {
         if (user && profile) {
-            await unfollowUser({ args: [user.userAddress, profile.userAddress] });
-            setUser({ ...user, following: user.following?.filter((address) => address !== profile.userAddress) });
-            storeUserInStorage({ ...user, following: user.following?.filter((address) => address !== profile.userAddress) });
+            await unfollowUser({ args: [user.id, Number(profile.id)] });
+            setUser({ ...user, following: user.following?.filter((id) => Number(id) !== Number(profile.id)) });
+            storeUserInStorage({ ...user, following: user.following?.filter((id) => Number(id) !== Number(profile.userAddress)) });
         } else {
             console.log('user or profile is undefined');
         }
     }
-
-    console.log(user);
 
     function handleToast(message: string, imageHash: string) {
         toast({

@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useSession } from "next-auth/react"
-import { useAccount, useContractRead, useContractWrite } from "wagmi"
+import { useAccount, useContractEvent, useContractRead, useContractWrite } from "wagmi"
 import { useEffect, useState } from "react"
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
@@ -19,6 +19,7 @@ export default function Index() {
   const router = useRouter();
   const toast = useToast();
   const [createUserModalOpen, setCreateUserModalOpen] = useState<boolean>(false);
+  const [isCreating, setIsCreating] = useState<boolean>(false);
 
   const {
     data: createUserData,
@@ -33,31 +34,50 @@ export default function Index() {
     }
   });
 
-  const { data: userData } = useContractRead({
+  const { data: allUsers } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
     abi: userManager.abi,
-    functionName: 'getUserByAddress',
-    args: [address],
-    onError(error) {
-      console.log('getUserByAdress', error);
+    functionName: 'getAllUsers',
+    onSuccess(data) {
+      console.log(data);
+    },
+  });
+
+  useContractEvent({
+    address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
+    abi: userManager.abi,
+    eventName: 'UserCreated',
+    listener(log: any) {
+      console.log(log);
+      const res = log[0].args as User;
+      if (res.userAddress === address) {
+        setUser({ id: Number(res.id), userAddress: res.userAddress });
+        storeUserInStorage(res);
+        setIsCreating(false);
+        router.push('/home');
+      }
     },
   });
 
   useEffect(() => {
     if (isConnected && status === 'authenticated' && session) {
 
-      if (userData) {
-        const res = userData as User;
-        if (deleteProfile === res.userAddress) return;
-        if (res.userAddress === address) {
-          setUser(res);
-          storeUserInStorage(res);
-          router.push('/home');
-          return;
+      if (allUsers) {
+        const res = allUsers as User[];
+        if (deleteProfile === address) return;
+        if (res.length > 0 && res.find(user => user.userAddress === address)) {
+          const user = res.find(user => user.userAddress === address);
+          if (user) {
+            setUser(user);
+            storeUserInStorage(user);
+            router.push('/home');
+            return;
+          }
         }
       }
 
       const timeout = setTimeout(() => {
+        if (isCreating) return;
         setCreateUserModalOpen(true);
       }, 2000);
 
@@ -66,13 +86,13 @@ export default function Index() {
       }
 
     }
-  }, [isConnected, session, userData])
+  }, [isConnected, session, allUsers])
 
   async function handleCreateUser() {
-    handleToast('Creating user...', '');
     await createUser({ args: [address] });
     setCreateUserModalOpen(false);
-    router.push('/home');
+    setIsCreating(true);
+    handleToast('Creating user...', '');
   }
 
   function handleToast(message: string, imageHash: string) {

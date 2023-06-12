@@ -7,12 +7,13 @@ import { useAppState } from '@/components/general/AppStateContext';
 import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wagmi';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
-import { Board, Pin } from '@/common/types/structs';
+import userManager from '../contracts/build/UserManager.json';
+import { Board, Pin, User } from '@/common/types/structs';
 import React from 'react';
 import { Skeleton, Stack, useToast } from '@chakra-ui/react';
 import { clearBoardStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
-import { getUserFromStorage } from '@/common/functions/users';
+import { storeUserInStorage } from '@/common/functions/users';
 
 export default function Home() {
   const { address, isConnected, connector: activeConnector } = useAccount()
@@ -72,13 +73,31 @@ export default function Home() {
     },
   });
 
+  const { data: allUsers } = useContractRead({
+    address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
+    abi: userManager.abi,
+    functionName: 'getAllUsers',
+    onSuccess(data) {
+      console.log(data);
+    },
+  });
+
   useEffect(() => {
     if (!isConnected && status === 'unauthenticated' && !session && !user) {
       router.push('/')
     }
 
     if (!user) {
-      setUser(getUserFromStorage());
+      if (allUsers) {
+        const res = allUsers as User[];
+        if (res.length > 0 && res.find(user => user.userAddress === address)) {
+          const resUser = res.find(user => user.userAddress === address);
+          if (resUser) {
+            setUser({ ...resUser, id: Number(resUser.id) });
+            storeUserInStorage(resUser);
+          }
+        }
+      }
     }
 
     getAllPins();

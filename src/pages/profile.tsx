@@ -9,17 +9,18 @@ import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wa
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import boardManager from '../contracts/build/BoardManager.json';
 import pinManager from '../contracts/build/PinManager.json';
+import userManager from '../contracts/build/UserManager.json';
 import { Pin } from '@/common/types/structs';
 import { useSession } from "next-auth/react"
 import { AppBar } from '@/components/general/AppBar';
 import { clearBoardStorage, getBoardsFromStorage, storeBoardsInStorage } from '@/common/functions/boards';
 import { Toast } from '@/components/general/Toasts';
-import { getUserFromStorage } from '@/common/functions/users';
+import { clearUserStorage, getUserFromStorage } from '@/common/functions/users';
 
 export default function Profile() {
     const { address, isConnected, connector: activeConnector } = useAccount()
     const { data: session, status } = useSession()
-    const { user, setUser, allBoards, setAllBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction } = useAppState();
+    const { user, setUser, allBoards, setAllBoards, loadCreateBoardTransaction, loadDeleteBoardTransaction, setLoadDeleteBoardTransaction, setLoadCreateBoardTransaction, setDeleteProfile } = useAppState();
     const router = useRouter();
     const [ownPins, setOwnPins] = useState<Pin[]>([]);
     const toast = useToast()
@@ -135,6 +136,17 @@ export default function Profile() {
             const args = log[0].args;
             onPinDeleted(Number(args.pinId), Number(args.boardId));
             handleToast('Pin deleted!', '');
+        },
+    });
+
+    useContractEvent({
+        address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
+        abi: userManager.abi,
+        eventName: 'UserDeleted',
+        listener(log) {
+            setUser(null);
+            clearUserStorage();
+            router.push('/');
         },
     });
 

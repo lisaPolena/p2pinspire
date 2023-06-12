@@ -5,7 +5,7 @@ import { Input, Textarea, useToast } from '@chakra-ui/react';
 import { IoAdd } from 'react-icons/io5';
 import { useIpfs } from '@/common/functions/contracts';
 import { AiOutlineLoading } from "react-icons/ai";
-import { useAccount, useContractWrite } from 'wagmi';
+import { useAccount, useContractEvent, useContractWrite } from 'wagmi';
 import userManager from '../../../contracts/build/UserManager.json';
 import { Toast } from '../../general/Toasts';
 import DeleteProfileModal from './DeleteProfile';
@@ -55,6 +55,7 @@ const EditProfileModal: React.FC = () => {
         }
     })
 
+
     useEffect(() => {
 
         if (!user) {
@@ -77,16 +78,21 @@ const EditProfileModal: React.FC = () => {
                 return;
             }
 
-            const userAddress = user?.userAddress ?? address ?? '';
-            const name = profileName != '' ? profileName : user?.name ?? '';
-            const bio = profileBio != '' ? profileBio : user?.bio ?? '';
-            const username = profileUsername != '' ? profileUsername.replace(/\s/g, '') : user?.username ?? '';
-            const image = profileImage != '' ? profileImage : user?.profileImageHash ?? '';
-            handleToast('Profile editing...', '');
-            await editUser({ args: [userAddress, name, username, image, bio] });
-            setUser({ userAddress, name, username, profileImageHash: image, bio, followers: user?.followers ?? [], following: user?.following ?? [] });
-            storeUserInStorage({ userAddress, name, username, profileImageHash: image, bio, followers: user?.followers ?? [], following: user?.following ?? [] });
-            setEditProfileModalOpen(false);
+            if (user) {
+                const userAddress = user.userAddress ?? address ?? '';
+                const name = profileName != '' ? profileName : user.name ?? '';
+                const bio = profileBio != '' ? profileBio : user.bio ?? '';
+                const username = profileUsername != '' ? profileUsername.replace(/\s/g, '') : user.username ?? '';
+                const image = profileImage != '' ? profileImage : user.profileImageHash ?? '';
+                handleToast('Profile editing...', '');
+                await editUser({ args: [user.id, name, username, image, bio] });
+                user ? setUser({ id: user.id, userAddress, name, username, profileImageHash: image, bio, followers: user.followers ?? [], following: user.following ?? [] }) : null;
+                user ? storeUserInStorage({ id: user.id, userAddress, name, username, profileImageHash: image, bio, followers: user.followers ?? [], following: user.following ?? [] }) : null;
+                setEditProfileModalOpen(false);
+            } else {
+                handleToast('User not found', '');
+            }
+
         }
     }
 
@@ -109,12 +115,14 @@ const EditProfileModal: React.FC = () => {
     const handleDeleteProfile = async () => {
         setDeleteProfileModalOpen(false);
         setEditProfileModalOpen(false);
-        await deleteUser({ args: [user?.userAddress ?? address] })
-        setDeleteProfile(user?.userAddress ?? '');
-        setUser(null);
-        clearUserStorage();
-        handleToast('Profile deleting...', '');
-        router.push('/');
+        if (user) {
+            await deleteUser({ args: [user.id] })
+            handleToast('Profile deleting...', '');
+            setDeleteProfile(user.userAddress);
+        } else {
+            handleToast('User not found', '');
+        }
+
     }
 
     function handleToast(message: string, imageHash: string) {

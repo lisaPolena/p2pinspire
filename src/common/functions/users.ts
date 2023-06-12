@@ -1,7 +1,12 @@
 import { User } from "../types/structs";
 
 export function storeUserInStorage(user: User): void {
-    window.sessionStorage.setItem("user", JSON.stringify(user));
+    const userString = JSON.stringify(user, (key, value) =>
+        typeof value === 'bigint'
+            ? Number(value)
+            : value // return everything else unchanged
+    );
+    window.sessionStorage.setItem("user", userString);
 }
 
 export function getUserFromStorage(): User {

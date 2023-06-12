@@ -5,15 +5,14 @@ pragma solidity >=0.7.0 <0.9.0;
 import {User} from "./common/types.sol";
 
 contract UserManager {
-    mapping(address => User) public users; // Mapping to store user information by user address
-    mapping(string => address) public usernameToUserAddress; // Mapping to store user address by username
+    mapping(uint256 => User) public users; // Mapping to store user information by user address
     uint public userCount; // Total number of users
 
-    event UserCreated(address userAddress); // Event emitted when a new user is created
-    event UserDeleted(address userAddress); // Event emitted when a user is deleted
-    event UserEdited(address userAddress); // Event emitted when a user is edited
-    event UserFollowed(address follower, address followee); // Event emitted when a user follows another user
-    event UserUnfollowed(address follower, address followee); // Event emitted when a user unfollows another user
+    event UserCreated(uint256 id, address userAddress); // Event emitted when a new user is created
+    event UserDeleted(uint256 id, address userAddress); // Event emitted when a user is deleted
+    event UserEdited(uint256 id, address userAddress); // Event emitted when a user is edited
+    event UserFollowed(uint256 follower, uint256 followee); // Event emitted when a user follows another user
+    event UserUnfollowed(uint256 follower, uint256 followee); // Event emitted when a user unfollows another user
 
     /**
      * @dev Create a new user
@@ -28,11 +27,12 @@ contract UserManager {
         string memory username;
         string memory profileImageHash;
         string memory bio;
-        address[] memory following;
-        address[] memory followers;
+        uint256[] memory following;
+        uint256[] memory followers;
 
         // Create user object
         User memory user = User(
+            userCount,
             userAddress,
             name,
             username,
@@ -43,12 +43,21 @@ contract UserManager {
         );
 
         // Store user in the mapping
-        users[userAddress] = user;
+        users[userCount] = user;
 
         // Emit event for user creation
-        emit UserCreated(userAddress);
+        emit UserCreated(userCount, userAddress);
 
-        return users[userAddress];
+        return users[userCount];
+    }
+
+    /**
+     * @dev Get user information by user id
+     * @param id Address of the user
+     * @return User struct containing user information
+     */
+    function getUserById(uint256 id) public view returns (User memory) {
+        return users[id];
     }
 
     /**
@@ -59,24 +68,26 @@ contract UserManager {
     function getUserByAddress(
         address userAddress
     ) public view returns (User memory) {
-        return users[userAddress];
+        for (uint256 i = 1; i <= userCount; i++) {
+            if (users[i].userAddress == userAddress) {
+                return users[i];
+            }
+        }
+        revert("User not found");
     }
 
     /**
      * @dev Delete a user
-     * @param userAddress Address of the user to delete
+     * @param id ID of the user to delete
      */
-    function deleteUser(address userAddress) public {
-        require(
-            users[userAddress].userAddress != address(0),
-            "User does not exist"
-        );
+    function deleteUser(uint256 id) public {
+        require(users[id].userAddress != address(0), "User does not exist");
 
         // Remove user from the mapping
-        delete users[userAddress];
+        delete users[id];
 
         // Emit event for user deletion
-        emit UserDeleted(userAddress);
+        emit UserDeleted(id, users[id].userAddress);
     }
 
     /**
@@ -87,16 +98,13 @@ contract UserManager {
         User[] memory allUsers = new User[](userCount);
         uint index = 0;
 
-        // Iterate over the users mapping and add each user to the array
-        for (uint i = 0; i < userCount; i++) {
-            address userAddress = address(uint160(i)); // Convert the index to address
-            if (users[userAddress].userAddress != address(0)) {
-                allUsers[index] = users[userAddress];
+        for (uint256 i = 1; i <= userCount; i++) {
+            if (users[i].userAddress != address(0)) {
+                allUsers[index] = users[i];
                 index++;
             }
         }
 
-        // Resize the array to remove empty slots
         assembly {
             mstore(allUsers, index)
         }
@@ -106,113 +114,95 @@ contract UserManager {
 
     /**
      * @dev Edit user information
-     * @param userAddress Address of the user to edit
+     * @param id ID of the user to edit
      * @param name New name of the user
      * @param username New username of the user
      * @param profileImageHash New profile image hash of the user
      * @param bio New bio of the user
      */
     function editUser(
-        address userAddress,
+        uint256 id,
         string memory name,
         string memory username,
         string memory profileImageHash,
         string memory bio
     ) public {
-        require(
-            users[userAddress].userAddress != address(0),
-            "User does not exist"
-        );
+        require(users[id].userAddress != address(0), "User does not exist");
 
-        User storage user = users[userAddress];
+        User storage user = users[id];
         user.name = name;
         user.username = username;
         user.profileImageHash = profileImageHash;
         user.bio = bio;
 
         // Emit event for user edition
-        emit UserEdited(userAddress);
+        emit UserEdited(id, user.userAddress);
     }
 
     /**
      * @dev Follow a user
-     * @param follower Address of the user who wants to follow
-     * @param followee Address of the user to be followed
+     * @param followerId ID of the user who wants to follow
+     * @param followeeId ID of the user to be followed
      */
-    function followUser(address follower, address followee) public {
+    function followUser(uint256 followerId, uint256 followeeId) public {
         require(
-            users[follower].userAddress != address(0),
+            users[followerId].userAddress != address(0),
             "Follower does not exist"
         );
         require(
-            users[followee].userAddress != address(0),
+            users[followeeId].userAddress != address(0),
             "Followee does not exist"
         );
 
-        User storage followerUser = users[follower];
-        User storage followeeUser = users[followee];
+        User storage followerUser = users[followerId];
+        User storage followeeUser = users[followeeId];
 
-        followerUser.following.push(followee);
-        followeeUser.followers.push(follower);
+        followerUser.following.push(followeeId);
+        followeeUser.followers.push(followerId);
 
         // Emit event for user following
-        emit UserFollowed(follower, followee);
+        emit UserFollowed(followerId, followeeId);
     }
 
     /**
      * @dev Unfollow a user
-     * @param follower Address of the user who wants to unfollow
-     * @param followee Address of the user to be unfollowed
+     * @param followerId ID of the user who wants to unfollow
+     * @param followeeId ID of the user to be unfollowed
      */
-    function unfollowUser(address follower, address followee) public {
+    function unfollowUser(uint256 followerId, uint256 followeeId) public {
         require(
-            users[follower].userAddress != address(0),
+            users[followerId].userAddress != address(0),
             "Follower does not exist"
         );
         require(
-            users[followee].userAddress != address(0),
+            users[followeeId].userAddress != address(0),
             "Followee does not exist"
         );
 
-        User storage followerUser = users[follower];
-        User storage followeeUser = users[followee];
+        User storage followerUser = users[followerId];
+        User storage followeeUser = users[followeeId];
 
-        uint followerIndex;
-        uint followeeIndex;
-        bool foundFollower = false;
-        bool foundFollowee = false;
-
-        // Find the index of the follower in the followee's followers array
         for (uint i = 0; i < followeeUser.followers.length; i++) {
-            if (followeeUser.followers[i] == follower) {
-                followerIndex = i;
-                foundFollower = true;
+            if (followeeUser.followers[i] == followerId) {
+                followeeUser.followers[i] = followeeUser.followers[
+                    followeeUser.followers.length - 1
+                ];
+                followeeUser.followers.pop();
                 break;
             }
         }
 
-        // Find the index of the followee in the follower's following array
         for (uint i = 0; i < followerUser.following.length; i++) {
-            if (followerUser.following[i] == followee) {
-                followeeIndex = i;
-                foundFollowee = true;
+            if (followerUser.following[i] == followerId) {
+                followerUser.following[i] = followerUser.following[
+                    followerUser.following.length - 1
+                ];
+                followerUser.following.pop();
                 break;
             }
         }
-
-        require(foundFollower, "Follower does not follow the specified user");
-        require(
-            foundFollowee,
-            "Followee is not followed by the specified user"
-        );
-
-        // Remove the follower from the followee's followers array
-        delete followeeUser.followers[followerIndex];
-
-        // Remove the followee from the follower's following array
-        delete followerUser.following[followeeIndex];
 
         // Emit event for user unfollowing
-        emit UserUnfollowed(follower, followee);
+        emit UserUnfollowed(followerId, followeeId);
     }
 }

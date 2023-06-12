@@ -30,11 +30,12 @@ struct Pin {
  * @dev Struct to store user information
  */
 struct User {
+    uint256 id; // Unique identifier for user
     address userAddress; //address of the user
     string name; //name of the user
     string username; //username of the user
     string profileImageHash; //hash of the profile image
     string bio; //bio of the user
-    address[] following; //addresses that the user follows
-    address[] followers; //addresses that follow the user
+    uint256[] following; //ids that the user follows
+    uint256[] followers; //ids that follow the user
 }
