@@ -16730,7 +16730,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.14",
-  "updatedAt": "2023-06-09T18:18:35.087Z",
+  "updatedAt": "2023-06-09T23:23:06.692Z",
   "devdoc": {
     "details": "A smart contract for managing pins",
     "events": {

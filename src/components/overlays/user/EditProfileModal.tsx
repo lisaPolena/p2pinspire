@@ -84,8 +84,8 @@ const EditProfileModal: React.FC = () => {
             const image = profileImage != '' ? profileImage : user?.profileImageHash ?? '';
             handleToast('Profile editing...', '');
             await editUser({ args: [userAddress, name, username, image, bio] });
-            setUser({ userAddress, name, username, profileImageHash: image, bio });
-            storeUserInStorage({ userAddress, name, username, profileImageHash: image, bio });
+            setUser({ userAddress, name, username, profileImageHash: image, bio, followers: user?.followers ?? [], following: user?.following ?? [] });
+            storeUserInStorage({ userAddress, name, username, profileImageHash: image, bio, followers: user?.followers ?? [], following: user?.following ?? [] });
             setEditProfileModalOpen(false);
         }
     }

@@ -329,6 +329,17 @@ export default function Profile() {
                                 </div>
                             }
 
+                            <div className='flex items-center justify-center mt-4 space-x-4'>
+                                <div className='flex flex-col items-center justify-center'>
+                                    <div className='text-sm font-medium text-gray-400'>{user.followers?.length ?? 0}{' '}Followers</div>
+                                </div>
+
+                                <div className='flex flex-col items-center justify-center'>
+                                    <div className='text-sm font-medium text-gray-400'>{user.following?.length ?? 0}{' '}Following</div>
+                                </div>
+
+                            </div>
+
                         </>
                     }
                 </div>

@@ -156,7 +156,7 @@ export default function DetailPin() {
                             className="object-cover w-full rounded-tl-3xl rounded-tr-3xl " />
                         <div className='p-4 bg-zinc-800 rounded-bl-3xl rounded-br-3xl'>
                             {pinOwner &&
-                                <div className='flex items-center gap-3 mb-4'>
+                                <div className='flex items-center gap-3 mb-4' onClick={() => router.push(`/profile/${pin.owner}`)}>
                                     {pinOwner.profileImageHash !== '' ? (
                                         <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pinOwner.profileImageHash}`}
                                             alt={pinOwner.name} className='w-10 h-10 rounded-full' />
