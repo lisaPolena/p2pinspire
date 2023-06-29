@@ -1,27 +1,42 @@
-import Head from 'next/head'
-import { Navbar } from '@/components/general/Navbar'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router';
-import { useSession } from "next-auth/react"
-import { useAppState } from '@/components/general/AppStateContext';
-import { ConnectorData, useAccount, useContractEvent, useContractRead } from 'wagmi';
-import boardManager from '../contracts/build/BoardManager.json';
-import pinManager from '../contracts/build/PinManager.json';
-import userManager from '../contracts/build/UserManager.json';
-import { Board, Pin, User } from '@/common/types/structs';
-import React from 'react';
-import { Skeleton, Stack, useToast } from '@chakra-ui/react';
-import { clearBoardStorage, storeBoardsInStorage } from '@/common/functions/boards';
-import { Toast } from '@/components/general/Toasts';
-import { storeUserInStorage } from '@/common/functions/users';
+import Head from "next/head";
+import { Navbar } from "@/components/general/Navbar";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { useAppState } from "@/components/general/AppStateContext";
+import {
+  ConnectorData,
+  useAccount,
+  useContractEvent,
+  useContractRead,
+} from "wagmi";
+import boardManager from "../contracts/build/BoardManager.json";
+import pinManager from "../contracts/build/PinManager.json";
+import userManager from "../contracts/build/UserManager.json";
+import { Board, Pin, User } from "@/common/types/structs";
+import React from "react";
+import { Skeleton, Stack, useToast } from "@chakra-ui/react";
+import {
+  clearBoardStorage,
+  storeBoardsInStorage,
+} from "@/common/functions/boards";
+import { Toast } from "@/components/general/Toasts";
+import { storeUserInStorage } from "@/common/functions/users";
 
 export default function Home() {
-  const { address, isConnected, connector: activeConnector } = useAccount()
-  const { data: session, status } = useSession()
+  const { address, isConnected, connector: activeConnector } = useAccount();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [pins, setPins] = useState<Pin[]>([]);
   const [allPins, setAllPins] = useState<Pin[]>([]);
-  const { setUser, allBoards, setAllBoards, user, loadSavePinTransaction, setLoadSavePinTransaction } = useAppState();
+  const {
+    setUser,
+    allBoards,
+    setAllBoards,
+    user,
+    loadSavePinTransaction,
+    setLoadSavePinTransaction,
+  } = useAppState();
   const [boards, setBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const toast = useToast();
@@ -29,7 +44,7 @@ export default function Home() {
   const { data: allBoardsByAddress } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
     abi: boardManager.abi,
-    functionName: 'getBoardsByOwner',
+    functionName: "getBoardsByOwner",
     args: [address],
     onSuccess(data) {
       setBoards(data as Board[]);
@@ -42,7 +57,7 @@ export default function Home() {
   const { data: allPinsByAddress } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
     abi: pinManager.abi,
-    functionName: 'getAllPins',
+    functionName: "getAllPins",
     onSuccess(data) {
       const res = data as Pin[];
       setAllPins(res);
@@ -52,7 +67,7 @@ export default function Home() {
   const { data: allPinsData } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
     abi: pinManager.abi,
-    functionName: 'getAllPins',
+    functionName: "getAllPins",
     onSuccess(data) {
       setAllPins(data as Pin[]);
     },
@@ -64,10 +79,17 @@ export default function Home() {
   useContractEvent({
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
     abi: boardManager.abi,
-    eventName: 'PinSaved',
+    eventName: "PinSaved",
     listener(log: any) {
       const args = log[0].args;
-      onPinSaved(Number(args.pinId), args.title, args.description, args.imageHash, Number(args.boardId), args.owner);
+      onPinSaved(
+        Number(args.pinId),
+        args.title,
+        args.description,
+        args.imageHash,
+        Number(args.boardId),
+        args.owner
+      );
       setLoadSavePinTransaction(0);
       handleSavedPinToast(args.imageHash, Number(args.boardId));
     },
@@ -76,22 +98,25 @@ export default function Home() {
   const { data: allUsers } = useContractRead({
     address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
     abi: userManager.abi,
-    functionName: 'getAllUsers',
+    functionName: "getAllUsers",
     onSuccess(data) {
       console.log(data);
     },
   });
 
   useEffect(() => {
-    if (!isConnected && status === 'unauthenticated' && !session && !user) {
-      router.push('/')
+    if (!isConnected && status === "unauthenticated" && !session && !user) {
+      router.push("/");
     }
 
     if (!user) {
       if (allUsers) {
         const res = allUsers as User[];
-        if (res.length > 0 && res.find(user => user.userAddress === address)) {
-          const resUser = res.find(user => user.userAddress === address);
+        if (
+          res.length > 0 &&
+          res.find((user) => user.userAddress === address)
+        ) {
+          const resUser = res.find((user) => user.userAddress === address);
           if (resUser) {
             setUser({ ...resUser, id: Number(resUser.id) });
             storeUserInStorage(resUser);
@@ -104,16 +129,23 @@ export default function Home() {
     getAllBoards();
 
     if (activeConnector) {
-      activeConnector.on('change', handleConnectorUpdate)
+      activeConnector.on("change", handleConnectorUpdate);
     }
 
     return () => {
       if (activeConnector) {
-        activeConnector.off('change', handleConnectorUpdate)
+        activeConnector.off("change", handleConnectorUpdate);
       }
-    }
-
-  }, [address, isConnected, boards, status, activeConnector, allPinsData, user])
+    };
+  }, [
+    address,
+    isConnected,
+    boards,
+    status,
+    activeConnector,
+    allPinsData,
+    user,
+  ]);
 
   const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
     if (account) {
@@ -123,28 +155,37 @@ export default function Home() {
       const timeout = setTimeout(() => {
         setIsLoading(false);
       }, 2000);
-      const text = 'Account changed to ' + account.slice(0, 4) + '...' + account.slice(38, account.length);
+      const text =
+        "Account changed to " +
+        account.slice(0, 4) +
+        "..." +
+        account.slice(38, account.length);
       toast({
-        position: 'top',
-        render: () => (
-          <Toast text={text} />
-        ),
-      })
+        position: "top",
+        render: () => <Toast text={text} />,
+      });
     } else if (chain) {
-      const text = chain.unsupported ? 'Sry, the network is not supported!' : 'You changed the network.';
+      const text = chain.unsupported
+        ? "Sry, the network is not supported!"
+        : "You changed the network.";
       toast({
-        position: 'top',
-        render: () => (
-          <Toast text={text} />
-        ),
-      })
+        position: "top",
+        render: () => <Toast text={text} />,
+      });
     }
-  }
+  };
 
   function getAllPins() {
     if (allBoardsByAddress && allPinsData) {
-      const boardPins = boards.map((board: Board) => board.pins.map((id: Pin) => Number(id))).flat();
-      setPins(allPins.filter((pin: { owner: string; id: number; }) => pin.owner !== address && !boardPins.includes(pin.id)));
+      const boardPins = boards
+        .map((board: Board) => board.pins.map((id: Pin) => Number(id)))
+        .flat();
+      setPins(
+        allPins.filter(
+          (pin: { owner: string; id: number }) =>
+            pin.owner !== address && !boardPins.includes(pin.id)
+        )
+      );
     }
   }
 
@@ -152,13 +193,24 @@ export default function Home() {
     if (allBoardsByAddress && allPinsByAddress) {
       let updatedBoards: Board[] = [];
       if ((allBoardsByAddress as Board[]).length > 0) {
-        updatedBoards = boards.map((board) => {
-          const boardPinsIds = board.pins.map((id: Pin) => id);
-          const boardPins = allPins.filter((pin: Pin) => boardPinsIds.find((id) => Number(id) === Number(pin.id)));
-          const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
-          const mergedPins = [...boardPins, ...pins];
-          return { id: Number(board.id), name: board.name, description: board.description, owner: board.owner, pins: mergedPins, boardCoverHash: board.boardCoverHash };
-        }).sort((a, b) => Number(a.id) - Number(b.id)) as Board[];
+        updatedBoards = boards
+          .map((board) => {
+            const boardPinsIds = board.pins.map((id: Pin) => id);
+            const boardPins = allPins.filter((pin: Pin) =>
+              boardPinsIds.find((id) => Number(id) === Number(pin.id))
+            );
+            const pins = allPins.filter((pin: Pin) => pin.boardId === board.id);
+            const mergedPins = [...boardPins, ...pins];
+            return {
+              id: Number(board.id),
+              name: board.name,
+              description: board.description,
+              owner: board.owner,
+              pins: mergedPins,
+              boardCoverHash: board.boardCoverHash,
+            };
+          })
+          .sort((a, b) => Number(a.id) - Number(b.id)) as Board[];
       }
 
       setAllBoards(updatedBoards);
@@ -166,11 +218,25 @@ export default function Home() {
     }
   }
 
-  const onPinSaved = (pinId: number, title: string, description: string, imageHash: string, boardId: number, owner: string) => {
+  const onPinSaved = (
+    pinId: number,
+    title: string,
+    description: string,
+    imageHash: string,
+    boardId: number,
+    owner: string
+  ) => {
     setPins((prevPins) => {
       return prevPins.filter(({ id }) => Number(id) !== pinId);
     });
-    const newPin = { id: pinId, title: title, description: description, imageHash: imageHash, boardId: boardId, owner: owner };
+    const newPin = {
+      id: pinId,
+      title: title,
+      description: description,
+      imageHash: imageHash,
+      boardId: boardId,
+      owner: owner,
+    };
     const updatedBoards = allBoards.map((board) => {
       if (board.id === boardId) {
         return { ...board, pins: [...board.pins, newPin] };
@@ -183,14 +249,13 @@ export default function Home() {
   };
 
   function handleSavedPinToast(imageHash: string, boardId: number) {
-    const boardName = allBoards.find((board) => board.id === boardId)?.name as string;
-    const message = 'Pin saved to ' + boardName;
+    const boardName = allBoards.find((board) => board.id === boardId)
+      ?.name as string;
+    const message = "Pin saved to " + boardName;
     toast({
-      position: 'top',
-      render: () => (
-        <Toast text={message} imageHash={imageHash} />
-      ),
-    })
+      position: "top",
+      render: () => <Toast text={message} imageHash={imageHash} />,
+    });
   }
 
   return (
@@ -201,54 +266,64 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className='h-screen overflow-auto bg-black'>
-        <div className={`fixed inset-x-0 top-0 grid grid-cols-3 bg-black h-[50px] pt-3 px-2 z-10`}>
-        </div>
+      <main className="h-screen overflow-auto bg-black">
+        <div
+          className={`fixed inset-x-0 top-0 grid grid-cols-3 bg-black h-[50px] pt-3 px-2 z-10`}
+        ></div>
 
         <div className="grid grid-cols-2 gap-3 px-4 relative top-[50px] mt-2">
           {!isLoading ? (
             <>
               {pins.map((pin: Pin) => (
                 <React.Fragment key={pin.id}>
-                  {loadSavePinTransaction && loadSavePinTransaction === Number(pin.id) ? (
+                  {loadSavePinTransaction &&
+                  loadSavePinTransaction === Number(pin.id) ? (
                     <Stack>
-                      <Skeleton height='215px' width='100%' fadeDuration={4} />
-                      <Skeleton height='15px' width='70%' fadeDuration={4} />
+                      <Skeleton height="215px" width="100%" fadeDuration={4} />
+                      <Skeleton height="15px" width="70%" fadeDuration={4} />
                     </Stack>
                   ) : (
-                    <div key={pin.id} className="h-auto" onClick={() => router.push(`/pin/${pin.id}`)}>
-                      <img src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
-                        alt={pin.title} className="object-cover w-full rounded-2xl max-h-72" />
-                      <div className='mb-4'>
-                        <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">{pin.title}</h2>
+                    <div
+                      key={pin.id}
+                      className="h-auto"
+                      onClick={() => router.push(`/pin/${pin.id}`)}
+                    >
+                      <img
+                        src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
+                        alt={pin.title}
+                        className="object-cover w-full rounded-2xl max-h-72"
+                      />
+                      <div className="mb-4">
+                        <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">
+                          {pin.title}
+                        </h2>
                       </div>
                     </div>
                   )}
                 </React.Fragment>
-
               ))}
             </>
           ) : (
             <>
               <Stack>
-                <Skeleton height='215px' width='100%' fadeDuration={4} />
-                <Skeleton height='15px' width='70%' fadeDuration={4} />
+                <Skeleton height="215px" width="100%" fadeDuration={4} />
+                <Skeleton height="15px" width="70%" fadeDuration={4} />
               </Stack>
               <Stack>
-                <Skeleton height='215px' width='100%' fadeDuration={4} />
-                <Skeleton height='15px' width='70%' fadeDuration={4} />
+                <Skeleton height="215px" width="100%" fadeDuration={4} />
+                <Skeleton height="15px" width="70%" fadeDuration={4} />
               </Stack>
               <Stack>
-                <Skeleton height='215px' width='100%' fadeDuration={4} />
-                <Skeleton height='15px' width='70%' fadeDuration={4} />
+                <Skeleton height="215px" width="100%" fadeDuration={4} />
+                <Skeleton height="15px" width="70%" fadeDuration={4} />
               </Stack>
               <Stack>
-                <Skeleton height='215px' width='100%' fadeDuration={4} />
-                <Skeleton height='15px' width='70%' fadeDuration={4} />
+                <Skeleton height="215px" width="100%" fadeDuration={4} />
+                <Skeleton height="15px" width="70%" fadeDuration={4} />
               </Stack>
               <Stack>
-                <Skeleton height='215px' width='100%' fadeDuration={4} />
-                <Skeleton height='15px' width='70%' fadeDuration={4} />
+                <Skeleton height="215px" width="100%" fadeDuration={4} />
+                <Skeleton height="15px" width="70%" fadeDuration={4} />
               </Stack>
             </>
           )}
@@ -256,5 +331,5 @@ export default function Home() {
       </main>
       <Navbar />
     </>
-  )
+  );
 }

@@ -193,13 +193,10 @@ export default function DetailPin() {
                     <div className="w-10 h-10 rounded-full bg-zinc-600" />
                   )}
                   <p className="text-sm font-semibold">
-                    {pinOwner.name != "" ? pinOwner.name : pinOwner.userAddress}
+                    {pinOwner.name != ""
+                      ? pinOwner.name + " - " + pinOwner.userAddress
+                      : pinOwner.userAddress}
                   </p>
-                  {pin.owner !== address && (
-                    <button className="px-4 py-2 text-white transition-colors bg-red-600 rounded-3xl">
-                      Following
-                    </button>
-                  )}
                 </div>
               )}
               <h1 className="text-2xl font-semibold">{pin?.title}</h1>

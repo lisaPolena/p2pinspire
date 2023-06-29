@@ -1,5 +1,5 @@
-import { Board, User } from '@/common/types/structs';
-import React, { createContext, useContext, useState } from 'react';
+import { Board, User } from "@/common/types/structs";
+import React, { createContext, useContext, useState } from "react";
 
 interface AppStateContextProps {
   allBoards: Board[];
@@ -18,8 +18,8 @@ interface AppStateContextProps {
   setEditBoardModalOpen: (open: boolean) => void;
   createPinModalOpen: boolean;
   setCreatePinModalOpen: (open: boolean) => void;
-  createdPin: { boardName: string, imageHash: string } | null;
-  setCreatedPin: (pin: { boardName: string, imageHash: string } | null) => void;
+  createdPin: { boardName: string; imageHash: string } | null;
+  setCreatedPin: (pin: { boardName: string; imageHash: string } | null) => void;
   deleteModalOpen: boolean;
   setDeleteModalOpen: (open: boolean) => void;
   loadDeleteBoardTransaction: number;
@@ -46,38 +46,51 @@ interface AppStateContextProps {
   setDeleteProfile: (open: string) => void;
 }
 
-const AppStateContext = createContext<AppStateContextProps | undefined>(undefined);
+const AppStateContext = createContext<AppStateContextProps | undefined>(
+  undefined
+);
 
 export const useAppState = () => {
   const context = useContext(AppStateContext);
   if (!context) {
-    throw new Error('useAppState must be used within an AppStateProvider');
+    throw new Error("useAppState must be used within an AppStateProvider");
   }
   return context;
 };
 
-export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({
+  children,
+}) => {
   const [allBoards, setAllBoards] = useState<Board[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [navbarModalOpen, setNavbarModalOpen] = useState<boolean>(false);
-  const [createBoardModalOpen, setCreateBoardModalOpen] = useState<boolean>(false);
+  const [createBoardModalOpen, setCreateBoardModalOpen] =
+    useState<boolean>(false);
   const [createPinModalOpen, setCreatePinModalOpen] = useState<boolean>(false);
-  const [createdPin, setCreatedPin] = useState<{ boardName: string, imageHash: string } | null>(null);
-  const [loadCreateBoardTransaction, setLoadCreateBoardTransaction] = useState<boolean>(false);
+  const [createdPin, setCreatedPin] = useState<{
+    boardName: string;
+    imageHash: string;
+  } | null>(null);
+  const [loadCreateBoardTransaction, setLoadCreateBoardTransaction] =
+    useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
   const [editBoardModalOpen, setEditBoardModalOpen] = useState<boolean>(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
-  const [loadDeleteBoardTransaction, setLoadDeleteBoardTransaction] = useState<number>(0);
+  const [loadDeleteBoardTransaction, setLoadDeleteBoardTransaction] =
+    useState<number>(0);
   const [editPinModalOpen, setEditPinModalOpen] = useState<boolean>(false);
   const [downloadPin, setDownloadPin] = useState<boolean>(false);
   const [deletePinModalOpen, setDeletePinModalOpen] = useState<boolean>(false);
   const [savePinModalOpen, setSavePinModalOpen] = useState<boolean>(false);
-  const [filterBoardModalOpen, setFilterBoardModalOpen] = useState<boolean>(false);
-  const [boardView, setBoardView] = useState<string>('default');
-  const [loadSavePinTransaction, setLoadSavePinTransaction] = useState<number>(0);
+  const [filterBoardModalOpen, setFilterBoardModalOpen] =
+    useState<boolean>(false);
+  const [boardView, setBoardView] = useState<string>("default");
+  const [loadSavePinTransaction, setLoadSavePinTransaction] =
+    useState<number>(0);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
-  const [editProfileModalOpen, setEditProfileModalOpen] = useState<boolean>(false);
-  const [deleteProfile, setDeleteProfile] = useState<string>('');
+  const [editProfileModalOpen, setEditProfileModalOpen] =
+    useState<boolean>(false);
+  const [deleteProfile, setDeleteProfile] = useState<string>("");
 
   const contextValue: AppStateContextProps = {
     allBoards,
@@ -110,7 +123,7 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     deleteModalOpen,
     setDeleteModalOpen: (value: boolean) => {
       setEditModalOpen(false);
-      setEditBoardModalOpen(true)
+      setEditBoardModalOpen(true);
       setDeleteModalOpen(value);
     },
     loadDeleteBoardTransaction,
@@ -125,7 +138,7 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     deletePinModalOpen,
     setDeletePinModalOpen: (value: boolean) => {
       setEditModalOpen(false);
-      setEditPinModalOpen(true)
+      setEditPinModalOpen(true);
       setDeletePinModalOpen(value);
     },
     savePinModalOpen,
@@ -144,5 +157,9 @@ export const AppStateProvider: React.FC<React.PropsWithChildren<{}>> = ({ childr
     setDeleteProfile,
   };
 
-  return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
+  return (
+    <AppStateContext.Provider value={contextValue}>
+      {children}
+    </AppStateContext.Provider>
+  );
 };

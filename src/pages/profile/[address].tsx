@@ -96,8 +96,6 @@ export default function DetailProfile() {
 
   useEffect(() => {
     if (profile && user) {
-      console.log(profile);
-      console.log(user);
       if (
         profile.followers?.find((follower) => Number(follower) === user?.id)
       ) {
