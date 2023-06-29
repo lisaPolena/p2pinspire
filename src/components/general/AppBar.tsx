@@ -13,19 +13,31 @@ import EditProfileModal from "../overlays/user/EditProfileModal";
 interface AppBarProps {
   isBoard: boolean;
   isSavedPin: boolean;
+  isProfile: boolean;
   title?: string;
   showTitle?: boolean;
   board?: Board | null;
   pin?: Pin;
-  hideBackButton?: boolean
+  hideBackButton?: boolean;
   pins?: Pin[] | null;
 }
 
 //TODO: add shadow if scroll position is > 0 (showtitle is true)
 
 export const AppBar = (props: AppBarProps) => {
-  const { isBoard, isSavedPin, title, showTitle, board, pin, hideBackButton, pins } = props;
-  const { setEditModalOpen, setFilterBoardModalOpen, createPinModalOpen } = useAppState();
+  const {
+    isBoard,
+    isSavedPin,
+    isProfile,
+    title,
+    showTitle,
+    board,
+    pin,
+    hideBackButton,
+    pins,
+  } = props;
+  const { setEditModalOpen, setFilterBoardModalOpen, createPinModalOpen } =
+    useAppState();
   const [longTitle, setLongTitle] = useState<boolean>(false);
   const router = useRouter();
 
@@ -33,20 +45,52 @@ export const AppBar = (props: AppBarProps) => {
     if (title && title.length > 17) {
       setLongTitle(true);
     }
-  }, [title])
-
+  }, [title]);
 
   return (
     <>
-      <div className={`fixed inset-x-0 top-0 grid grid-cols-3 ${isBoard ? 'bg-black' : 'bg-transparent'} h-[50px] pt-3 px-2 z-10`}>
-        {!hideBackButton &&
-          <div className={`text-2xl ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'}`} onClick={() => !createPinModalOpen ? router.back() : null}>{!createPinModalOpen && <IoChevronBack />}</div>
-        }
+      <div
+        className={`fixed inset-x-0 top-0 grid grid-cols-3 ${
+          isBoard ? "bg-black" : "bg-transparent"
+        } h-[50px] pt-3 px-2 z-10`}
+      >
+        {!hideBackButton && (
+          <div
+            className={`text-2xl ${isBoard ? "" : "pt-[0.5rem] pr-[0.5rem]"}`}
+            onClick={() => (!createPinModalOpen ? router.back() : null)}
+          >
+            {!createPinModalOpen && <IoChevronBack />}
+          </div>
+        )}
         {hideBackButton && <div></div>}
-        <div className={`text-center ${longTitle ? 'mt-[-0.5rem]' : ''}`}>{showTitle && title ? title : ''}</div>
-        <div className={`flex justify-end gap-6 ${isBoard ? '' : 'pt-[0.5rem] pr-[0.5rem]'} `}>
-          {isBoard && <div className='text-2xl' onClick={() => !createPinModalOpen ? setFilterBoardModalOpen(true) : null}>{!createPinModalOpen && <IoFilter />}</div>}
-          <div className='text-2xl' onClick={() => !createPinModalOpen ? setEditModalOpen(true) : null}>{!createPinModalOpen && <IoIosMore />}</div>
+        <div className={`text-center ${longTitle ? "mt-[-0.5rem]" : ""}`}>
+          {showTitle && title ? title : ""}
+        </div>
+        <div
+          className={`flex justify-end gap-6 ${
+            isBoard ? "" : "pt-[0.5rem] pr-[0.5rem]"
+          } `}
+        >
+          {isBoard && (
+            <div
+              className="text-2xl"
+              onClick={() =>
+                !createPinModalOpen ? setFilterBoardModalOpen(true) : null
+              }
+            >
+              {!createPinModalOpen && <IoFilter />}
+            </div>
+          )}
+          <div
+            className="text-2xl"
+            onClick={() =>
+              !createPinModalOpen ? setEditModalOpen(true) : null
+            }
+          >
+            {!createPinModalOpen && (isBoard || isSavedPin || isProfile) && (
+              <IoIosMore />
+            )}
+          </div>
         </div>
       </div>
       <EditGeneralModal isBoard={isBoard} isSavedPin={isSavedPin} />
