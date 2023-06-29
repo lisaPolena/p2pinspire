@@ -86,8 +86,6 @@ export default function DetailPin() {
     if (router.query.boardId || pin?.owner === address) setIsSavedPin(true);
     else setIsSavedPin(false);
 
-    console.log("pinOwnerData", pinOwnerData);
-
     if (pinOwnerData) {
       const res = pinOwnerData as PinOwnerData;
       const shortAddress =

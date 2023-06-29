@@ -100,29 +100,27 @@ export default function Home() {
     abi: userManager.abi,
     functionName: "getAllUsers",
     onSuccess(data) {
-      console.log(data);
+      if (!user) {
+        if (data) {
+          const res = data as User[];
+          if (
+            res.length > 0 &&
+            res.find((user) => user.userAddress === address)
+          ) {
+            const resUser = res.find((user) => user.userAddress === address);
+            if (resUser) {
+              setUser({ ...resUser, id: Number(resUser.id) });
+              storeUserInStorage(resUser);
+            }
+          }
+        }
+      }
     },
   });
 
   useEffect(() => {
     if (!isConnected && status === "unauthenticated" && !session && !user) {
       router.push("/");
-    }
-
-    if (!user) {
-      if (allUsers) {
-        const res = allUsers as User[];
-        if (
-          res.length > 0 &&
-          res.find((user) => user.userAddress === address)
-        ) {
-          const resUser = res.find((user) => user.userAddress === address);
-          if (resUser) {
-            setUser({ ...resUser, id: Number(resUser.id) });
-            storeUserInStorage(resUser);
-          }
-        }
-      }
     }
 
     getAllPins();
@@ -145,6 +143,7 @@ export default function Home() {
     activeConnector,
     allPinsData,
     user,
+    allUsers,
   ]);
 
   const handleConnectorUpdate = ({ account, chain }: ConnectorData) => {
@@ -183,7 +182,7 @@ export default function Home() {
       setPins(
         allPins.filter(
           (pin: { owner: string; id: number }) =>
-            pin.owner !== address && !boardPins.includes(pin.id)
+            pin.owner !== address && !boardPins.includes(Number(pin.id))
         )
       );
     }
