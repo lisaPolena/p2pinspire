@@ -22,6 +22,7 @@ import {
 } from "@/common/functions/boards";
 import { Toast } from "@/components/general/Toasts";
 import { storeUserInStorage } from "@/common/functions/users";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
 export default function Home() {
   const { address, isConnected, connector: activeConnector } = useAccount();
@@ -270,10 +271,13 @@ export default function Home() {
           className={`fixed inset-x-0 top-0 grid grid-cols-3 bg-black h-[50px] pt-3 px-2 z-10`}
         ></div>
 
-        <div className="grid grid-cols-2 gap-3 px-4 relative top-[50px] mt-2">
-          {!isLoading ? (
-            <>
-              {pins.map((pin: Pin) => (
+        <Masonry
+          columnsCount={2}
+          gutter={"20px"}
+          className="px-4 mt-2 relative top-[50px] mb-32"
+        >
+          {!isLoading
+            ? pins.map((pin: Pin) => (
                 <React.Fragment key={pin.id}>
                   {loadSavePinTransaction &&
                   loadSavePinTransaction === Number(pin.id) ? (
@@ -292,7 +296,7 @@ export default function Home() {
                         alt={pin.title}
                         className="object-cover w-full rounded-2xl max-h-72"
                       />
-                      <div className="mb-4">
+                      <div>
                         <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">
                           {pin.title}
                         </h2>
@@ -300,33 +304,30 @@ export default function Home() {
                     </div>
                   )}
                 </React.Fragment>
-              ))}
-            </>
-          ) : (
-            <>
-              <Stack>
-                <Skeleton height="215px" width="100%" fadeDuration={4} />
-                <Skeleton height="15px" width="70%" fadeDuration={4} />
-              </Stack>
-              <Stack>
-                <Skeleton height="215px" width="100%" fadeDuration={4} />
-                <Skeleton height="15px" width="70%" fadeDuration={4} />
-              </Stack>
-              <Stack>
-                <Skeleton height="215px" width="100%" fadeDuration={4} />
-                <Skeleton height="15px" width="70%" fadeDuration={4} />
-              </Stack>
-              <Stack>
-                <Skeleton height="215px" width="100%" fadeDuration={4} />
-                <Skeleton height="15px" width="70%" fadeDuration={4} />
-              </Stack>
-              <Stack>
-                <Skeleton height="215px" width="100%" fadeDuration={4} />
-                <Skeleton height="15px" width="70%" fadeDuration={4} />
-              </Stack>
-            </>
-          )}
-        </div>
+              ))
+            : [
+                <Stack>
+                  <Skeleton height="215px" width="100%" fadeDuration={4} />
+                  <Skeleton height="15px" width="70%" fadeDuration={4} />
+                </Stack>,
+                <Stack>
+                  <Skeleton height="215px" width="100%" fadeDuration={4} />
+                  <Skeleton height="15px" width="70%" fadeDuration={4} />
+                </Stack>,
+                <Stack>
+                  <Skeleton height="215px" width="100%" fadeDuration={4} />
+                  <Skeleton height="15px" width="70%" fadeDuration={4} />
+                </Stack>,
+                <Stack>
+                  <Skeleton height="215px" width="100%" fadeDuration={4} />
+                  <Skeleton height="15px" width="70%" fadeDuration={4} />
+                </Stack>,
+                <Stack>
+                  <Skeleton height="215px" width="100%" fadeDuration={4} />
+                  <Skeleton height="15px" width="70%" fadeDuration={4} />
+                </Stack>,
+              ]}
+        </Masonry>
       </main>
       <Navbar />
     </>

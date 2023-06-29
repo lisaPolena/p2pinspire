@@ -17,6 +17,7 @@ import {
   storeBoardsInStorage,
 } from "@/common/functions/boards";
 import { Toast } from "@/components/general/Toasts";
+import Masonry from "react-responsive-masonry";
 
 export default function DetailBoard() {
   const { address, isConnected } = useAccount();
@@ -320,14 +321,12 @@ export default function DetailBoard() {
                     {pins && pins.length ? pins.length + " Pins" : "0 Pins"}
                   </p>
                 </div>
-                <div
-                  className={`grid ${
-                    boardView === "wide"
-                      ? "grid-cols-1"
-                      : boardView === "compact"
-                      ? "grid-cols-3"
-                      : "grid-cols-2"
-                  } gap-3 px-4`}
+                <Masonry
+                  columnsCount={
+                    boardView === "wide" ? 1 : boardView === "compact" ? 3 : 2
+                  }
+                  gutter={"20px"}
+                  className="px-4 mt-2 relative top-[50px] mb-32"
                 >
                   {pins.map((pin: Pin) => (
                     <div
@@ -355,7 +354,7 @@ export default function DetailBoard() {
                       </div>
                     </div>
                   ))}
-                </div>
+                </Masonry>
               </>
             ) : (
               <div className="flex items-center justify-center h-[60vh]">
