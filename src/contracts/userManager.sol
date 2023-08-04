@@ -82,6 +82,10 @@ contract UserManager {
      */
     function deleteUser(uint256 id) public {
         require(users[id].userAddress != address(0), "User does not exist");
+        require(
+            msg.sender == users[id].userAddress,
+            "Only the user owner can delete the user"
+        );
 
         // Remove user from the mapping
         delete users[id];
@@ -128,6 +132,10 @@ contract UserManager {
         string memory bio
     ) public {
         require(users[id].userAddress != address(0), "User does not exist");
+        require(
+            msg.sender == users[id].userAddress,
+            "Only the user owner can edit the user"
+        );
 
         User storage user = users[id];
         user.name = name;
@@ -145,6 +153,10 @@ contract UserManager {
      * @param followeeId ID of the user to be followed
      */
     function followUser(uint256 followerId, uint256 followeeId) public {
+        require(
+            msg.sender == users[followerId].userAddress,
+            "Only the user owner can follow a user"
+        );
         require(
             users[followerId].userAddress != address(0),
             "Follower does not exist"
@@ -170,6 +182,10 @@ contract UserManager {
      * @param followeeId ID of the user to be unfollowed
      */
     function unfollowUser(uint256 followerId, uint256 followeeId) public {
+        require(
+            msg.sender == users[followerId].userAddress,
+            "Only the user owner can follow a user"
+        );
         require(
             users[followerId].userAddress != address(0),
             "Follower does not exist"

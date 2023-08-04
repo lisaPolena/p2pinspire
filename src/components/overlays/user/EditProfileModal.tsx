@@ -5,8 +5,10 @@ import { Input, Textarea, useToast } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
 import { useIpfs } from "@/common/functions/contracts";
 import { AiOutlineLoading } from "react-icons/ai";
-import { useAccount, useContractEvent, useContractWrite } from "wagmi";
+import { useAccount, useContractWrite } from "wagmi";
 import userManager from "../../../contracts/build/UserManager.json";
+import boardManager from "../../../contracts/build/BoardManager.json";
+import pinManager from "../../../contracts/build/PinManager.json";
 import { Toast } from "../../general/Toasts";
 import DeleteProfileModal from "./DeleteProfile";
 import { useRouter } from "next/router";
@@ -59,6 +61,26 @@ const EditProfileModal: React.FC = () => {
     address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
     abi: userManager.abi,
     functionName: "deleteUser",
+  });
+
+  const {
+    data: deleteAllBoardsFromUserData,
+    status: deleteAllBoardFromUserStatus,
+    writeAsync: deleteAllBoardsFromUser,
+  } = useContractWrite({
+    address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
+    abi: boardManager.abi,
+    functionName: "deleteAllBoardsFromUser",
+  });
+
+  const {
+    data: deleteAllPinsFromUserData,
+    status: deleteAllPinsFromUserStatus,
+    writeAsync: deleteAllPinsFromUser,
+  } = useContractWrite({
+    address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
+    abi: pinManager.abi,
+    functionName: "deleteAllPinsFromUser",
   });
 
   useEffect(() => {
@@ -149,6 +171,22 @@ const EditProfileModal: React.FC = () => {
     setDeleteProfileModalOpen(false);
     setEditProfileModalOpen(false);
     if (user) {
+      await deleteAllBoardsFromUser()
+        .then(() => {
+          handleToast("Boards from Profile deleting...", "");
+        })
+        .catch((err) => {
+          handleToast("Transaction rejected");
+        });
+
+      await deleteAllPinsFromUser()
+        .then(() => {
+          handleToast("Pins from Profile deleting...", "");
+        })
+        .catch((err) => {
+          handleToast("Transaction rejected");
+        });
+
       await deleteUser({ args: [user.id] })
         .then(() => {
           handleToast("Profile deleting...", "");

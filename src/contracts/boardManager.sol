@@ -177,6 +177,19 @@ contract BoardManager {
     }
 
     /**
+     * @dev Delete all boards from a user
+     * Requirements:
+     * - Only the board owner can delete the boards
+     */
+    function deleteAllBoardsFromUser() public {
+        for (uint256 i = 1; i <= currentBoardId; i++) {
+            if (boards[i].owner == msg.sender) {
+                delete boards[i];
+            }
+        }
+    }
+
+    /**
      * @dev Get board information by its ID
      * @param boardId ID of the board to get
      * @return Board struct containing board information

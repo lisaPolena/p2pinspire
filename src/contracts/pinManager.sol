@@ -116,6 +116,19 @@ contract PinManager {
     }
 
     /**
+     * @dev Delete all pins from a user
+     * Requirements:
+     * - Only the pin owner can delete the pins
+     */
+    function deleteAllPinsFromUser() public {
+        for (uint256 i = 1; i <= currentPinId; i++) {
+            if (pins[i].owner == msg.sender) {
+                delete pins[i];
+            }
+        }
+    }
+
+    /**
      * @dev Get pin information by its ID
      * @param pinId ID of the pin to get
      * @return Pin struct containing pin information
