@@ -49,9 +49,6 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
     abi: pinManager.abi,
     functionName: "createPin",
-    onError(err) {
-      console.log("error ", err);
-    },
   });
 
   useEffect(() => {
@@ -87,13 +84,22 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
       }
       return;
     }
-    await createPin({ args: [pinTitle, pinDescription, pinImage, bId] });
-    setCreatePinModalOpen(false);
-    setBoardSlideOpen(false);
-    const board = allBoards.find((board) => board.id === Number(bId));
-    if (board) setCreatedPin({ boardName: board.name, imageHash: pinImage });
-    clearForm();
-    handleLoadingCreatingPinToast("The Pin is being created...");
+    await createPin({ args: [pinTitle, pinDescription, pinImage, bId] })
+      .then(() => {
+        setCreatePinModalOpen(false);
+        setBoardSlideOpen(false);
+        const board = allBoards.find((board) => board.id === Number(bId));
+        if (board)
+          setCreatedPin({ boardName: board.name, imageHash: pinImage });
+        clearForm();
+        handleLoadingCreatingPinToast("The Pin is being created...");
+      })
+      .catch((err) => {
+        setCreatePinModalOpen(false);
+        setBoardSlideOpen(false);
+        clearForm();
+        handleToast("Transaction rejected");
+      });
   };
 
   function clearForm() {
@@ -124,7 +130,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
     clearForm();
   };
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

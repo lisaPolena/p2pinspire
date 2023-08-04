@@ -39,9 +39,6 @@ const EditBoardModal: React.FC<EditBoardModalProps> = (
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
     abi: boardManager.abi,
     functionName: "editBoard",
-    onError(err) {
-      console.log("error", err);
-    },
   });
 
   useEffect(() => {
@@ -65,12 +62,18 @@ const EditBoardModal: React.FC<EditBoardModalProps> = (
     }
     await editBoard({
       args: [board?.id, boardName, boardDescription, boardCoverImage],
-    });
-    setEditBoardModalOpen(false);
-    handleToast(boardName + " editing...", "");
+    })
+      .then(() => {
+        setEditBoardModalOpen(false);
+        handleToast(boardName + " editing...", "");
+      })
+      .catch((err) => {
+        setEditBoardModalOpen(false);
+        handleToast("Transaction rejected");
+      });
   };
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

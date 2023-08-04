@@ -35,9 +35,6 @@ export default function Index() {
     address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
     abi: userManager.abi,
     functionName: "createUser",
-    onError(err) {
-      console.log(err);
-    },
   });
 
   const { data: allUsers } = useContractRead({
@@ -96,13 +93,19 @@ export default function Index() {
   }, [isConnected, session, allUsers]);
 
   async function handleCreateUser() {
-    await createUser({ args: [address] });
-    setCreateUserModalOpen(false);
-    setIsCreating(true);
-    handleToast("Creating user...", "");
+    await createUser({ args: [address] })
+      .then(() => {
+        setCreateUserModalOpen(false);
+        setIsCreating(true);
+        handleToast("Creating user...");
+      })
+      .catch((err) => {
+        setCreateUserModalOpen(false);
+        handleToast("Transaction rejected");
+      });
   }
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

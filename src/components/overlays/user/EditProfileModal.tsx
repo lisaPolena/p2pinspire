@@ -49,9 +49,6 @@ const EditProfileModal: React.FC = () => {
     onSuccess() {
       handleToast("Profile edited!", "");
     },
-    onError(err) {
-      console.log("error", err);
-    },
   });
 
   const {
@@ -62,9 +59,6 @@ const EditProfileModal: React.FC = () => {
     address: `0x${process.env.NEXT_PUBLIC_USER_MANAGER_CONTRACT}`,
     abi: userManager.abi,
     functionName: "deleteUser",
-    onError(err) {
-      console.log("error ", err);
-    },
   });
 
   useEffect(() => {
@@ -97,34 +91,40 @@ const EditProfileModal: React.FC = () => {
         const image =
           profileImage != "" ? profileImage : user.profileImageHash ?? "";
         handleToast("Profile editing...", "");
-        await editUser({ args: [user.id, name, username, image, bio] });
-        user
-          ? setUser({
-              id: user.id,
-              userAddress,
-              name,
-              username,
-              profileImageHash: image,
-              bio,
-              followers: user.followers ?? [],
-              following: user.following ?? [],
-            })
-          : null;
-        user
-          ? storeUserInStorage({
-              id: user.id,
-              userAddress,
-              name,
-              username,
-              profileImageHash: image,
-              bio,
-              followers: user.followers ?? [],
-              following: user.following ?? [],
-            })
-          : null;
-        setEditProfileModalOpen(false);
+        await editUser({ args: [user.id, name, username, image, bio] })
+          .then(() => {
+            user
+              ? setUser({
+                  id: user.id,
+                  userAddress,
+                  name,
+                  username,
+                  profileImageHash: image,
+                  bio,
+                  followers: user.followers ?? [],
+                  following: user.following ?? [],
+                })
+              : null;
+            user
+              ? storeUserInStorage({
+                  id: user.id,
+                  userAddress,
+                  name,
+                  username,
+                  profileImageHash: image,
+                  bio,
+                  followers: user.followers ?? [],
+                  following: user.following ?? [],
+                })
+              : null;
+            setEditProfileModalOpen(false);
+          })
+          .catch((err) => {
+            setEditProfileModalOpen(false);
+            handleToast("Transaction rejected");
+          });
       } else {
-        handleToast("User not found", "");
+        handleToast("User not found");
       }
     }
   };
@@ -149,15 +149,20 @@ const EditProfileModal: React.FC = () => {
     setDeleteProfileModalOpen(false);
     setEditProfileModalOpen(false);
     if (user) {
-      await deleteUser({ args: [user.id] });
-      handleToast("Profile deleting...", "");
-      setDeleteProfile(user.userAddress);
+      await deleteUser({ args: [user.id] })
+        .then(() => {
+          handleToast("Profile deleting...", "");
+          setDeleteProfile(user.userAddress);
+        })
+        .catch((err) => {
+          handleToast("Transaction rejected");
+        });
     } else {
       handleToast("User not found", "");
     }
   };
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

@@ -50,9 +50,6 @@ export default function Home() {
     onSuccess(data) {
       setBoards(data as Board[]);
     },
-    onError(error) {
-      console.log(error);
-    },
   });
 
   const { data: allPinsByAddress } = useContractRead({
@@ -71,9 +68,6 @@ export default function Home() {
     functionName: "getAllPins",
     onSuccess(data) {
       setAllPins(data as Pin[]);
-    },
-    onError(error) {
-      console.log(error);
     },
   });
 

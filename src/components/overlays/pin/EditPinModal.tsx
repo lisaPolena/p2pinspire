@@ -58,9 +58,6 @@ const EditBoardModal: React.FC<EditPinModalProps> = (
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
     abi: boardManager.abi,
     functionName: "editSavedPin",
-    onError(err) {
-      console.log("err.prepare: ", err);
-    },
   });
 
   const {
@@ -71,9 +68,6 @@ const EditBoardModal: React.FC<EditPinModalProps> = (
     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
     abi: pinManager.abi,
     functionName: "editCreatedPin",
-    onError(err) {
-      console.log("error ", err);
-    },
   });
 
   useEffect(() => {
@@ -134,27 +128,39 @@ const EditBoardModal: React.FC<EditPinModalProps> = (
           pinDescription,
           newPinBoardId != "" ? newPinBoardId : pinBoardId,
         ],
-      });
-      setEditPinModalOpen(false);
-      handleToast("Pin " + pinTitle + " editing...", "");
-      setNewPinBoardId("");
-      if (newPinBoardId != "") router.push("/profile");
+      })
+        .then(() => {
+          setEditPinModalOpen(false);
+          handleToast("Pin " + pinTitle + " editing...", "");
+          setNewPinBoardId("");
+          if (newPinBoardId != "") router.push("/profile");
+        })
+        .catch((err) => {
+          setEditPinModalOpen(false);
+          handleToast("Transaction rejected");
+        });
     } else {
-      handleToast("Pin not found!", "");
+      handleToast("Pin not found!");
     }
   }
 
   const editSavedPin = async () => {
     if (pin) {
       if (newPinBoardId !== "") {
-        await writeEditSavedPin({ args: [pin.id, pinBoardId, newPinBoardId] });
+        await writeEditSavedPin({ args: [pin.id, pinBoardId, newPinBoardId] })
+          .then(() => {
+            setEditPinModalOpen(false);
+            handleToast("Pin editing...");
+            setNewPinBoardId("");
+            router.push("/profile");
+          })
+          .catch((err) => {
+            setEditPinModalOpen(false);
+            handleToast("Transaction rejected");
+          });
       }
-      setEditPinModalOpen(false);
-      handleToast("Pin editing...", "");
-      setNewPinBoardId("");
-      router.push("/profile");
     } else {
-      handleToast("Pin not found!", "");
+      handleToast("Pin not found!");
     }
   };
 
@@ -164,7 +170,7 @@ const EditBoardModal: React.FC<EditPinModalProps> = (
     setBoard(board);
   };
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

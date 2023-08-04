@@ -54,7 +54,7 @@ export default function DetailPin() {
     enabled: !!pin?.owner,
     args: [pin?.owner],
     onError(error) {
-      console.log("getUserByAdress", error);
+      handleToast("User not found");
     },
   });
 
@@ -72,7 +72,7 @@ export default function DetailPin() {
       } as Pin;
       setPin(newPin);
       const message = "Pin " + args.newTitle + " edited!";
-      handleEditPinToast(message, args.imageHash);
+      handleToast(message, args.imageHash);
     },
   });
 
@@ -149,7 +149,7 @@ export default function DetailPin() {
     }
   }
 
-  function handleEditPinToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

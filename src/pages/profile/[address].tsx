@@ -42,7 +42,7 @@ export default function DetailProfile() {
       }
     },
     onError(error) {
-      console.log("getUserByAdress", error);
+      handleToast("User not found");
     },
   });
 
@@ -53,7 +53,7 @@ export default function DetailProfile() {
     args: [address],
     onSuccess(data) {},
     onError(error) {
-      console.log(error);
+      handleToast("Boards not found");
     },
   });
 
@@ -69,9 +69,6 @@ export default function DetailProfile() {
       console.log("success", data);
       handleToast("Followed user", "");
     },
-    onError(err) {
-      console.log("error", err);
-    },
   });
 
   const {
@@ -86,9 +83,6 @@ export default function DetailProfile() {
       console.log("success", data);
       handleToast("Unfollowed user", "");
       setIsFollowing(false);
-    },
-    onError(err) {
-      console.log("error", err);
     },
   });
 
@@ -114,59 +108,69 @@ export default function DetailProfile() {
 
   const handleFollowUser = async () => {
     if (user && profile) {
-      await followUser({ args: [user.id, Number(profile.id)] });
-      setUser({
-        ...user,
-        following: user.following
-          ? [...user.following, profile.id]
-          : [profile.id],
-      });
-      setProfile({
-        ...profile,
-        followers: profile.followers
-          ? [...profile.followers, user.id]
-          : [user.id],
-      });
-      storeUserInStorage({
-        ...user,
-        following: user.following
-          ? [...user.following, profile.id]
-          : [profile.id],
-      });
-      setIsFollowing(true);
+      await followUser({ args: [user.id, Number(profile.id)] })
+        .then(() => {
+          setUser({
+            ...user,
+            following: user.following
+              ? [...user.following, profile.id]
+              : [profile.id],
+          });
+          setProfile({
+            ...profile,
+            followers: profile.followers
+              ? [...profile.followers, user.id]
+              : [user.id],
+          });
+          storeUserInStorage({
+            ...user,
+            following: user.following
+              ? [...user.following, profile.id]
+              : [profile.id],
+          });
+          setIsFollowing(true);
+        })
+        .catch((err) => {
+          handleToast("Transaction rejected");
+        });
     } else {
-      console.log("user or profile is undefined");
+      handleToast("User or Profile is undefined");
     }
   };
 
   const handleUnfollowUser = async () => {
     if (user && profile) {
-      await unfollowUser({ args: [user.id, Number(profile.id)] });
-      setUser({
-        ...user,
-        following: user.following?.filter(
-          (id) => Number(id) !== Number(profile.id)
-        ),
-      });
-      setProfile({
-        ...profile,
-        followers: profile.followers?.filter(
-          (id) => Number(id) !== Number(user.id)
-        ),
-      });
-      storeUserInStorage({
-        ...user,
-        following: user.following?.filter(
-          (id) => Number(id) !== Number(profile.userAddress)
-        ),
-      });
-      setIsFollowing(false);
+      await unfollowUser({ args: [user.id, Number(profile.id)] })
+        .then(() => {
+          setUser({
+            ...user,
+            following: user.following?.filter(
+              (id) => Number(id) !== Number(profile.id)
+            ),
+          });
+          setProfile({
+            ...profile,
+            followers: profile.followers?.filter(
+              (id) => Number(id) !== Number(user.id)
+            ),
+          });
+          storeUserInStorage({
+            ...user,
+            following: user.following?.filter(
+              (id) => Number(id) !== Number(profile.userAddress)
+            ),
+          });
+          setIsFollowing(false);
+        })
+        .catch((err) => {
+          handleToast("Transaction rejected");
+        });
     } else {
-      console.log("user or profile is undefined");
+      handleToast("User or Profile is undefined");
     }
   };
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

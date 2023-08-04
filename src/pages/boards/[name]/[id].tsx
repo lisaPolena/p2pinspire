@@ -41,7 +41,7 @@ export default function DetailBoard() {
     },
     onError(err) {
       if (err.message.includes("Board does not exist.")) {
-        console.log("Board does not exist.");
+        handleToast("Board does not exist.");
         router.push("/profile");
       }
     },
@@ -277,7 +277,7 @@ export default function DetailBoard() {
     storeBoardsInStorage(updatedBoards);
   };
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

@@ -7,6 +7,7 @@ import boardManager from "../../../contracts/build/BoardManager.json";
 import pinManager from "../../../contracts/build/PinManager.json";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { Board, Pin } from "@/common/types/structs";
+import { Toast } from "@/components/general/Toasts";
 
 interface SavePinModalProps {
   pinId: number | null;
@@ -26,6 +27,7 @@ const SavePinModal: React.FC<SavePinModalProps> = (
   const router = useRouter();
   const [pin, setPin] = useState<Pin | null>(null);
   const id = pinId ?? router.query.id;
+  const toast = useToast();
 
   const {
     data: savePinToBoardData,
@@ -35,9 +37,6 @@ const SavePinModal: React.FC<SavePinModalProps> = (
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
     abi: boardManager.abi,
     functionName: "savePinToBoard",
-    onError(err) {
-      console.log("error ", err);
-    },
   });
 
   const { data: allPinsByAddress } = useContractRead({
@@ -63,13 +62,25 @@ const SavePinModal: React.FC<SavePinModalProps> = (
           pin.imageHash,
           pin.owner,
         ],
-      });
-      setLoadSavePinTransaction(Number(pin.id) ?? 0);
+      })
+        .then(() => {
+          setLoadSavePinTransaction(Number(pin.id) ?? 0);
+        })
+        .catch((err) => {
+          handleToast("Transaction rejected");
+        });
     } else {
-      console.log("no pin");
+      handleToast("Pin not found!");
     }
     router.push("/home");
   };
+
+  function handleToast(message: string, imageHash?: string) {
+    toast({
+      position: "top",
+      render: () => <Toast text={message} imageHash={imageHash} />,
+    });
+  }
 
   return (
     <Modal
