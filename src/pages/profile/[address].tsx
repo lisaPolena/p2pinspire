@@ -5,15 +5,13 @@ import { useEffect, useState } from "react";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import userManager from "../../contracts/build/UserManager.json";
 import boardManager from "../../contracts/build/BoardManager.json";
-import { Board, Pin, User } from "@/common/types/structs";
+import { Board, User } from "@/common/types/structs";
 import {
   Tabs,
   TabList,
   Tab,
   TabPanels,
   TabPanel,
-  Stack,
-  Skeleton,
   useToast,
 } from "@chakra-ui/react";
 import React from "react";
@@ -96,6 +94,8 @@ export default function DetailProfile() {
 
   useEffect(() => {
     if (profile && user) {
+      console.log(profile.followers);
+      console.log(user);
       if (
         profile.followers?.find((follower) => Number(follower) === user?.id)
       ) {
@@ -107,6 +107,7 @@ export default function DetailProfile() {
     profileData,
     allBoardsByAddress,
     isFollowing,
+    profileData,
     profile,
     user,
   ]);
@@ -120,12 +121,19 @@ export default function DetailProfile() {
           ? [...user.following, profile.id]
           : [profile.id],
       });
+      setProfile({
+        ...profile,
+        followers: profile.followers
+          ? [...profile.followers, user.id]
+          : [user.id],
+      });
       storeUserInStorage({
         ...user,
         following: user.following
           ? [...user.following, profile.id]
           : [profile.id],
       });
+      setIsFollowing(true);
     } else {
       console.log("user or profile is undefined");
     }
@@ -140,12 +148,19 @@ export default function DetailProfile() {
           (id) => Number(id) !== Number(profile.id)
         ),
       });
+      setProfile({
+        ...profile,
+        followers: profile.followers?.filter(
+          (id) => Number(id) !== Number(user.id)
+        ),
+      });
       storeUserInStorage({
         ...user,
         following: user.following?.filter(
           (id) => Number(id) !== Number(profile.userAddress)
         ),
       });
+      setIsFollowing(false);
     } else {
       console.log("user or profile is undefined");
     }
@@ -178,6 +193,7 @@ export default function DetailProfile() {
                   <img
                     src={`https://web3-pinterest.infura-ipfs.io/ipfs/${profile.profileImageHash}`}
                     className="object-cover w-40 h-40 rounded-full"
+                    alt="Profile Image"
                   />
                 </div>
               )}
