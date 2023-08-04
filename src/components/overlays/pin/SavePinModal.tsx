@@ -8,6 +8,7 @@ import pinManager from "../../../contracts/build/PinManager.json";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { Board, Pin } from "@/common/types/structs";
 import { Toast } from "@/components/general/Toasts";
+import Image from "next/image";
 
 interface SavePinModalProps {
   pinId: number | null;
@@ -97,18 +98,22 @@ const SavePinModal: React.FC<SavePinModalProps> = (
           >
             <div className="flex items-center h-16">
               {board.boardCoverHash != "" ? (
-                <img
+                <Image
                   className="w-14 h-14 rounded-xl"
                   src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`}
                   alt="board"
+                  width={100}
+                  height={100}
                 />
               ) : (
                 <>
                   {board.pins?.length > 0 && board.pins[0].imageHash ? (
-                    <img
+                    <Image
                       className="w-14 h-14 rounded-xl"
                       src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`}
                       alt="board"
+                      width={100}
+                      height={100}
                     />
                   ) : (
                     <div className="bg-gray-200 w-14 h-14 rounded-xl"></div>

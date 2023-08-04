@@ -9,15 +9,15 @@ import {
   Textarea,
   useToast,
 } from "@chakra-ui/react";
-import { Progress } from "@chakra-ui/react";
 import pinManager from "../../../contracts/build/PinManager.json";
-import { useAccount, useContractWrite } from "wagmi";
+import { useContractWrite } from "wagmi";
 import { useIpfs } from "@/common/functions/contracts";
 import ImageUploader from "../../general/ImageUploader";
 import { IoChevronBack, IoCheckmarkSharp } from "react-icons/io5";
 import { getBoardsFromStorage } from "@/common/functions/boards";
 import { Toast } from "../../general/Toasts";
 import { Board } from "@/common/types/structs";
+import Image from "next/image";
 
 interface CreatePinModalProps {
   boardId?: number | null;
@@ -56,8 +56,7 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
       const storageBoards = getBoardsFromStorage();
       setAllBoards(storageBoards);
     }
-  }, []);
-
+  }, [allBoards.length]);
   const handleCreatePin = async () => {
     const bId = boardId ? boardId : pinBoardId;
     if (
@@ -169,9 +168,12 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
               isLoading={imageLoading}
             />
           ) : (
-            <img
+            <Image
               src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pinImage}`}
               className="object-cover m-auto w-80 h-80 rounded-2xl"
+              alt="Pin Image"
+              width={100}
+              height={100}
             />
           )}
 
@@ -227,18 +229,22 @@ const CreatePinModal: React.FC<CreatePinModalProps> = ({ boardId }) => {
                   >
                     <div className="flex items-center h-16">
                       {board.boardCoverHash != "" ? (
-                        <img
+                        <Image
                           className="w-14 h-14 rounded-xl"
                           src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`}
                           alt="board"
+                          width={100}
+                          height={100}
                         />
                       ) : (
                         <>
                           {board.pins?.length > 0 && board.pins[0].imageHash ? (
-                            <img
+                            <Image
                               className="w-14 h-14 rounded-xl"
                               src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`}
                               alt="board"
+                              width={100}
+                              height={100}
                             />
                           ) : (
                             <div className="bg-gray-200 w-14 h-14 rounded-xl"></div>

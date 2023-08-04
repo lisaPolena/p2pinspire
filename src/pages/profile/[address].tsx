@@ -18,6 +18,7 @@ import React from "react";
 import { useAppState } from "@/components/general/AppStateContext";
 import { Toast } from "@/components/general/Toasts";
 import { storeUserInStorage } from "@/common/functions/users";
+import Image from "next/image";
 
 export default function DetailProfile() {
   const { address, isConnected } = useAccount();
@@ -190,10 +191,12 @@ export default function DetailProfile() {
             <div className="flex flex-col items-center justify-center pt-20">
               {profile.profileImageHash && (
                 <div className="">
-                  <img
+                  <Image
                     src={`https://web3-pinterest.infura-ipfs.io/ipfs/${profile.profileImageHash}`}
                     className="object-cover w-40 h-40 rounded-full"
                     alt="Profile Image"
+                    width={100}
+                    height={100}
                   />
                 </div>
               )}
@@ -280,13 +283,16 @@ export default function DetailProfile() {
                             >
                               <div className="col-span-1">
                                 {pins?.length > 0 && pins[0].imageHash ? (
-                                  <img
+                                  <Image
                                     className={`object-cover w-full h-[120px] ${
                                       pins.length > 1 && pins[0].imageHash
                                         ? "rounded-tl-3xl rounded-bl-3xl"
                                         : "rounded-3xl"
                                     }`}
                                     src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pins[0].imageHash}`}
+                                    alt={pins[0].title}
+                                    width={100}
+                                    height={100}
                                   />
                                 ) : (
                                   <div className="h-full bg-white rounded-tl-3xl rounded-bl-3xl"></div>
@@ -302,22 +308,28 @@ export default function DetailProfile() {
                                 } `}
                               >
                                 {pins?.length > 1 && pins[1].imageHash ? (
-                                  <img
+                                  <Image
                                     className={`object-cover w-full ${
                                       pins.length > 2 && pins[2].imageHash
                                         ? "h-[60px]"
                                         : "h-[120px] rounded-br-3xl"
                                     } rounded-tr-3xl`}
                                     src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pins[1].imageHash}`}
+                                    alt={pins[1].title}
+                                    width={100}
+                                    height={100}
                                   />
                                 ) : (
                                   <div className="h-full row-span-1 bg-white rounded-tr-3xl"></div>
                                 )}
 
                                 {pins?.length > 2 && pins[2].imageHash && (
-                                  <img
+                                  <Image
                                     className={`object-cover w-full h-[60px] rounded-br-3xl`}
                                     src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pins[2].imageHash}`}
+                                    alt={pins[2].title}
+                                    width={100}
+                                    height={100}
                                   />
                                 )}
 

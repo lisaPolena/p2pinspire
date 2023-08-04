@@ -9,6 +9,7 @@ import { IoAdd, IoChevronBack } from "react-icons/io5";
 import { RiEditCircleFill } from "react-icons/ri";
 import { Board, Pin } from "@/common/types/structs";
 import { Toast } from "../../general/Toasts";
+import Image from "next/image";
 
 interface EditBoardModalProps {
   board: Board | null;
@@ -113,9 +114,12 @@ const EditBoardModal: React.FC<EditBoardModalProps> = (
               </div>
             ) : (
               <div onClick={() => setPinSlideOpen(true)}>
-                <img
+                <Image
                   src={`https://web3-pinterest.infura-ipfs.io/ipfs/${boardCoverImage}`}
                   className="object-cover w-40 h-40 rounded-2xl"
+                  alt="Board cover"
+                  width={100}
+                  height={100}
                 />
                 <RiEditCircleFill
                   size={23}
@@ -219,10 +223,12 @@ const EditBoardModal: React.FC<EditBoardModalProps> = (
                   setPinSlideOpen(false);
                 }}
               >
-                <img
+                <Image
                   src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
                   alt={pin.title}
                   className="object-cover w-full rounded-2xl max-h-52"
+                  width={100}
+                  height={100}
                 />
               </div>
             ))}

@@ -18,6 +18,7 @@ import {
 } from "@/common/functions/boards";
 import { Toast } from "@/components/general/Toasts";
 import Masonry from "react-responsive-masonry";
+import Image from "next/image";
 
 export default function DetailBoard() {
   const { address, isConnected } = useAccount();
@@ -336,7 +337,7 @@ export default function DetailBoard() {
                         router.push(`/pin/${pin.id}?boardId=${board.id}`)
                       }
                     >
-                      <img
+                      <Image
                         src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
                         alt={pin.title}
                         className={`object-cover w-full rounded-2xl ${
@@ -346,6 +347,8 @@ export default function DetailBoard() {
                             ? "max-h-40"
                             : "max-h-72"
                         }`}
+                        width={100}
+                        height={100}
                       />
                       <div className="mb-2">
                         <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">

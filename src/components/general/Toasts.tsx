@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface ToastProps {
   text: string;
   imageHash?: string;
@@ -11,9 +13,12 @@ export const Toast: React.FC<ToastProps> = ({ text, imageHash }) => {
       } `}
     >
       {imageHash && (
-        <img
+        <Image
           src={`https://web3-pinterest.infura-ipfs.io/ipfs/${imageHash}`}
           className="object-cover w-[50px] h-[50px] rounded-2xl"
+          alt="Toast Image"
+          width={100}
+          height={100}
         />
       )}
 

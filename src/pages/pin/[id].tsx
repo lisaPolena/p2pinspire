@@ -11,6 +11,7 @@ import pinManager from "../../contracts/build/PinManager.json";
 import boardManager from "../../contracts/build/BoardManager.json";
 import userManager from "../../contracts/build/UserManager.json";
 import { Toast } from "@/components/general/Toasts";
+import Image from "next/image";
 
 export default function DetailPin() {
   const { address, isConnected } = useAccount();
@@ -170,10 +171,12 @@ export default function DetailPin() {
         />
         {pin ? (
           <div className="">
-            <img
+            <Image
               src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`}
-              alt={pin?.title}
+              alt={pin?.title ?? "Pin image"}
               className="object-cover w-full rounded-tl-3xl rounded-tr-3xl "
+              width={100}
+              height={100}
             />
             <div className="p-4 bg-zinc-800 rounded-bl-3xl rounded-br-3xl">
               {pinOwner && (
@@ -182,10 +185,12 @@ export default function DetailPin() {
                   onClick={() => router.push(`/profile/${pin.owner}`)}
                 >
                   {pinOwner.profileImageHash !== "" ? (
-                    <img
+                    <Image
                       src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pinOwner.profileImageHash}`}
-                      alt={pinOwner.name}
+                      alt={pinOwner.name ?? "Profile image"}
                       className="w-10 h-10 rounded-full"
+                      width={100}
+                      height={100}
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-zinc-600" />

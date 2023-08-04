@@ -22,6 +22,7 @@ import {
 } from "react-icons/io5";
 import { getBoardsFromStorage } from "@/common/functions/boards";
 import { Toast } from "../../general/Toasts";
+import Image from "next/image";
 
 interface EditPinModalProps {
   pin: Pin | null;
@@ -205,10 +206,12 @@ const EditBoardModal: React.FC<EditPinModalProps> = (
         </div>
         <div className="flex flex-col gap-4">
           <div>
-            <img
+            <Image
               src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin?.imageHash}`}
-              alt={pin?.title}
+              alt={pin?.title ?? "Pin Image"}
               className="object-cover m-auto w-80 h-80 rounded-2xl"
+              width={100}
+              height={100}
             />
           </div>
           {isOwner && (
@@ -247,18 +250,22 @@ const EditBoardModal: React.FC<EditPinModalProps> = (
             {board ? (
               <>
                 {board.boardCoverHash != "" ? (
-                  <img
+                  <Image
                     className="w-12 h-12 rounded-xl"
                     src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`}
                     alt="board"
+                    width={100}
+                    height={100}
                   />
                 ) : (
                   <>
                     {board.pins?.length > 0 && board.pins[0].imageHash ? (
-                      <img
+                      <Image
                         className="w-12 h-12 rounded-xl"
                         src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`}
                         alt="board"
+                        width={100}
+                        height={100}
                       />
                     ) : (
                       <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
@@ -306,18 +313,22 @@ const EditBoardModal: React.FC<EditPinModalProps> = (
                 >
                   <div className="flex items-center h-16">
                     {board.boardCoverHash != "" ? (
-                      <img
+                      <Image
                         className="w-14 h-14 rounded-xl"
                         src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.boardCoverHash}`}
                         alt="board"
+                        width={100}
+                        height={100}
                       />
                     ) : (
                       <>
                         {board.pins?.length > 0 && board.pins[0].imageHash ? (
-                          <img
+                          <Image
                             className="w-14 h-14 rounded-xl"
                             src={`https://web3-pinterest.infura-ipfs.io/ipfs/${board.pins[0].imageHash}`}
                             alt="board"
+                            width={100}
+                            height={100}
                           />
                         ) : (
                           <div className="bg-gray-200 w-14 h-14 rounded-xl"></div>

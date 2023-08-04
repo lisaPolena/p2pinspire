@@ -16,6 +16,7 @@ import { User } from "@/common/types/structs";
 import { useAppState } from "@/components/general/AppStateContext";
 import CreateProfileModal from "@/components/overlays/user/CreateProfileModal";
 import { storeUserInStorage } from "@/common/functions/users";
+import Image from "next/image";
 
 export default function Index() {
   const { address, isConnected } = useAccount();
@@ -125,7 +126,13 @@ export default function Index() {
       </Head>
       <main className="fixed flex flex-col items-center justify-end h-screen scroll-background">
         <div className="z-10 flex flex-col h-[40vh] bg-black justify-between w-screen items-center pt-12 pb-8 shadow-index">
-          <img className="w-24" src="/assets/logo.png" alt="Logo"></img>
+          <Image
+            className="w-24"
+            src="/assets/logo.png"
+            alt="Logo"
+            width={100}
+            height={100}
+          ></Image>
           <h2>Welcome to Web3 Pinterest</h2>
           <ConnectButton accountStatus={"full"} label="Connect" />
         </div>

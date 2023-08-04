@@ -22,7 +22,8 @@ import {
 } from "@/common/functions/boards";
 import { Toast } from "@/components/general/Toasts";
 import { storeUserInStorage } from "@/common/functions/users";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import Masonry from "react-responsive-masonry";
+import Image from "next/image";
 
 export default function Home() {
   const { address, isConnected, connector: activeConnector } = useAccount();
@@ -131,6 +132,8 @@ export default function Home() {
       }
     };
   }, [
+    router,
+    session,
     address,
     isConnected,
     boards,
@@ -285,10 +288,12 @@ export default function Home() {
                       className="h-auto"
                       onClick={() => router.push(`/pin/${pin.id}`)}
                     >
-                      <img
+                      <Image
                         src={`https://web3-pinterest.infura-ipfs.io/ipfs/${pin.imageHash}`}
                         alt={pin.title}
                         className="object-cover w-full rounded-2xl max-h-72"
+                        width={100}
+                        height={100}
                       />
                       <div>
                         <h2 className="pt-2 pl-2 text-white font-semibold text-[0.9rem]">
@@ -300,23 +305,23 @@ export default function Home() {
                 </React.Fragment>
               ))
             : [
-                <Stack>
+                <Stack key={"0"}>
                   <Skeleton height="215px" width="100%" fadeDuration={4} />
                   <Skeleton height="15px" width="70%" fadeDuration={4} />
                 </Stack>,
-                <Stack>
+                <Stack key={"1"}>
                   <Skeleton height="215px" width="100%" fadeDuration={4} />
                   <Skeleton height="15px" width="70%" fadeDuration={4} />
                 </Stack>,
-                <Stack>
+                <Stack key={"2"}>
                   <Skeleton height="215px" width="100%" fadeDuration={4} />
                   <Skeleton height="15px" width="70%" fadeDuration={4} />
                 </Stack>,
-                <Stack>
+                <Stack key={"3"}>
                   <Skeleton height="215px" width="100%" fadeDuration={4} />
                   <Skeleton height="15px" width="70%" fadeDuration={4} />
                 </Stack>,
-                <Stack>
+                <Stack key={"4"}>
                   <Skeleton height="215px" width="100%" fadeDuration={4} />
                   <Skeleton height="15px" width="70%" fadeDuration={4} />
                 </Stack>,

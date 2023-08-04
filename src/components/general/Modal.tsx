@@ -68,14 +68,12 @@ const Modal: React.FC<ModalProps> = ({
             </div>
             {isAlternative && (
               <div className="flex justify-center mt-8">
-                <Button
-                  colorScheme="secondary"
-                  borderRadius={"50px"}
-                  variant="solid"
+                <button
+                  className="w-20 px-4 py-2 mt-4 text-white transition-colors bg-gray-500 rounded-2xl"
                   onClick={closeModal}
                 >
                   Close
-                </Button>
+                </button>
               </div>
             )}
           </div>

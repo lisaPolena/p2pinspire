@@ -16,6 +16,7 @@ import {
   getUserFromStorage,
   storeUserInStorage,
 } from "@/common/functions/users";
+import Image from "next/image";
 
 const EditProfileModal: React.FC = () => {
   const {
@@ -256,13 +257,16 @@ const EditProfileModal: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center ">
-                <img
+                <Image
                   src={`https://web3-pinterest.infura-ipfs.io/ipfs/${
                     !profileImage && user?.profileImageHash
                       ? user?.profileImageHash
                       : profileImage
                   }`}
                   className="object-cover w-40 h-40 rounded-full"
+                  alt="Profile Image"
+                  width={100}
+                  height={100}
                 />
                 <div>
                   <button className="w-20 px-4 py-2 mt-4 text-white transition-colors bg-gray-500 rounded-2xl">
