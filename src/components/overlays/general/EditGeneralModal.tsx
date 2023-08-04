@@ -34,7 +34,7 @@ const EditGeneralModal: React.FC<EditGeneralModalProps> = (
 
   function handleMergeDownloadClick() {
     if (isBoard) {
-      console.log("merge");
+      handleToast("Merge function doesn't exist yet");
     } else if (isSavedPin) {
       setDownloadPin(true);
       setEditModalOpen(false);
@@ -48,7 +48,7 @@ const EditGeneralModal: React.FC<EditGeneralModalProps> = (
     router.push("/");
   }
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,

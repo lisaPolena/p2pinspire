@@ -13,7 +13,6 @@ import { Toast } from "../../general/Toasts";
 import DeleteProfileModal from "./DeleteProfile";
 import { useRouter } from "next/router";
 import {
-  clearUserStorage,
   getUserFromStorage,
   storeUserInStorage,
 } from "@/common/functions/users";

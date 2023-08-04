@@ -42,7 +42,7 @@ export default function Index() {
     abi: userManager.abi,
     functionName: "getAllUsers",
     onSuccess(data) {
-      console.log(data);
+      //console.log(data);
     },
   });
 
@@ -51,7 +51,6 @@ export default function Index() {
     abi: userManager.abi,
     eventName: "UserCreated",
     listener(log: any) {
-      console.log(log);
       const res = log[0].args as User;
       if (res.userAddress === address) {
         setUser({ id: Number(res.id), userAddress: res.userAddress });

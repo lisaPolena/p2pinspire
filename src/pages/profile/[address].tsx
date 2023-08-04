@@ -66,8 +66,7 @@ export default function DetailProfile() {
     abi: userManager.abi,
     functionName: "followUser",
     onSuccess(data) {
-      console.log("success", data);
-      handleToast("Followed user", "");
+      handleToast("Followed user");
     },
   });
 
@@ -80,16 +79,13 @@ export default function DetailProfile() {
     abi: userManager.abi,
     functionName: "unfollowUser",
     onSuccess(data) {
-      console.log("success", data);
-      handleToast("Unfollowed user", "");
+      handleToast("Unfollowed user");
       setIsFollowing(false);
     },
   });
 
   useEffect(() => {
     if (profile && user) {
-      console.log(profile.followers);
-      console.log(user);
       if (
         profile.followers?.find((follower) => Number(follower) === user?.id)
       ) {

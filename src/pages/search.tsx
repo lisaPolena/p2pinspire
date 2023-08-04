@@ -10,12 +10,12 @@ export default function Search() {
     abi: userManager.abi,
     functionName: "getAllUsers",
     onSuccess(data) {
-      console.log(data);
+      //console.log(data);
     },
   });
 
   useEffect(() => {
-    console.log(allUsers);
+    //console.log(allUsers);
   }, []);
 
   return (

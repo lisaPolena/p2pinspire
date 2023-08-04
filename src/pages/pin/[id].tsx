@@ -205,7 +205,9 @@ export default function DetailPin() {
                   borderRadius={"50px"}
                   colorScheme="tertiary"
                   variant="solid"
-                  onClick={() => console.log("view")}
+                  onClick={() =>
+                    handleToast("View function not implemented yet")
+                  }
                 >
                   View
                 </Button>

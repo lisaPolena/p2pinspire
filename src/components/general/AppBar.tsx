@@ -22,8 +22,6 @@ interface AppBarProps {
   pins?: Pin[] | null;
 }
 
-//TODO: add shadow if scroll position is > 0 (showtitle is true)
-
 export const AppBar = (props: AppBarProps) => {
   const {
     isBoard,
