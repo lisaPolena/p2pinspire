@@ -13,7 +13,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { mainnet, polygon, polygonMumbai } from "wagmi/chains";
+import { polygonMumbai } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
@@ -46,15 +46,15 @@ export default function App({ Component, pageProps }: AppProps) {
     <AppStateProvider>
       <WagmiConfig config={wagmiConfig}>
         <SessionProvider session={pageProps.session} refetchInterval={0}>
-          {/* <RainbowKitSiweNextAuthProvider
+          <RainbowKitSiweNextAuthProvider
             getSiweMessageOptions={getSiweMessageOptions}
-          > */}
-          <RainbowKitProvider chains={chains}>
-            <ChakraProvider theme={customTheme}>
-              <Component {...pageProps} />
-            </ChakraProvider>
-          </RainbowKitProvider>
-          {/* </RainbowKitSiweNextAuthProvider> */}
+          >
+            <RainbowKitProvider chains={chains}>
+              <ChakraProvider theme={customTheme}>
+                <Component {...pageProps} />
+              </ChakraProvider>
+            </RainbowKitProvider>
+          </RainbowKitSiweNextAuthProvider>
         </SessionProvider>
       </WagmiConfig>
     </AppStateProvider>
