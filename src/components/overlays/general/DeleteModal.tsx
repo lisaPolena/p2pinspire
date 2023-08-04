@@ -46,9 +46,6 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
     address: `0x${process.env.NEXT_PUBLIC_PIN_MANAGER_CONTRACT}`,
     abi: pinManager.abi,
     functionName: "deletePin",
-    onError(err) {
-      console.log("error ", err);
-    },
   });
 
   const {
@@ -59,9 +56,6 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
     abi: boardManager.abi,
     functionName: "deleteSavedPin",
-    onError(err) {
-      console.log("error ", err);
-    },
   });
 
   const {
@@ -72,9 +66,6 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
     address: `0x${process.env.NEXT_PUBLIC_BOARD_MANAGER_CONTRACT}`,
     abi: boardManager.abi,
     functionName: "deleteBoard",
-    onError(err) {
-      console.log("error ", err);
-    },
   });
 
   const handleDeleteBoard = async () => {
@@ -83,33 +74,46 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
       setEditBoardModalOpen(false);
       await deleteBoard({ args: [board.id] });
       setLoadDeleteBoardTransaction(Number(board.id));
-      handleToast("Board deleting...", "");
+      handleToast("Board deleting...");
       router.push("/profile");
     } else {
-      //TODO: handle error
-      console.log("no board to delete");
+      handleToast("Board not found.");
     }
   };
 
   const deletePin = async () => {
     if (pin && isOwner) {
-      setDeletePinModalOpen(false);
-      setEditPinModalOpen(false);
-      await deleteCreatedPin({ args: [pin.id] });
-      handleToast("Pin deleting...", "");
-      router.back();
+      await deleteCreatedPin({ args: [pin.id] })
+        .then(() => {
+          handleToast("Pin deleting...");
+          setDeletePinModalOpen(false);
+          setEditPinModalOpen(false);
+          router.back();
+        })
+        .catch(() => {
+          handleToast("Transaction rejected");
+          setDeletePinModalOpen(false);
+          setEditPinModalOpen(false);
+        });
     } else if (pin && !isOwner) {
-      setDeletePinModalOpen(false);
-      setEditPinModalOpen(false);
-      await deleteSavedPin({ args: [pin.id, savedPinBoardId] });
-      router.back();
+      await deleteSavedPin({ args: [pin.id, savedPinBoardId] })
+        .then(() => {
+          handleToast("Pin deleting...");
+          setDeletePinModalOpen(false);
+          setEditPinModalOpen(false);
+          router.back();
+        })
+        .catch(() => {
+          handleToast("Transaction rejected");
+          setDeletePinModalOpen(false);
+          setEditPinModalOpen(false);
+        });
     } else {
-      //TODO: handle error
-      console.log("no pin to delete");
+      handleToast("Pin not found.");
     }
   };
 
-  function handleToast(message: string, imageHash: string) {
+  function handleToast(message: string, imageHash?: string) {
     toast({
       position: "top",
       render: () => <Toast text={message} imageHash={imageHash} />,
@@ -117,7 +121,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
   }
 
   return (
-    <>
+    <div className="z-50">
       {isOpen && (
         <OutsideAlerter action={closeModal}>
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] z-[14] h-[20%]">
@@ -151,7 +155,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
           </div>
         </OutsideAlerter>
       )}
-    </>
+    </div>
   );
 };
 
