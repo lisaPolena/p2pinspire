@@ -46,15 +46,15 @@ export default function App({ Component, pageProps }: AppProps) {
     <AppStateProvider>
       <WagmiConfig config={wagmiConfig}>
         <SessionProvider session={pageProps.session} refetchInterval={0}>
-          <RainbowKitSiweNextAuthProvider
+          {/* <RainbowKitSiweNextAuthProvider
             getSiweMessageOptions={getSiweMessageOptions}
-          >
-            <RainbowKitProvider chains={chains}>
-              <ChakraProvider theme={customTheme}>
-                <Component {...pageProps} />
-              </ChakraProvider>
-            </RainbowKitProvider>
-          </RainbowKitSiweNextAuthProvider>
+          > */}
+          <RainbowKitProvider chains={chains}>
+            <ChakraProvider theme={customTheme}>
+              <Component {...pageProps} />
+            </ChakraProvider>
+          </RainbowKitProvider>
+          {/* </RainbowKitSiweNextAuthProvider> */}
         </SessionProvider>
       </WagmiConfig>
     </AppStateProvider>
