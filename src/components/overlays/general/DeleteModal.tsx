@@ -124,15 +124,30 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
     <div className="z-50">
       {isOpen && (
         <OutsideAlerter action={closeModal}>
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-800 rounded-t-[40px] z-[14] h-[20%]">
-            <div>
-              <h2 className="text-xl text-white">
-                {isBoard
-                  ? "Delete this board and all of its Pins?"
-                  : "Are you sure?"}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-zinc-900 rounded-t-[40px] z-[30] h-[20%]">
+            <div className="text-center">
+              <h2 className="mb-2 text-2xl font-bold text-white">
+                Are you sure?
               </h2>
+              {savedPinBoardId && !isOwner && (
+                <p className="opacity-60">
+                  If you delete this pin, it will be gone from this board.
+                </p>
+              )}
+              {savedPinBoardId && isOwner && (
+                <p className="opacity-60">
+                  If you delete this pin, it will be gone forever. Everyone who
+                  saved it, can't view it anymore.
+                </p>
+              )}
+              {isBoard && (
+                <p className="opacity-60">
+                  If you delete this board, it will be gone forever with all of
+                  its pins.
+                </p>
+              )}
             </div>
-            <div className="flex justify-evenly">
+            <div className="flex pt-2 justify-evenly">
               <Button
                 colorScheme="secondary"
                 borderRadius={"50px"}
