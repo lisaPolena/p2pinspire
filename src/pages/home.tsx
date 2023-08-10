@@ -178,10 +178,12 @@ export default function Home() {
         .map((board: Board) => board.pins.map((id: Pin) => Number(id)))
         .flat();
       setPins(
-        allPins.filter(
-          (pin: { owner: string; id: number }) =>
-            pin.owner !== address && !boardPins.includes(Number(pin.id))
-        )
+        allPins
+          .filter(
+            (pin: { owner: string; id: number }) =>
+              pin.owner !== address && !boardPins.includes(Number(pin.id))
+          )
+          .sort((a, b) => 0.5 - Math.random())
       );
     }
   }
