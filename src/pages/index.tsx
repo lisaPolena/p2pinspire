@@ -119,8 +119,8 @@ export default function Index() {
   return (
     <>
       <Head>
-        <title>Web3 Pinterest</title>
-        <meta name="description" content="Web3 Pinterest" />
+        <title>P2Pinspire</title>
+        <meta name="description" content="P2Pinspire" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -133,7 +133,7 @@ export default function Index() {
             width={100}
             height={100}
           ></Image>
-          <h2>Welcome to Web3 Pinterest</h2>
+          <h2 className="text-2xl font-bold">Welcome to P2Pinspire</h2>
           <ConnectButton accountStatus={"full"} label="Connect" />
         </div>
       </main>

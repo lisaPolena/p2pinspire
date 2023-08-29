@@ -137,7 +137,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
               {savedPinBoardId && isOwner && (
                 <p className="opacity-60">
                   If you delete this pin, it will be gone forever. Everyone who
-                  saved it, can't view it anymore.
+                  saved it, cannot view it anymore.
                 </p>
               )}
               {isBoard && (

@@ -37,7 +37,7 @@ export const Navbar = () => {
           </div>
         </Link>
         <Link
-          href={"/search"}
+          href={""}
           className="flex justify-center w-full px-3 py-5 align-center"
         >
           <div className="text-2xl">

@@ -27,7 +27,7 @@ export default function App({ Component, pageProps }: AppProps) {
   );
 
   const { connectors } = getDefaultWallets({
-    appName: "Web3Pinterest",
+    appName: "P2Pinspire",
     projectId: "875210f269badbd4a01da1fab3ee5fde",
     chains,
   });
@@ -39,7 +39,7 @@ export default function App({ Component, pageProps }: AppProps) {
   });
 
   const getSiweMessageOptions: GetSiweMessageOptions = () => ({
-    statement: "Sign in to Web3Pinterest",
+    statement: "Sign in to P2Pinspire",
   });
 
   return (

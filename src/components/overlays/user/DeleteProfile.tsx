@@ -24,7 +24,7 @@ const DeleteProfileModal: React.FC<DeleteProfileModalProps> = ({
               </h2>
               <p className="opacity-60">
                 All of your boards and pins will be gone forever. Everyone who
-                saved a pin, can't view it anymore.
+                saved a pin, cannot view it anymore.
               </p>
             </div>
             <div className="flex pt-4 justify-evenly">
